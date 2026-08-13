@@ -6,6 +6,18 @@
 #include <vector>
 #include <array>
 
+/*
+TO DO:
+
+1. Central Command - data structure that owns everything created (split into 3 sections - settings, canvas management, SDL managment).
+2. SDL_GetKeyboardState to allow for simultaneous inputs.
+3. Text based interface?
+4. Boundary checking.
+
+
+
+*/
+
 #pragma region Quit
 static int quit(int error) {
     SDL_Quit(); return error;
