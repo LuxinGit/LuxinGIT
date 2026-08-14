@@ -18,6 +18,8 @@ TO DO:
 
 */
 
+
+
 #pragma region Quit
 static int quit(int error) {
     SDL_Quit(); return error;
@@ -35,22 +37,6 @@ static int quit(int error, SDL_Window* window, SDL_Renderer* renderer, SDL_Textu
     return quit(error, window, renderer);
 }
 #pragma endregion
-
-static SDL_Window* initialiseSDL(int width, int height) {
-
-    if (!SDL_Init(SDL_INIT_VIDEO))
-        return nullptr;
-
-    SDL_Window* window = SDL_CreateWindow(
-        "Better Paint",
-        width, 
-        height,
-        0
-    );
-
-    return window;
-
-}
 
 #pragma region Luxels + Canvas
 struct luxel {
@@ -125,6 +111,74 @@ static void drawLine(std::vector<luxel>& canvas, int width, std::pair<float,floa
 
 #pragma endregion
 
+#pragma region SDL Handler
+struct SDL_Handler {
+
+    SDL_Window* Window;
+    SDL_Renderer* Renderer;
+    SDL_Texture* Texture;
+
+    SDL_Handler() {
+        Window = nullptr;
+        Renderer = nullptr;
+        Texture = nullptr; // if adding multiple this will need to be rethought, maybe map?
+    }
+
+    ~SDL_Handler() {
+        cleanup();
+    }
+
+private:
+
+    int initialiseWindow(int width, int height) {
+        if (!SDL_Init(SDL_INIT_VIDEO))
+            return 1;
+
+        Window = SDL_CreateWindow("Better Paint", width, height, 0);
+        if (!Window) return 1; else return 0;
+    }
+
+    int initialiseRenderer() {
+        Renderer = SDL_CreateRenderer(Window, nullptr);
+        if (!Renderer) return 1; else return 0;
+    }
+
+    int initialiseTexture(int width, int height) {
+        Texture = SDL_CreateTexture(Renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, width, height);
+        if (!Texture) return 1; else return 0;
+    }
+
+public:
+
+    int initialiseSDL(int width, int height) {
+        if (initialiseWindow(width, height)) return 1;
+        if (initialiseRenderer()) return 1;
+        if (initialiseTexture(width, height)) return 1;
+        return 0;
+    }
+
+    void updateTexture(const std::vector<luxel>& canvas, int width) const  {
+        SDL_UpdateTexture(Texture, nullptr, canvas.data(), width * sizeof(luxel));
+    }
+
+    void renderTexture() const { 
+        SDL_RenderTexture(Renderer, Texture, nullptr, nullptr);  
+    }
+
+    void renderPresent() const {
+        SDL_RenderPresent(Renderer);
+    }
+
+    void cleanup() const {
+        if (Texture) SDL_DestroyTexture(Texture);
+        if (Renderer) SDL_DestroyRenderer(Renderer);
+        if (Window) SDL_DestroyWindow(Window);
+        SDL_Quit();
+    }
+
+};
+#pragma endregion
+
 int main()
 {
 
@@ -137,18 +191,14 @@ int main()
     int drawStep = 10;
     std::array<uint8_t, 4> colour = { 200, 200, 200, 255 };
 
-    SDL_Window* window = initialiseSDL(width, height);
-    if (!window) return quit(1);
+    SDL_Handler SDLHandler;
 
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, nullptr);
-    if (!renderer) return quit(1, window);
-
-    SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, width, height);
-    if (!texture) return quit(1, window, renderer);
+    if (SDLHandler.initialiseSDL(width, height)) return 1;
 
     std::vector<luxel> canvas = createCanvas(width, height);
     int canvasSize = width * sizeof(luxel);
-    SDL_UpdateTexture(texture, nullptr, canvas.data(), canvasSize);
+    
+    SDLHandler.updateTexture(canvas, width);
 
    
 
@@ -195,16 +245,15 @@ int main()
         drawLine(canvas, width, cursorC, newCursorC, colour);
         cursorC = newCursorC;
 
-        SDL_UpdateTexture(texture, nullptr, canvas.data(), canvasSize);
-
-        SDL_RenderTexture(renderer, texture, nullptr, nullptr);
-
-        SDL_RenderPresent(renderer);
+        SDLHandler.updateTexture(canvas, width);
+        SDLHandler.renderTexture();
+        SDLHandler.renderPresent();
 
         deltaC = { 0,0 };
 
     }
 
     // Clean up
-    return quit(0, window, renderer, texture);
+    SDLHandler.cleanup();
+    return 0;
 }
