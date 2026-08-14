@@ -19,26 +19,7 @@ TO DO:
 */
 
 
-
-#pragma region Quit
-static int quit(int error) {
-    SDL_Quit(); return error;
-}
-static int quit(int error, SDL_Window* window) {
-    SDL_DestroyWindow(window);
-    return quit(error);
-}
-static int quit(int error, SDL_Window* window, SDL_Renderer* renderer) {
-    SDL_DestroyRenderer(renderer);
-    return quit(error, window);
-}
-static int quit(int error, SDL_Window* window, SDL_Renderer* renderer, SDL_Texture* texture) {
-    SDL_DestroyTexture(texture);
-    return quit(error, window, renderer);
-}
-#pragma endregion
-
-#pragma region Luxels + Canvas
+#pragma region Luxels
 struct luxel {
     std::array<uint8_t, 4> colour;
 
@@ -50,59 +31,6 @@ struct luxel {
     }
 
 };
-static std::vector<luxel> createCanvas(int width, int height) {
-    return std::vector<luxel>(width * height);
-}
-static void clearCanvas(std::vector<luxel>& canvas) {
-    for (luxel& l : canvas) {
-        l.resetLuxel();
-    }
-}
-#pragma endregion
-
-#pragma region Line Drawing
-static size_t indexFromCoord(std::pair<float,float> c, int width) {
-    // ASSUMES POSITIVE X/Y. INDEXING WITH THIS INDEX WITHOUT SIZE CHECKING MAY CAUSE OUT OF BOUNDARY MEMORY CRASH [IF COORD > LAST LUXEL INDEX].
-    return size_t(c.second) * width + size_t(c.first);
-}
-static void drawPoint(std::vector<luxel>& canvas, int width, std::pair<float,float> c, const std::array<uint8_t, 4>& colour) {
-    canvas[indexFromCoord(c, width)].colour = colour;
-}
-static void drawVerticalLine(std::vector<luxel>& canvas, int width, std::pair<float, float>& c, int y, const std::array<uint8_t, 4>& colour) {
-    bool n = y < c.second;
-    int d = 1; if (n) d = -1;
-    for (c.second; c.second != y; c.second += d) drawPoint(canvas, width, c, colour);
-    drawPoint(canvas, width, {c.first, y}, colour);
-    return;
-}
-static void drawLine(std::vector<luxel>& canvas, int width, std::pair<float,float>& c, std::pair<float,float> newc, const std::array<uint8_t, 4>& colour) {
-    
-    drawPoint(canvas, width, c, colour);
-    
-    // vertical line edge case
-    if (c.first == newc.first) { 
-        drawVerticalLine(canvas, width, c, newc.second, colour);
-        return;
-    } 
-
-    // Figure out direction (lines can be backwards)
-    bool n = newc.first < c.first;
-    int d = 1; if (n) d = -1;
-
-    float slope = (newc.second - c.second) / (newc.first - c.first);
-    float y = 0.0f;
-
-    for (c.first; c.first != newc.first; c.first += d) {
-        y = c.second + slope;
-        c.second = y;
-        drawPoint(canvas, width, c, colour);
-    }
-
-    // At ending x
-    drawPoint(canvas, width, newc, colour);
-
-    return;
-}
 #pragma endregion
 
 #pragma region Canvas Handler
@@ -148,7 +76,9 @@ private:
         return;
     }
 
-    void drawLine(std::vector<luxel>& canvas, int width, std::pair<float, float>& c, std::pair<float, float> newc, const std::array<uint8_t, 4>& colour) {
+public:
+
+    void drawLine(std::pair<float, float>& c, std::pair<float, float> newc, const std::array<uint8_t, 4>& colour) {
 
         drawPoint(c, colour);
 
@@ -176,6 +106,9 @@ private:
 
         return;
     }
+    void drawLine(std::pair<std::pair<float, float>, std::pair<float, float>>& payload, const std::array<uint8_t, 4>& colour) {
+        drawLine(payload.first, payload.second, colour);
+    }
 };
 #pragma endregion
 
@@ -187,17 +120,46 @@ private:
     std::pair<float, float> cursor;
     std::pair<float, float> newCursor;
     std::pair<float, float> deltaCursor = { 0, 0 }; // newCursor = cursor + deltaCursor at t==0, cursor = newCursor at t==1;
+    std::pair<std::pair<float, float>, std::pair<float,float>> bothCursors; // for sending to drawLine;
 
     int drawStep = 10;
+
+    void adjustDeltaCursor(std::pair<float, float> incoming) { deltaCursor.first += incoming.first; deltaCursor.second += incoming.second; }
 
 public:
 
     Cursor_Handler(std::pair<float, float> varcursor) { cursor = varcursor; newCursor = varcursor; };
 
-    void updateDrawstep(int delta) { drawStep += delta; } // probably should sizecheck this but we can leave that for now
-    void adjustDeltaCursor(std::pair<float, float> incoming) { deltaCursor.first += incoming.first; deltaCursor.second += incoming.second; }
-    void calcNewCursor() { newCursor.first += deltaCursor.first; newCursor.second += deltaCursor.second; }
+    void updateDrawstep(int delta) { 
+        drawStep += delta;
+        if (drawStep < 5) drawStep = 5;
+    } // probably should sizecheck this but we can leave that for now
+    
+    void updateDeltaCursor(bool yaxis, bool negative) {
+        std::pair<float, float> payload = { 0,0 };
+        int tempstep = drawStep;
+        if (negative) tempstep *= -1;
 
+        if (yaxis) payload.second += tempstep;
+        else payload.first += tempstep;
+
+        adjustDeltaCursor(payload);
+    }
+
+    void calcNewCursor() { 
+        newCursor.first += deltaCursor.first; 
+        newCursor.second += deltaCursor.second; 
+        bothCursors = { cursor, newCursor };
+    }
+
+    void resetCursors() {
+        cursor = newCursor;
+        deltaCursor = { 0 , 0 };
+    }
+
+    std::pair<std::pair<float, float>, std::pair<float, float>>& retrieveBothCursors() { 
+        return bothCursors;
+    }
 };
 #pragma endregion
 
@@ -279,10 +241,6 @@ int main()
     // DEFINES
     int width = 800, height = 600;
     bool running = true;
-    std::pair<float, float> cursorC = { 100.0f, 100.0f }; //
-    std::pair<float, float> newCursorC = cursorC;//
-    std::pair<float, float> deltaC = { 0.0f, 0.0f }; //
-    int drawStep = 10;//
     std::array<uint8_t, 4> colour = { 200, 200, 200, 255 };
 
     SDL_Handler SDLHandler;
@@ -290,13 +248,8 @@ int main()
     Canvas_Handler CanvasHandler(width, height);
 
     if (SDLHandler.initialiseSDL(width, height)) return 1;
-
-    std::vector<luxel> canvas = createCanvas(width, height);//
-    int canvasSize = width * sizeof(luxel);//
     
-    SDLHandler.updateTexture(canvas, width);
-
-   
+    SDLHandler.updateTexture(CanvasHandler.retrieveCanvas(), width);
 
     while (running) {
 
@@ -310,42 +263,40 @@ int main()
             if (event.type == SDL_EVENT_KEY_DOWN) {
                 switch (event.key.key) {
                     case SDLK_W:
-                        deltaC.second -= drawStep;
+                        CursorHandler.updateDeltaCursor(true, true);
                         break;
                     case SDLK_S:
-                        deltaC.second += drawStep;
+                        CursorHandler.updateDeltaCursor(true, false);
                         break;
                     case SDLK_A:
-                        deltaC.first -= drawStep;
+                        CursorHandler.updateDeltaCursor(false, true);
                         break;
                     case SDLK_D:
-                        deltaC.first += drawStep;
+                        CursorHandler.updateDeltaCursor(false, false);
                         break;
                     case SDLK_Z:
-                        drawStep -= 5;
-                        if (drawStep < 5) drawStep = 5;
+                        CursorHandler.updateDrawstep(-5);
                         break;
                     case SDLK_X:
-                        drawStep += 5;
+                        CursorHandler.updateDrawstep(5);
                         break;
                     case SDLK_C:
-                        clearCanvas(canvas);
+                        CanvasHandler.clearCanvas();
                         break;
                 }
             }
             
         }
 
-        newCursorC.first = cursorC.first + deltaC.first; newCursorC.second = cursorC.second + deltaC.second;
+        CursorHandler.calcNewCursor();
 
-        drawLine(canvas, width, cursorC, newCursorC, colour);
-        cursorC = newCursorC;
+        CanvasHandler.drawLine(CursorHandler.retrieveBothCursors(), colour);
+        
+        CursorHandler.resetCursors();
 
-        SDLHandler.updateTexture(canvas, width);
+        SDLHandler.updateTexture(CanvasHandler.retrieveCanvas(), width);
         SDLHandler.renderTexture();
         SDLHandler.renderPresent();
-
-        deltaC = { 0,0 };
 
     }
 
