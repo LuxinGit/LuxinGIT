@@ -9,7 +9,7 @@
 /*
 TO DO:
 
-1. Central Command - data structure that owns everything created (split into 3 sections - settings, canvas management, SDL managment).
+1. Combine Handlers.
 2. SDL_GetKeyboardState to allow for simultaneous inputs.
 3. Text based interface?
 4. Boundary checking.
@@ -38,15 +38,14 @@ struct Canvas_Handler {
 
 private: 
 
-    int width; int height;
-
+    int& width; int& height;
+    std::array<uint8_t, 4> colour = { 200, 200, 200, 255 };
     std::vector<luxel> canvas;
 
 public:
 
-    Canvas_Handler(int varwidth, int varheight) {
-        width = varwidth; height = varheight;
-        canvas = std::vector<luxel>(width * height);
+    Canvas_Handler(int& varwidth, int& varheight) : width(varwidth), height(varheight), canvas(std::vector<luxel>(width * height)) {
+       // Only concern here is that if underlying height / width changes then this will need to be recalculated.
     }
 
     void clearCanvas() {
@@ -57,6 +56,8 @@ public:
 
     std::vector<luxel> retrieveCanvas() { return canvas; }
 
+    void changeColour(const std::array<uint8_t, 4>& varcolour) { colour = varcolour; };
+
 private:
 
     size_t indexFromCoord(std::pair<float, float> c) const {
@@ -64,27 +65,27 @@ private:
         return size_t(c.second) * width + size_t(c.first);
     }
 
-    void drawPoint(std::pair<float, float> c, const std::array<uint8_t, 4>& colour) {
+    void drawPoint(std::pair<float, float> c) {
         canvas[indexFromCoord(c)].colour = colour;
     }
 
-    void drawVerticalLine(std::pair<float, float>& c, int y, const std::array<uint8_t, 4>& colour) {
+    void drawVerticalLine(std::pair<float, float>& c, float y) {
         bool n = y < c.second;
         int d = 1; if (n) d = -1;
-        for (c.second; c.second != y; c.second += d) drawPoint(c, colour);
-        drawPoint({ c.first, y }, colour);
+        for (c.second; c.second != y; c.second += d) drawPoint(c);
+        drawPoint({ c.first, y });
         return;
     }
 
 public:
 
-    void drawLine(std::pair<float, float>& c, std::pair<float, float> newc, const std::array<uint8_t, 4>& colour) {
+    void drawLine(std::pair<float, float>& c, std::pair<float, float> newc) {
 
-        drawPoint(c, colour);
+        drawPoint(c);
 
         // vertical line edge case
         if (c.first == newc.first) {
-            drawVerticalLine(c, newc.second, colour);
+            drawVerticalLine(c, newc.second);
             return;
         }
 
@@ -98,17 +99,18 @@ public:
         for (c.first; c.first != newc.first; c.first += d) {
             y = c.second + slope;
             c.second = y;
-            drawPoint(c, colour);
+            drawPoint(c);
         }
 
         // At ending x
-        drawPoint(newc, colour);
+        drawPoint(newc);
 
         return;
     }
-    void drawLine(std::pair<std::pair<float, float>, std::pair<float, float>>& payload, const std::array<uint8_t, 4>& colour) {
-        drawLine(payload.first, payload.second, colour);
+    void drawLine(std::pair<std::pair<float, float>, std::pair<float, float>>& payload) {
+        drawLine(payload.first, payload.second);
     }
+
 };
 #pragma endregion
 
@@ -128,6 +130,7 @@ private:
 
 public:
 
+    Cursor_Handler() { cursor = { 100, 100 }; newCursor = cursor; }
     Cursor_Handler(std::pair<float, float> varcursor) { cursor = varcursor; newCursor = varcursor; };
 
     void updateDrawstep(int delta) { 
@@ -233,6 +236,55 @@ public:
 
 #pragma region Master Handler
 
+struct Master_Handler {
+
+private:
+
+    int width; int height;
+
+    void updateSDLTexture() {
+        SDLHandler.updateTexture(CanvasHandler.retrieveCanvas(), width);
+    }
+
+    void drawLine() {
+        CursorHandler.calcNewCursor();
+        CanvasHandler.drawLine(CursorHandler.retrieveBothCursors());
+        CursorHandler.resetCursors();
+    }
+
+    void renderNewSDLTexture() {
+        updateSDLTexture();
+        SDLHandler.renderTexture();
+        SDLHandler.renderPresent();
+    }
+
+public: 
+
+    Cursor_Handler CursorHandler;
+    Canvas_Handler CanvasHandler;
+    SDL_Handler SDLHandler;
+
+    Master_Handler(int varwidth, int varheight) : width(varwidth), height(varheight), CanvasHandler(width, height) {};
+
+    // Functions that use multiple handlers
+
+    int initialiseSDL() {
+        if (SDLHandler.initialiseSDL(width, height)) return 1;
+        updateSDLTexture();
+        return 0;
+    }
+
+    void refreshSDL() {
+        drawLine();
+        renderNewSDLTexture();
+    }
+
+    void cleanup() const {
+        SDLHandler.cleanup();
+    }
+
+};
+
 #pragma endregion
 
 int main()
@@ -241,15 +293,10 @@ int main()
     // DEFINES
     int width = 800, height = 600;
     bool running = true;
-    std::array<uint8_t, 4> colour = { 200, 200, 200, 255 };
 
-    SDL_Handler SDLHandler;
-    Cursor_Handler CursorHandler({ 100.0f, 100.0f });
-    Canvas_Handler CanvasHandler(width, height);
+    Master_Handler MasterHandler(width, height);
 
-    if (SDLHandler.initialiseSDL(width, height)) return 1;
-    
-    SDLHandler.updateTexture(CanvasHandler.retrieveCanvas(), width);
+    if (MasterHandler.initialiseSDL()) return 1;
 
     while (running) {
 
@@ -263,44 +310,36 @@ int main()
             if (event.type == SDL_EVENT_KEY_DOWN) {
                 switch (event.key.key) {
                     case SDLK_W:
-                        CursorHandler.updateDeltaCursor(true, true);
+                        MasterHandler.CursorHandler.updateDeltaCursor(true, true);
                         break;
                     case SDLK_S:
-                        CursorHandler.updateDeltaCursor(true, false);
+                        MasterHandler.CursorHandler.updateDeltaCursor(true, false);
                         break;
                     case SDLK_A:
-                        CursorHandler.updateDeltaCursor(false, true);
+                        MasterHandler.CursorHandler.updateDeltaCursor(false, true);
                         break;
                     case SDLK_D:
-                        CursorHandler.updateDeltaCursor(false, false);
+                        MasterHandler.CursorHandler.updateDeltaCursor(false, false);
                         break;
                     case SDLK_Z:
-                        CursorHandler.updateDrawstep(-5);
+                        MasterHandler.CursorHandler.updateDrawstep(-5);
                         break;
                     case SDLK_X:
-                        CursorHandler.updateDrawstep(5);
+                        MasterHandler.CursorHandler.updateDrawstep(5);
                         break;
                     case SDLK_C:
-                        CanvasHandler.clearCanvas();
+                        MasterHandler.CanvasHandler.clearCanvas();
                         break;
                 }
             }
             
         }
 
-        CursorHandler.calcNewCursor();
-
-        CanvasHandler.drawLine(CursorHandler.retrieveBothCursors(), colour);
-        
-        CursorHandler.resetCursors();
-
-        SDLHandler.updateTexture(CanvasHandler.retrieveCanvas(), width);
-        SDLHandler.renderTexture();
-        SDLHandler.renderPresent();
+        MasterHandler.refreshSDL();
 
     }
 
     // Clean up
-    SDLHandler.cleanup();
+    MasterHandler.cleanup();
     return 0;
 }
