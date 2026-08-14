@@ -7,6 +7,7 @@
 #include <array>
 #include <cmath>
 #include <cstdlib>
+#include <vector>
 
 /*
 TO DO:
@@ -44,24 +45,6 @@ private:
     std::array<uint8_t, 4> colour = { 200, 200, 200, 255 };
     std::vector<luxel> canvas;
 
-public:
-
-    Canvas_Handler(int& varwidth, int& varheight) : width(varwidth), height(varheight), canvas(std::vector<luxel>(width * height)) {
-       // Only concern here is that if underlying height / width changes then this will need to be recalculated.
-    }
-
-    void clearCanvas() {
-        for (luxel& l : canvas) {
-            l.resetLuxel();
-        }
-    }
-
-    std::vector<luxel> retrieveCanvas() { return canvas; }
-
-    void changeColour(const std::array<uint8_t, 4>& varcolour) { colour = varcolour; };
-
-private:
-
     size_t indexFromCoord(std::pair<float, float> c) const {
         // ASSUMES POSITIVE X/Y. INDEXING WITH THIS INDEX WITHOUT SIZE CHECKING MAY CAUSE OUT OF BOUNDARY MEMORY CRASH [IF COORD > LAST LUXEL INDEX].
         return size_t(c.second) * width + size_t(c.first);
@@ -87,7 +70,22 @@ private:
         }
     }
 
+
 public:
+
+    Canvas_Handler(int& varwidth, int& varheight) : width(varwidth), height(varheight), canvas(std::vector<luxel>(width * height)) {
+       // Only concern here is that if underlying height / width changes then this will need to be recalculated.
+    }
+
+    void clearCanvas() {
+        for (luxel& l : canvas) {
+            l.resetLuxel();
+        }
+    }
+
+    std::vector<luxel> retrieveCanvas() { return canvas; }
+
+    void changeColour(const std::array<uint8_t, 4>& varcolour) { colour = varcolour; };
 
     void drawLine(std::pair<float, float>& c, std::pair<float, float> newc) {
 
@@ -209,28 +207,6 @@ struct SDL_Handler {
         cleanup();
     }
 
-private:
-
-    int initialiseWindow(int width, int height) {
-        if (!SDL_Init(SDL_INIT_VIDEO))
-            return 1;
-
-        Window = SDL_CreateWindow("Better Paint", width, height, 0);
-        if (!Window) return 1; else return 0;
-    }
-
-    int initialiseRenderer() {
-        Renderer = SDL_CreateRenderer(Window, nullptr);
-        if (!Renderer) return 1; else return 0;
-    }
-
-    int initialiseTexture(int width, int height) {
-        Texture = SDL_CreateTexture(Renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, width, height);
-        if (!Texture) return 1; else return 0;
-    }
-
-public:
-
     int initialiseSDL(int width, int height) {
         if (initialiseWindow(width, height)) return 1;
         if (initialiseRenderer()) return 1;
@@ -257,6 +233,25 @@ public:
         SDL_Quit();
     }
 
+private:
+
+    int initialiseWindow(int width, int height) {
+        if (!SDL_Init(SDL_INIT_VIDEO))
+            return 1;
+
+        Window = SDL_CreateWindow("Better Paint", width, height, 0);
+        if (!Window) return 1; else return 0;
+    }
+
+    int initialiseRenderer() {
+        Renderer = SDL_CreateRenderer(Window, nullptr);
+        if (!Renderer) return 1; else return 0;
+    }
+
+    int initialiseTexture(int width, int height) {
+        Texture = SDL_CreateTexture(Renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, width, height);
+        if (!Texture) return 1; else return 0;
+    }
 };
 #pragma endregion
 
@@ -265,11 +260,15 @@ public:
 struct Master_Handler {
 
 private:
-
     int width; int height;
 
     void updateSDLTexture() {
         SDLHandler.updateTexture(CanvasHandler.retrieveCanvas(), width);
+    }
+    void renderNewSDLTexture() {
+        updateSDLTexture();
+        SDLHandler.renderTexture();
+        SDLHandler.renderPresent();
     }
 
     void drawLine() {
@@ -277,14 +276,31 @@ private:
         CanvasHandler.drawLine(CursorHandler.retrieveBothCursors());
         CursorHandler.resetCursors();
     }
+    void drawCircle(bool setting = false) {
+        CanvasHandler.drawCircle(CursorHandler.retrieveCursor(), CursorHandler.retrieveDrawstep(), setting);
+    }
 
-    void renderNewSDLTexture() {
-        updateSDLTexture();
-        SDLHandler.renderTexture();
-        SDLHandler.renderPresent();
+    enum class DrawCommand;
+    std::vector<std::pair<DrawCommand, int>> commandQueue;
+
+    void clearCommands() { commandQueue = {}; }
+    void processDrawCommand(std::pair<DrawCommand, int> command) {
+        switch (command.first) {
+        case DrawCommand::LINE:
+            drawLine();
+            break;
+        case DrawCommand::CIRCLE:
+            drawCircle(command.second);
+            break;
+        }
     }
 
 public: 
+
+    enum class DrawCommand {
+        LINE,
+        CIRCLE
+    };
 
     Cursor_Handler CursorHandler;
     Canvas_Handler CanvasHandler;
@@ -300,13 +316,19 @@ public:
         return 0;
     }
 
-    void drawCircle(bool setting = false) {
-        CanvasHandler.drawCircle(CursorHandler.retrieveCursor(), CursorHandler.retrieveDrawstep(), setting);
+    void refreshSDL() {
+        for (const auto& command : commandQueue) processDrawCommand(command);
+        renderNewSDLTexture();
+        clearCommands();
     }
 
-    void refreshSDL() {
-        drawLine();
-        renderNewSDLTexture();
+    void addCommand(DrawCommand command, int addArg = 0) {
+        commandQueue.emplace_back(command, addArg);
+    }
+
+    void processCursorMovement(const std::pair<bool, bool>& yandneg) {
+        CursorHandler.updateDeltaCursor(yandneg.first, yandneg.second);
+        addCommand(DrawCommand::LINE);
     }
 
     void cleanup() const {
@@ -340,22 +362,23 @@ int main()
             if (event.type == SDL_EVENT_KEY_DOWN) {
                 switch (event.key.key) {
                     case SDLK_W:
-                        MasterHandler.CursorHandler.updateDeltaCursor(true, true);
+                        MasterHandler.processCursorMovement({ true,true });
                         break;
                     case SDLK_S:
-                        MasterHandler.CursorHandler.updateDeltaCursor(true, false);
+                        MasterHandler.processCursorMovement({ true,false });
                         break;
                     case SDLK_A:
-                        MasterHandler.CursorHandler.updateDeltaCursor(false, true);
+                        MasterHandler.processCursorMovement({ false,true });
                         break;
                     case SDLK_D:
-                        MasterHandler.CursorHandler.updateDeltaCursor(false, false);
+                        MasterHandler.processCursorMovement({ false,false });
                         break;
                     case SDLK_G:
-                        MasterHandler.drawCircle();
+                        MasterHandler.addCommand(Master_Handler::DrawCommand::CIRCLE);
                         break;
                     case SDLK_L:
-                        MasterHandler.drawCircle(true);
+                        MasterHandler.addCommand(Master_Handler::DrawCommand::CIRCLE, 1);
+                        break;
                     case SDLK_Z:
                         MasterHandler.CursorHandler.updateDrawstep(-5);
                         break;
