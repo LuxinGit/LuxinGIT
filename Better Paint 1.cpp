@@ -105,10 +105,100 @@ static void drawLine(std::vector<luxel>& canvas, int width, std::pair<float,floa
 }
 #pragma endregion
 
-#pragma region Keyboard State Handling
+#pragma region Canvas Handler
+struct Canvas_Handler {
 
+private: 
 
+    int width; int height;
 
+    std::vector<luxel> canvas;
+
+public:
+
+    Canvas_Handler(int varwidth, int varheight) {
+        width = varwidth; height = varheight;
+        canvas = std::vector<luxel>(width * height);
+    }
+
+    void clearCanvas() {
+        for (luxel& l : canvas) {
+            l.resetLuxel();
+        }
+    }
+
+    std::vector<luxel> retrieveCanvas() { return canvas; }
+
+private:
+
+    size_t indexFromCoord(std::pair<float, float> c) const {
+        // ASSUMES POSITIVE X/Y. INDEXING WITH THIS INDEX WITHOUT SIZE CHECKING MAY CAUSE OUT OF BOUNDARY MEMORY CRASH [IF COORD > LAST LUXEL INDEX].
+        return size_t(c.second) * width + size_t(c.first);
+    }
+
+    void drawPoint(std::pair<float, float> c, const std::array<uint8_t, 4>& colour) {
+        canvas[indexFromCoord(c)].colour = colour;
+    }
+
+    void drawVerticalLine(std::pair<float, float>& c, int y, const std::array<uint8_t, 4>& colour) {
+        bool n = y < c.second;
+        int d = 1; if (n) d = -1;
+        for (c.second; c.second != y; c.second += d) drawPoint(c, colour);
+        drawPoint({ c.first, y }, colour);
+        return;
+    }
+
+    void drawLine(std::vector<luxel>& canvas, int width, std::pair<float, float>& c, std::pair<float, float> newc, const std::array<uint8_t, 4>& colour) {
+
+        drawPoint(c, colour);
+
+        // vertical line edge case
+        if (c.first == newc.first) {
+            drawVerticalLine(c, newc.second, colour);
+            return;
+        }
+
+        // Figure out direction (lines can be backwards)
+        bool n = newc.first < c.first;
+        int d = 1; if (n) d = -1;
+
+        float slope = (newc.second - c.second) / (newc.first - c.first);
+        float y = 0.0f;
+
+        for (c.first; c.first != newc.first; c.first += d) {
+            y = c.second + slope;
+            c.second = y;
+            drawPoint(c, colour);
+        }
+
+        // At ending x
+        drawPoint(newc, colour);
+
+        return;
+    }
+};
+#pragma endregion
+
+#pragma region Cursor Handler
+struct Cursor_Handler {
+
+private:
+
+    std::pair<float, float> cursor;
+    std::pair<float, float> newCursor;
+    std::pair<float, float> deltaCursor = { 0, 0 }; // newCursor = cursor + deltaCursor at t==0, cursor = newCursor at t==1;
+
+    int drawStep = 10;
+
+public:
+
+    Cursor_Handler(std::pair<float, float> varcursor) { cursor = varcursor; newCursor = varcursor; };
+
+    void updateDrawstep(int delta) { drawStep += delta; } // probably should sizecheck this but we can leave that for now
+    void adjustDeltaCursor(std::pair<float, float> incoming) { deltaCursor.first += incoming.first; deltaCursor.second += incoming.second; }
+    void calcNewCursor() { newCursor.first += deltaCursor.first; newCursor.second += deltaCursor.second; }
+
+};
 #pragma endregion
 
 #pragma region SDL Handler
@@ -179,24 +269,30 @@ public:
 };
 #pragma endregion
 
+#pragma region Master Handler
+
+#pragma endregion
+
 int main()
 {
 
     // DEFINES
     int width = 800, height = 600;
     bool running = true;
-    std::pair<float, float> cursorC = { 100.0f, 100.0f }; //x,y
-    std::pair<float, float> newCursorC = cursorC;
-    std::pair<float, float> deltaC = { 0.0f, 0.0f }; // xDelta, yDelta
-    int drawStep = 10;
+    std::pair<float, float> cursorC = { 100.0f, 100.0f }; //
+    std::pair<float, float> newCursorC = cursorC;//
+    std::pair<float, float> deltaC = { 0.0f, 0.0f }; //
+    int drawStep = 10;//
     std::array<uint8_t, 4> colour = { 200, 200, 200, 255 };
 
     SDL_Handler SDLHandler;
+    Cursor_Handler CursorHandler({ 100.0f, 100.0f });
+    Canvas_Handler CanvasHandler(width, height);
 
     if (SDLHandler.initialiseSDL(width, height)) return 1;
 
-    std::vector<luxel> canvas = createCanvas(width, height);
-    int canvasSize = width * sizeof(luxel);
+    std::vector<luxel> canvas = createCanvas(width, height);//
+    int canvasSize = width * sizeof(luxel);//
     
     SDLHandler.updateTexture(canvas, width);
 
