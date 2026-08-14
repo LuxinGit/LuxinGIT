@@ -5,11 +5,13 @@
 #include <SDL3/SDL.h>
 #include <vector>
 #include <array>
+#include <cmath>
+#include <cstdlib>
 
 /*
 TO DO:
 
-1. Combine Handlers.
+1. Refocus command execution loop (to be done in conjunction with below
 2. SDL_GetKeyboardState to allow for simultaneous inputs.
 3. Text based interface?
 4. Boundary checking.
@@ -77,6 +79,14 @@ private:
         return;
     }
 
+    void drawCcl(const std::pair<float, float>& c, int radius) {
+        int offset = 0;
+        for (int i = c.first - radius; i <= c.first + radius; i++) {
+            offset = std::sqrt(radius * radius - (i - c.first) * (i - c.first));
+            drawPoint({ i,c.second + offset }); drawPoint({ i, c.second - offset });
+        }
+    }
+
 public:
 
     void drawLine(std::pair<float, float>& c, std::pair<float, float> newc) {
@@ -110,6 +120,19 @@ public:
     void drawLine(std::pair<std::pair<float, float>, std::pair<float, float>>& payload) {
         drawLine(payload.first, payload.second);
     }
+
+    void drawCircle(const std::pair<float, float>& c, int radius, bool setting) {
+        if (setting) {
+            for (int i = 1; i <= radius; i++) {
+                colour = { static_cast<uint8_t>(rand() % 256),static_cast<uint8_t>(rand() % 256),static_cast<uint8_t>(rand() % 256), 255 };
+                drawCcl(c, i);
+            }
+            colour = { 200, 200, 200, 255 };
+            return;
+        }
+        else drawCcl(c, radius);
+    }
+    
 
 };
 #pragma endregion
@@ -163,6 +186,9 @@ public:
     std::pair<std::pair<float, float>, std::pair<float, float>>& retrieveBothCursors() { 
         return bothCursors;
     }
+
+    std::pair<float, float> retrieveCursor() const { return cursor; }
+    int retrieveDrawstep() const { return drawStep; }
 };
 #pragma endregion
 
@@ -274,6 +300,10 @@ public:
         return 0;
     }
 
+    void drawCircle(bool setting = false) {
+        CanvasHandler.drawCircle(CursorHandler.retrieveCursor(), CursorHandler.retrieveDrawstep(), setting);
+    }
+
     void refreshSDL() {
         drawLine();
         renderNewSDLTexture();
@@ -321,6 +351,11 @@ int main()
                     case SDLK_D:
                         MasterHandler.CursorHandler.updateDeltaCursor(false, false);
                         break;
+                    case SDLK_G:
+                        MasterHandler.drawCircle();
+                        break;
+                    case SDLK_L:
+                        MasterHandler.drawCircle(true);
                     case SDLK_Z:
                         MasterHandler.CursorHandler.updateDrawstep(-5);
                         break;
