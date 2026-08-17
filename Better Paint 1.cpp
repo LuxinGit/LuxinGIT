@@ -165,14 +165,14 @@ private:
     void drawPoint(std::pair<float, float> c) {
         canvas[indexFromCoord(c)].colour = colour;
     }
-    void drawVerticalLine(std::pair<float, float>& c, float y) {
+    void drawVerticalLine(std::pair<float, float> c, float y) {
         bool n = y < c.second;
         int d = 1; if (n) d = -1;
         for (c.second; c.second != y; c.second += d) drawPoint(c);
         drawPoint({ c.first, y });
         return;
     }
-    void drawLine(std::pair<float, float>& c, std::pair<float, float> newc) {
+    void drawLine(std::pair<float, float> c, std::pair<float, float> newc) {
 
         drawPoint(c);
 
@@ -204,11 +204,32 @@ private:
         drawLine(payload.first, payload.second);
     }
     
-    void drawCircle(std::pair<float, float>& c, int radius) {
-        int offset = 0;
-        for (int i = c.first - radius; i <= c.first + radius; i++) {
-            offset = static_cast<int>(std::sqrt(radius * radius - (i - c.first) * (i - c.first)));
-            drawPoint({ i,c.second + offset }); drawPoint({ i, c.second - offset });
+    void drawCircle(const std::pair<float, float>& c, int radius) {
+        int x = 0;
+        int y = radius;
+        int d = 1 - radius;
+
+        while (x <= y) {
+
+            drawPoint({ c.first + x, c.second + y });
+            drawPoint({ c.first - x, c.second + y });
+            drawPoint({ c.first + x, c.second - y });
+            drawPoint({ c.first - x, c.second - y });
+
+            drawPoint({ c.first + y, c.second + x });
+            drawPoint({ c.first - y, c.second + x });
+            drawPoint({ c.first + y, c.second - x });
+            drawPoint({ c.first - y, c.second - x });
+
+            x++;
+
+            if (d < 0) {
+                d += 2 * x + 1;
+            }
+            else {
+                y--;
+                d += 2 * (x - y) + 1;
+            }
         }
     }
 
