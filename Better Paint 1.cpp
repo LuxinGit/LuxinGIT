@@ -76,7 +76,8 @@ public:
     };
 
     enum class META {
-        CLEAR = 0
+        CLEAR = 0,
+        CHANGE_COLOUR = 1
     };
 
     Command(MOVE cmd, int varsetting = 0) : Command(TYPE::MOVE, static_cast<int>(cmd), varsetting) {}
@@ -156,6 +157,10 @@ private:
 
     std::array<uint8_t, 4> colour = { 200, 200, 200, 255 };
     std::vector<luxel> canvas;
+
+    std::array<uint8_t, 4> getRandomColour() {
+        return { static_cast<uint8_t>(rand() % 256),static_cast<uint8_t>(rand() % 256),static_cast<uint8_t>(rand() % 256), 255 };
+    }
 
     size_t indexFromCoord(std::pair<float, float> c) const {
         // ASSUMES POSITIVE X/Y. INDEXING WITH THIS INDEX WITHOUT SIZE CHECKING MAY CAUSE OUT OF BOUNDARY MEMORY CRASH [IF COORD > LAST LUXEL INDEX].
@@ -243,13 +248,31 @@ private:
         int radius = CursorHandler.retrieveDrawstep();
         if (setting) {
             for (int i = 1; i <= radius; i++) {
-                colour = { static_cast<uint8_t>(rand() % 256),static_cast<uint8_t>(rand() % 256),static_cast<uint8_t>(rand() % 256), 255 };
+                colour = getRandomColour();
                 drawCircle(c, i);
             }
             colour = { 200, 200, 200, 255 };
             return;
         }
         else drawCircle(c, radius);
+    }
+
+    void clearCanvas() {
+        for (luxel& l : canvas) {
+            l.resetLuxel();
+        }
+    }
+
+    void changeColour(const std::array<uint8_t, 4>& varcolour = { 200, 200, 200, 255 }) { colour = varcolour; };
+    void processClearColourCommand(int setting){
+        switch (setting) {
+        case 0:
+            changeColour();
+            break;
+        case 1:
+            changeColour(getRandomColour());
+            break;
+        }
     }
 
 public:
@@ -261,16 +284,9 @@ public:
        // Only concern here is that if underlying height / width changes then this will need to be recalculated.
     }
 
-    void clearCanvas() {
-        for (luxel& l : canvas) {
-            l.resetLuxel();
-        }
-    }
-
     std::vector<luxel> retrieveCanvas() { return canvas; }
     int& retrieveCanvasWidth() { return width; }
-    void changeColour(const std::array<uint8_t, 4>& varcolour) { colour = varcolour; };
-
+    
     void processDrawCommand(const Command& command) {
         switch (static_cast<Command::DRAW>(command.action)) {
         case Command::DRAW::LINE:
@@ -286,7 +302,12 @@ public:
         case Command::META::CLEAR:
             clearCanvas();
             break;
+        case Command::META::CHANGE_COLOUR:
+            processClearColourCommand(command.setting);
+            break;
         }
+        
+
     };
 
 };
@@ -385,7 +406,7 @@ private:
     void processMoveCommand(const Command& command) { // not in use
         switch (static_cast<Command::MOVE>(command.action)) {
         case Command::MOVE::UP:
-            CanvasHandler.clearCanvas();
+            //CanvasHandler.clearCanvas();
             break;
         default:
             break;
@@ -528,6 +549,9 @@ int main()
                         break;
                     case SDLK_L:
                         MasterHandler.addCommand(Command{Command::DRAW::CIRCLE, 1});
+                        break;
+                    case SDLK_J:
+                        MasterHandler.addCommand(Command{Command::META::CHANGE_COLOUR, 1});
                         break;
                     case SDLK_Z:
                         MasterHandler.updateDrawstep(-5);
