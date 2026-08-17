@@ -25,7 +25,6 @@ TO DO:
 struct Command;
 struct Luxel;
 
-struct Cursor_Handler;
 struct Canvas_Handler;
 struct SDL_Handler;
 struct Command_Handler;
@@ -94,171 +93,210 @@ public:
 
 #pragma endregion
 
-#pragma region Cursor Handler
-struct Cursor_Handler {
-
-private:
-
-    std::pair<float, float> cursor;
-    std::pair<float, float> newCursor;
-    std::pair<float, float> deltaCursor = { 0, 0 }; // newCursor = cursor + deltaCursor at t==0, cursor = newCursor at t==1;
-    std::pair<std::pair<float, float>, std::pair<float, float>> bothCursors; // for sending to drawLine;
-
-    int drawStep = 5;
-
-    void adjustDeltaCursor(std::pair<float, float> incoming) { deltaCursor.first += incoming.first; deltaCursor.second += incoming.second; }
-
-public:
-
-    Cursor_Handler() { cursor = { 100, 100 }; newCursor = cursor; }
-    Cursor_Handler(std::pair<float, float> varcursor) { cursor = varcursor; newCursor = varcursor; };
-
-    void updateDrawstep(int delta) {
-        drawStep += delta;
-        if (drawStep < 5) drawStep = 5;
-    } // probably should sizecheck this but we can leave that for now
-
-    void updateDeltaCursor(bool yaxis, bool negative) {
-        std::pair<float, float> payload = { 0,0 };
-        int tempstep = drawStep;
-        if (negative) tempstep *= -1;
-
-        if (yaxis) payload.second += tempstep;
-        else payload.first += tempstep;
-
-        adjustDeltaCursor(payload);
-    }
-
-    void calcNewCursor() {
-        newCursor.first += deltaCursor.first;
-        newCursor.second += deltaCursor.second;
-        bothCursors = { cursor, newCursor };
-    }
-
-    void resetCursors() {
-        cursor = newCursor;
-        deltaCursor = { 0 , 0 };
-    }
-
-    std::pair<std::pair<float, float>, std::pair<float, float>>& retrieveBothCursors() {
-        return bothCursors;
-    }
-    std::pair<float, float>& retrieveCursor() { return cursor; }
-    int retrieveDrawstep() const { return drawStep; }
-
-
-};
-#pragma endregion
-
 #pragma region Canvas Handler
 struct Canvas_Handler {
 
 private: 
 
     int& width; int& height;
-    Cursor_Handler& CursorHandler;
-
-    std::array<uint8_t, 4> colour = { 200, 200, 200, 255 };
     std::vector<luxel> canvas;
 
-    std::array<uint8_t, 4> getRandomColour() {
-        return { static_cast<uint8_t>(rand() % 256),static_cast<uint8_t>(rand() % 256),static_cast<uint8_t>(rand() % 256), 255 };
-    }
+#pragma region Cursor Handler
+
+    struct Cursor_Handler {
+
+    private:
+
+        Canvas_Handler& CanvasHandler;
+
+        std::pair<float, float> cursor = { 100, 100 };
+        std::pair<float, float> newCursor = { 100, 100 };
+        std::pair<float, float> deltaCursor = { 0, 0 }; // newCursor = cursor + deltaCursor at t==0, cursor = newCursor at t==1;
+
+        int drawStep = 5;
+
+        void adjustDeltaCursor(std::pair<float, float> incoming) { deltaCursor.first += incoming.first; deltaCursor.second += incoming.second; }
+      
+        void updateDrawstep(int delta) {
+            drawStep += delta;
+            if (drawStep < 5) drawStep = 5;
+        } // probably should sizecheck this but we can leave that for now
+
+    public:
+
+        Cursor_Handler(Canvas_Handler& varCanvH) : CanvasHandler(varCanvH) {}
+
+
+        void updateDeltaCursor(bool yaxis, bool negative) {
+            std::pair<float, float> payload = { 0,0 };
+            int tempstep = drawStep;
+            if (negative) tempstep *= -1;
+
+            if (yaxis) payload.second += tempstep;
+            else payload.first += tempstep;
+
+            adjustDeltaCursor(payload);
+        }
+
+        void calcNewCursor() {
+            newCursor.first += deltaCursor.first;
+            newCursor.second += deltaCursor.second;
+        }
+        void resetCursors() {
+            cursor = newCursor;
+            deltaCursor = { 0 , 0 };
+        }
+
+        void processChangeDrawstepCommand(int setting) {
+            updateDrawstep(setting); // lazy !
+        }
+        void processMoveCommand(bool yaxis, bool negative, int setting = 0) {
+            updateDeltaCursor(yaxis, negative);
+            CanvasHandler.DrawHandler.processDrawLineCommand();
+        }
+
+        std::pair<float, float>& retrieveCursor() { return cursor; }
+        std::pair<float, float>& retrieveNewCursor() { return newCursor; }
+        int& retrieveDrawstep() { return drawStep; }
+
+
+    };
+#pragma endregion
+
+    Cursor_Handler CursorHandler;
+
+
+public:
 
     size_t indexFromCoord(std::pair<float, float> c) const {
         // ASSUMES POSITIVE X/Y. INDEXING WITH THIS INDEX WITHOUT SIZE CHECKING MAY CAUSE OUT OF BOUNDARY MEMORY CRASH [IF COORD > LAST LUXEL INDEX].
         return size_t(c.second) * width + size_t(c.first);
     }
 
-    void drawPoint(std::pair<float, float> c) {
-        canvas[indexFromCoord(c)].colour = colour;
-    }
-    void drawVerticalLine(std::pair<float, float> c, float y) {
-        bool n = y < c.second;
-        int d = 1; if (n) d = -1;
-        for (c.second; c.second != y; c.second += d) drawPoint(c);
-        drawPoint({ c.first, y });
-        return;
-    }
-    void drawLine(std::pair<float, float> c, std::pair<float, float> newc) {
+private:
 
-        drawPoint(c);
+#pragma region Draw Handler
 
-        // vertical line edge case
-        if (c.first == newc.first) {
-            drawVerticalLine(c, newc.second);
+    struct Draw_Handler {
+
+    private:
+
+        Canvas_Handler& CanvasHandler;
+        std::array<uint8_t, 4> colour = { 200, 200, 200, 255 };
+
+        void drawPoint(std::pair<float, float> c) {
+            CanvasHandler.retrieveCanvas()[CanvasHandler.indexFromCoord(c)].colour = colour;
+        }
+        void drawVerticalLine(std::pair<float, float> c, float y) {
+            bool n = y < c.second;
+            int d = 1; if (n) d = -1;
+            for (c.second; c.second != y; c.second += d) drawPoint(c);
+            drawPoint({ c.first, y });
             return;
         }
+        void drawCircle(const std::pair<float, float>& c, int radius) {
+            int x = 0;
+            int y = radius;
+            int d = 1 - radius;
 
-        // Figure out direction (lines can be backwards)
-        bool n = newc.first < c.first;
-        int d = 1; if (n) d = -1;
+            while (x <= y) {
 
-        float slope = (newc.second - c.second) / (newc.first - c.first);
-        float y = 0.0f;
+                drawPoint({ c.first + x, c.second + y });
+                drawPoint({ c.first - x, c.second + y });
+                drawPoint({ c.first + x, c.second - y });
+                drawPoint({ c.first - x, c.second - y });
 
-        for (c.first; c.first != newc.first; c.first += d) {
-            y = c.second + slope;
-            c.second = y;
+                drawPoint({ c.first + y, c.second + x });
+                drawPoint({ c.first - y, c.second + x });
+                drawPoint({ c.first + y, c.second - x });
+                drawPoint({ c.first - y, c.second - x });
+
+                x++;
+
+                if (d < 0) {
+                    d += 2 * x + 1;
+                }
+                else {
+                    y--;
+                    d += 2 * (x - y) + 1;
+                }
+            }
+        }
+
+    public:
+
+        Draw_Handler(Canvas_Handler& CanvH) : CanvasHandler(CanvH) {}
+
+        std::array<uint8_t, 4>& getActiveColour() { return colour; }
+        std::array<uint8_t, 4> getRandomColour() {
+            return { static_cast<uint8_t>(rand() % 256),static_cast<uint8_t>(rand() % 256),static_cast<uint8_t>(rand() % 256), 255 };
+        }
+        void changeColour(const std::array<uint8_t, 4>& varcolour = { 200, 200, 200, 255 }) { colour = varcolour; };
+
+        void drawLine(std::pair<float, float> c, std::pair<float, float> newc) {
+
             drawPoint(c);
-        }
 
-        // At ending x
-        drawPoint(newc);
-
-        return;
-    }
-    void drawLine(std::pair<std::pair<float, float>, std::pair<float, float>>& payload) {
-        drawLine(payload.first, payload.second);
-    }
-    
-    void drawCircle(const std::pair<float, float>& c, int radius) {
-        int x = 0;
-        int y = radius;
-        int d = 1 - radius;
-
-        while (x <= y) {
-
-            drawPoint({ c.first + x, c.second + y });
-            drawPoint({ c.first - x, c.second + y });
-            drawPoint({ c.first + x, c.second - y });
-            drawPoint({ c.first - x, c.second - y });
-
-            drawPoint({ c.first + y, c.second + x });
-            drawPoint({ c.first - y, c.second + x });
-            drawPoint({ c.first + y, c.second - x });
-            drawPoint({ c.first - y, c.second - x });
-
-            x++;
-
-            if (d < 0) {
-                d += 2 * x + 1;
+            // vertical line edge case
+            if (c.first == newc.first) {
+                drawVerticalLine(c, newc.second);
+                return;
             }
-            else {
-                y--;
-                d += 2 * (x - y) + 1;
-            }
-        }
-    }
 
-    void processDrawLineCommand() {
-        CursorHandler.calcNewCursor();
-        drawLine(CursorHandler.retrieveBothCursors());
-        CursorHandler.resetCursors();
-    }
-    void processDrawCircleCommand(bool setting) {
-        std::pair<float, float>& c = CursorHandler.retrieveCursor();
-        int radius = CursorHandler.retrieveDrawstep();
-        if (setting) {
-            for (int i = 1; i <= radius; i++) {
-                colour = getRandomColour();
-                drawCircle(c, i);
+            // Figure out direction (lines can be backwards)
+            bool n = newc.first < c.first;
+            int d = 1; if (n) d = -1;
+
+            float slope = (newc.second - c.second) / (newc.first - c.first);
+            float y = 0.0f;
+
+            for (c.first; c.first != newc.first; c.first += d) {
+                y = c.second + slope;
+                c.second = y;
+                drawPoint(c);
             }
-            colour = { 200, 200, 200, 255 };
+
+            // At ending x
+            drawPoint(newc);
+
             return;
         }
-        else drawCircle(c, radius);
-    }
+
+        void processDrawLineCommand() {
+            CanvasHandler.CursorHandler.calcNewCursor();
+            drawLine(CanvasHandler.CursorHandler.retrieveCursor(), CanvasHandler.CursorHandler.retrieveNewCursor());
+            CanvasHandler.CursorHandler.resetCursors();
+        }
+        void processDrawCircleCommand(bool setting) {
+            std::pair<float, float>& c = CanvasHandler.CursorHandler.retrieveCursor();
+            int radius = CanvasHandler.CursorHandler.retrieveDrawstep();
+            if (setting) {
+                for (int i = 1; i <= radius; i++) {
+                    colour = getRandomColour();
+                    drawCircle(c, i);
+                }
+                colour = { 200, 200, 200, 255 };
+                return;
+            }
+            else drawCircle(c, radius);
+        }
+
+        void processChangeColourCommand(int setting) {
+            switch (setting) {
+            case 0:
+                changeColour();
+                break;
+            case 1:
+                changeColour(getRandomColour());
+                break;
+            }
+        }
+
+    };
+
+#pragma endregion
+
+    Draw_Handler DrawHandler;
 
     void clearCanvas() {
         for (luxel& l : canvas) {
@@ -266,46 +304,26 @@ private:
         }
     }
 
-    void changeColour(const std::array<uint8_t, 4>& varcolour = { 200, 200, 200, 255 }) { colour = varcolour; };
-    void processClearColourCommand(int setting){
-        switch (setting) {
-        case 0:
-            changeColour();
-            break;
-        case 1:
-            changeColour(getRandomColour());
-            break;
-        }
-    }
-
-    void processChangeDrawstepCommand(int setting) {
-        CursorHandler.updateDrawstep(setting); // lazy !
-    }
-
-    void processMoveCommand(bool yaxis, bool negative, int setting = 0) {
-        CursorHandler.updateDeltaCursor(yaxis, negative);
-        processDrawLineCommand();
-    }
-
 public:
 
-    Canvas_Handler(int& varwidth, int& varheight, Cursor_Handler& varCursH) : 
-        width(varwidth), height(varheight), 
-        CursorHandler(varCursH), 
-        canvas(std::vector<luxel>(width * height)) {
+    Canvas_Handler(int& varwidth, int& varheight) :
+        width(varwidth), height(varheight),
+        CursorHandler(*this),
+        DrawHandler(*this),
+        canvas(std::vector<luxel>(width* height)) {
        // Only concern here is that if underlying height / width changes then this will need to be recalculated.
     }
 
-    std::vector<luxel> retrieveCanvas() { return canvas; }
+    std::vector<luxel>& retrieveCanvas() { return canvas; }
     int& retrieveCanvasWidth() { return width; }
     
     void processDrawCommand(const Command& command) {
         switch (static_cast<Command::DRAW>(command.action)) {
         case Command::DRAW::LINE:
-            processDrawLineCommand();
+            DrawHandler.processDrawLineCommand();
             break;
         case Command::DRAW::CIRCLE:
-            processDrawCircleCommand(command.setting);
+            DrawHandler.processDrawCircleCommand(command.setting);
             break;
         }
     };
@@ -315,10 +333,10 @@ public:
             clearCanvas();
             break;
         case Command::META::CHANGE_COLOUR:
-            processClearColourCommand(command.setting);
+            DrawHandler.processChangeColourCommand(command.setting);
             break;
         case Command::META::CHANGE_DRAWSTEP:
-            processChangeDrawstepCommand(command.setting);
+            CursorHandler.processChangeDrawstepCommand(command.setting);
             break;
         }
         
@@ -327,19 +345,20 @@ public:
     void processMoveCommand(const Command& command) {
         switch (static_cast<Command::MOVE>(command.action)) {
         case Command::MOVE::UP:
-            processMoveCommand(true, true);
+            CursorHandler.processMoveCommand(true, true);
             break;
         case Command::MOVE::RIGHT:
-            processMoveCommand(false, false);
+            CursorHandler.processMoveCommand(false, false);
             break;
         case Command::MOVE::DOWN:
-            processMoveCommand(true, false);
+            CursorHandler.processMoveCommand(true, false);
             break;
         case Command::MOVE::LEFT:
-            processMoveCommand(false, true);
+            CursorHandler.processMoveCommand(false, true);
             break;
         }
     }
+
 
 
 };
@@ -426,7 +445,6 @@ private:
     std::vector<Command> commandQueue;
 
     // References to handlers needed for command processing
-    Cursor_Handler& CursorHandler;
     Canvas_Handler& CanvasHandler;
     SDL_Handler& SDLHandler;
 
@@ -458,8 +476,8 @@ public:
     }
     void clearCommands() { commandQueue = {}; }
 
-    Command_Handler(Cursor_Handler& varCursH, Canvas_Handler& varCanvH, SDL_Handler& varSDLH)
-        : CursorHandler(varCursH), CanvasHandler(varCanvH), SDLHandler(varSDLH) {}
+    Command_Handler(Canvas_Handler& varCanvH, SDL_Handler& varSDLH)
+        : CanvasHandler(varCanvH), SDLHandler(varSDLH) {}
 
 };
 #pragma endregion
@@ -501,7 +519,6 @@ private:
 
     int width; int height;
 
-    Cursor_Handler CursorHandler;
     Canvas_Handler CanvasHandler;
     SDL_Handler SDLHandler;
     Command_Handler CommandHandler;
@@ -519,8 +536,8 @@ public:
 
     Master_Handler(int varwidth, int varheight) : 
         width(varwidth), height(varheight), 
-        CanvasHandler(width, height, CursorHandler), 
-        CommandHandler(CursorHandler, CanvasHandler, SDLHandler) {};
+        CanvasHandler(width, height), 
+        CommandHandler(CanvasHandler, SDLHandler) {};
 
     int initialiseSDL() {
         return (SDLHandler.initialiseSDL(width, height, CanvasHandler.retrieveCanvas()));
