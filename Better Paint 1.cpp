@@ -8,6 +8,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <vector>
+#include <map>
 
 /*
 TO DO:
@@ -255,6 +256,52 @@ private:
 };
 #pragma endregion
 
+#pragma region Commands
+
+enum class COMMAND_TYPE {
+    DRAW = 0,
+    MOVE = 1,
+    META = 2
+};
+
+enum class MOVE_COMMAND {
+    UP = 0,
+    RIGHT = 1,
+    DOWN = 2,
+    LEFT = 3
+};
+
+enum class DRAW_COMMAND {
+    LINE = 0,
+    CIRCLE = 1
+};
+
+enum class META_COMMAND {
+    CLEAR = 0
+};
+
+struct Command {
+    Command(COMMAND_TYPE vartype, int varaction, int varsetting = 0) : type(vartype), action(varaction) { if (varsetting) setting = varsetting; }
+
+    COMMAND_TYPE type;
+    int action; // differentiates between commands.
+    int setting = 0; // for passing additional information ?
+};
+
+#pragma endregion
+
+#pragma region Keyboard Handler
+struct Keyboard_Handler {
+
+private:
+
+    
+
+public:
+
+};
+#pragma endregion
+
 #pragma region Master Handler
 
 struct Master_Handler {
@@ -280,27 +327,52 @@ private:
         CanvasHandler.drawCircle(CursorHandler.retrieveCursor(), CursorHandler.retrieveDrawstep(), setting);
     }
 
-    enum class DrawCommand;
-    std::vector<std::pair<DrawCommand, int>> commandQueue;
-
+    std::vector<Command> commandQueue;
     void clearCommands() { commandQueue = {}; }
-    void processDrawCommand(std::pair<DrawCommand, int> command) {
-        switch (command.first) {
-        case DrawCommand::LINE:
+    void processDrawCommand(const Command& command) {
+        switch (static_cast<DRAW_COMMAND>(command.action)) {
+        case DRAW_COMMAND::LINE:
             drawLine();
             break;
-        case DrawCommand::CIRCLE:
-            drawCircle(command.second);
+        case DRAW_COMMAND::CIRCLE:
+            drawCircle(command.setting);
+            break;
+        }
+    };
+    void processMoveCommand(const Command& command) {
+        switch (static_cast<MOVE_COMMAND>(command.action)) {
+        case MOVE_COMMAND::UP:
+            CanvasHandler.clearCanvas();
+            break;
+        default:
+            break;
+        }
+        
+    };
+    void processMetaCommand(const Command& command) {
+        switch (static_cast<META_COMMAND>(command.action)) {
+        case META_COMMAND::CLEAR:
+            CanvasHandler.clearCanvas();
+            break;
+        }
+    };
+    
+    void processCommand(const Command& command) {
+        switch (command.type) {
+        case COMMAND_TYPE::DRAW:
+            processDrawCommand(command);
+            break;
+        case COMMAND_TYPE::MOVE:
+            processMoveCommand(command);
+            break;
+        case COMMAND_TYPE::META:
+            processMetaCommand(command);
             break;
         }
     }
 
-public: 
 
-    enum class DrawCommand {
-        LINE,
-        CIRCLE
-    };
+public: 
 
     Cursor_Handler CursorHandler;
     Canvas_Handler CanvasHandler;
@@ -317,18 +389,18 @@ public:
     }
 
     void refreshSDL() {
-        for (const auto& command : commandQueue) processDrawCommand(command);
+        for (const auto& command : commandQueue) processCommand(command);
         renderNewSDLTexture();
         clearCommands();
     }
 
-    void addCommand(DrawCommand command, int addArg = 0) {
-        commandQueue.emplace_back(command, addArg);
+    void addCommand(Command command) {
+        commandQueue.emplace_back(command);
     }
 
     void processCursorMovement(const std::pair<bool, bool>& yandneg) {
         CursorHandler.updateDeltaCursor(yandneg.first, yandneg.second);
-        addCommand(DrawCommand::LINE);
+        addCommand(Command{COMMAND_TYPE::DRAW, 0, 0});
     }
 
     void cleanup() const {
@@ -374,10 +446,10 @@ int main()
                         MasterHandler.processCursorMovement({ false,false });
                         break;
                     case SDLK_G:
-                        MasterHandler.addCommand(Master_Handler::DrawCommand::CIRCLE);
+                        MasterHandler.addCommand(Command{COMMAND_TYPE::DRAW, 1});
                         break;
                     case SDLK_L:
-                        MasterHandler.addCommand(Master_Handler::DrawCommand::CIRCLE, 1);
+                        MasterHandler.addCommand(Command{COMMAND_TYPE::DRAW, 1, 1});
                         break;
                     case SDLK_Z:
                         MasterHandler.CursorHandler.updateDrawstep(-5);
