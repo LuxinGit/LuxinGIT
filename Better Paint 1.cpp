@@ -66,7 +66,7 @@ private:
     void drawCcl(const std::pair<float, float>& c, int radius) {
         int offset = 0;
         for (int i = c.first - radius; i <= c.first + radius; i++) {
-            offset = std::sqrt(radius * radius - (i - c.first) * (i - c.first));
+            offset = static_cast<int>(std::sqrt(radius * radius - (i - c.first) * (i - c.first)));
             drawPoint({ i,c.second + offset }); drawPoint({ i, c.second - offset });
         }
     }
@@ -85,6 +85,7 @@ public:
     }
 
     std::vector<luxel> retrieveCanvas() { return canvas; }
+    int& retrieveCanvasWidth() { return width; }
 
     void changeColour(const std::array<uint8_t, 4>& varcolour) { colour = varcolour; };
 
@@ -208,10 +209,11 @@ struct SDL_Handler {
         cleanup();
     }
 
-    int initialiseSDL(int width, int height) {
+    int initialiseSDL(int width, int height, const std::vector<luxel>& canvas) {
         if (initialiseWindow(width, height)) return 1;
         if (initialiseRenderer()) return 1;
         if (initialiseTexture(width, height)) return 1;
+        SDL_UpdateTexture(Texture, nullptr, canvas.data(), width * sizeof(luxel));
         return 0;
     }
 
@@ -258,36 +260,146 @@ private:
 
 #pragma region Commands
 
-enum class COMMAND_TYPE {
-    DRAW = 0,
-    MOVE = 1,
-    META = 2
-};
-
-enum class MOVE_COMMAND {
-    UP = 0,
-    RIGHT = 1,
-    DOWN = 2,
-    LEFT = 3
-};
-
-enum class DRAW_COMMAND {
-    LINE = 0,
-    CIRCLE = 1
-};
-
-enum class META_COMMAND {
-    CLEAR = 0
-};
-
 struct Command {
-    Command(COMMAND_TYPE vartype, int varaction, int varsetting = 0) : type(vartype), action(varaction) { if (varsetting) setting = varsetting; }
 
-    COMMAND_TYPE type;
+public:
+
+    enum class TYPE {
+        DRAW = 0,
+        MOVE = 1,
+        META = 2
+    };
+
+private:
+
+    Command(TYPE vartype, int varaction, int varsetting = 0) : type(vartype), action(varaction), setting(varsetting) {}
+
+public:
+
+    enum class MOVE {
+        UP = 0,
+        RIGHT = 1,
+        DOWN = 2,
+        LEFT = 3
+    };
+
+    enum class DRAW {
+        LINE = 0,
+        CIRCLE = 1
+    };
+
+    enum class META {
+        CLEAR = 0
+    };
+
+    Command(MOVE cmd, int varsetting = 0) : Command(TYPE::MOVE, static_cast<int>(cmd), varsetting) {}
+    Command(DRAW cmd, int varsetting = 0) : Command(TYPE::DRAW, static_cast<int>(cmd), varsetting) {}
+    Command(META cmd, int varsetting = 0) : Command(TYPE::META, static_cast<int>(cmd), varsetting) {}
+
+    TYPE type;
     int action; // differentiates between commands.
     int setting = 0; // for passing additional information ?
+
 };
 
+
+#pragma endregion
+
+#pragma region Command Handler
+
+struct Command_Handler {
+
+private:
+
+    std::vector<Command> commandQueue;
+
+    // References to handlers needed for command processing
+    Cursor_Handler& CursorHandler;
+    Canvas_Handler& CanvasHandler;
+    SDL_Handler& SDLHandler;
+
+    // IDEALLY MOVE BELOW TO SEPARATE HANDLERS.
+
+    void updateSDLTexture() {
+        SDLHandler.updateTexture(CanvasHandler.retrieveCanvas(), CanvasHandler.retrieveCanvasWidth());
+    }
+    void renderNewSDLTexture() {
+        updateSDLTexture();
+        SDLHandler.renderTexture();
+        SDLHandler.renderPresent();
+    }
+
+    void drawLine() {
+        CursorHandler.calcNewCursor();
+        CanvasHandler.drawLine(CursorHandler.retrieveBothCursors());
+        CursorHandler.resetCursors();
+    }
+    void drawCircle(bool setting = false) {
+        CanvasHandler.drawCircle(CursorHandler.retrieveCursor(), CursorHandler.retrieveDrawstep(), setting);
+    }
+
+    void processDrawCommand(const Command& command) {
+        switch (static_cast<Command::DRAW>(command.action)) {
+        case Command::DRAW::LINE:
+            drawLine();
+            break;
+        case Command::DRAW::CIRCLE:
+            drawCircle(command.setting);
+            break;
+        }
+    };
+    void processMoveCommand(const Command& command) { // not in use
+        switch (static_cast<Command::MOVE>(command.action)) {
+        case Command::MOVE::UP:
+            CanvasHandler.clearCanvas();
+            break;
+        default:
+            break;
+        }
+
+    };
+    void processMetaCommand(const Command& command) {
+        switch (static_cast<Command::META>(command.action)) {
+        case Command::META::CLEAR:
+            CanvasHandler.clearCanvas();
+            break;
+        }
+    };
+
+    // ON THE BASIS THAT THE ABOVE IS LARGELY HANDLED BY RESPECTIVE HANDLERS AND THIS SHOULDNT BE RESPONSIBLE.
+
+    void processCommand(const Command& command) {
+        switch (command.type) {
+        case Command::TYPE::DRAW:
+            processDrawCommand(command);
+            break;
+        case Command::TYPE::MOVE:
+            processMoveCommand(command);
+            break;
+        case Command::TYPE::META:
+            processMetaCommand(command);
+            break;
+        }
+    }
+
+
+public:
+
+    void processCommands() {
+        for (const auto& command : commandQueue) processCommand(command);
+        renderNewSDLTexture();
+        clearCommands();
+    }
+
+    void addCommand(Command command) {
+        commandQueue.emplace_back(command);
+    }
+    void clearCommands() { commandQueue = {}; }
+
+    Command_Handler(Cursor_Handler& varCursH, Canvas_Handler& varCanvH, SDL_Handler& varSDLH)
+        : CursorHandler(varCursH), CanvasHandler(varCanvH), SDLHandler(varSDLH) {}
+
+};
 #pragma endregion
 
 #pragma region Keyboard Handler
@@ -307,100 +419,38 @@ public:
 struct Master_Handler {
 
 private:
+
     int width; int height;
-
-    void updateSDLTexture() {
-        SDLHandler.updateTexture(CanvasHandler.retrieveCanvas(), width);
-    }
-    void renderNewSDLTexture() {
-        updateSDLTexture();
-        SDLHandler.renderTexture();
-        SDLHandler.renderPresent();
-    }
-
-    void drawLine() {
-        CursorHandler.calcNewCursor();
-        CanvasHandler.drawLine(CursorHandler.retrieveBothCursors());
-        CursorHandler.resetCursors();
-    }
-    void drawCircle(bool setting = false) {
-        CanvasHandler.drawCircle(CursorHandler.retrieveCursor(), CursorHandler.retrieveDrawstep(), setting);
-    }
-
-    std::vector<Command> commandQueue;
-    void clearCommands() { commandQueue = {}; }
-    void processDrawCommand(const Command& command) {
-        switch (static_cast<DRAW_COMMAND>(command.action)) {
-        case DRAW_COMMAND::LINE:
-            drawLine();
-            break;
-        case DRAW_COMMAND::CIRCLE:
-            drawCircle(command.setting);
-            break;
-        }
-    };
-    void processMoveCommand(const Command& command) {
-        switch (static_cast<MOVE_COMMAND>(command.action)) {
-        case MOVE_COMMAND::UP:
-            CanvasHandler.clearCanvas();
-            break;
-        default:
-            break;
-        }
-        
-    };
-    void processMetaCommand(const Command& command) {
-        switch (static_cast<META_COMMAND>(command.action)) {
-        case META_COMMAND::CLEAR:
-            CanvasHandler.clearCanvas();
-            break;
-        }
-    };
-    
-    void processCommand(const Command& command) {
-        switch (command.type) {
-        case COMMAND_TYPE::DRAW:
-            processDrawCommand(command);
-            break;
-        case COMMAND_TYPE::MOVE:
-            processMoveCommand(command);
-            break;
-        case COMMAND_TYPE::META:
-            processMetaCommand(command);
-            break;
-        }
-    }
-
-
-public: 
 
     Cursor_Handler CursorHandler;
     Canvas_Handler CanvasHandler;
     SDL_Handler SDLHandler;
+    Command_Handler CommandHandler;
 
-    Master_Handler(int varwidth, int varheight) : width(varwidth), height(varheight), CanvasHandler(width, height) {};
+public: 
 
-    // Functions that use multiple handlers
+    Master_Handler(int varwidth, int varheight) : 
+        width(varwidth), height(varheight), 
+        CanvasHandler(width, height), 
+        CommandHandler(CursorHandler, CanvasHandler, SDLHandler) {};
 
     int initialiseSDL() {
-        if (SDLHandler.initialiseSDL(width, height)) return 1;
-        updateSDLTexture();
-        return 0;
+        return (SDLHandler.initialiseSDL(width, height, CanvasHandler.retrieveCanvas()));
     }
 
-    void refreshSDL() {
-        for (const auto& command : commandQueue) processCommand(command);
-        renderNewSDLTexture();
-        clearCommands();
+    void processCommands() {
+        CommandHandler.processCommands();
     }
-
     void addCommand(Command command) {
-        commandQueue.emplace_back(command);
+        CommandHandler.addCommand(command);
+    }
+    void updateDrawstep(int delta) {
+        return CursorHandler.updateDrawstep(delta);
     }
 
     void processCursorMovement(const std::pair<bool, bool>& yandneg) {
         CursorHandler.updateDeltaCursor(yandneg.first, yandneg.second);
-        addCommand(Command{COMMAND_TYPE::DRAW, 0, 0});
+        addCommand(Command{Command::DRAW::LINE, 0});
     }
 
     void cleanup() const {
@@ -411,6 +461,7 @@ public:
 
 #pragma endregion
 
+#pragma region Main
 int main()
 {
 
@@ -446,26 +497,26 @@ int main()
                         MasterHandler.processCursorMovement({ false,false });
                         break;
                     case SDLK_G:
-                        MasterHandler.addCommand(Command{COMMAND_TYPE::DRAW, 1});
+                        MasterHandler.addCommand(Command{Command::DRAW::CIRCLE});
                         break;
                     case SDLK_L:
-                        MasterHandler.addCommand(Command{COMMAND_TYPE::DRAW, 1, 1});
+                        MasterHandler.addCommand(Command{Command::DRAW::CIRCLE, 1});
                         break;
                     case SDLK_Z:
-                        MasterHandler.CursorHandler.updateDrawstep(-5);
+                        MasterHandler.updateDrawstep(-5);
                         break;
                     case SDLK_X:
-                        MasterHandler.CursorHandler.updateDrawstep(5);
+                        MasterHandler.updateDrawstep(5);
                         break;
                     case SDLK_C:
-                        MasterHandler.CanvasHandler.clearCanvas();
+                        MasterHandler.addCommand(Command{Command::META::CLEAR});
                         break;
                 }
             }
             
         }
 
-        MasterHandler.refreshSDL();
+        MasterHandler.processCommands();
 
     }
 
@@ -473,3 +524,4 @@ int main()
     MasterHandler.cleanup();
     return 0;
 }
+#pragma endregion
