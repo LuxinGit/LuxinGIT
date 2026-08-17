@@ -9,7 +9,7 @@
 #include <cstdlib>
 #include <vector>
 #include <map>
-
+#include <unordered_map>
 /*
 TO DO:
 
@@ -77,7 +77,8 @@ public:
 
     enum class META {
         CLEAR = 0,
-        CHANGE_COLOUR = 1
+        CHANGE_COLOUR = 1,
+        CHANGE_DRAWSTEP = 2
     };
 
     Command(MOVE cmd, int varsetting = 0) : Command(TYPE::MOVE, static_cast<int>(cmd), varsetting) {}
@@ -103,7 +104,7 @@ private:
     std::pair<float, float> deltaCursor = { 0, 0 }; // newCursor = cursor + deltaCursor at t==0, cursor = newCursor at t==1;
     std::pair<std::pair<float, float>, std::pair<float, float>> bothCursors; // for sending to drawLine;
 
-    int drawStep = 10;
+    int drawStep = 5;
 
     void adjustDeltaCursor(std::pair<float, float> incoming) { deltaCursor.first += incoming.first; deltaCursor.second += incoming.second; }
 
@@ -144,6 +145,8 @@ public:
     }
     std::pair<float, float>& retrieveCursor() { return cursor; }
     int retrieveDrawstep() const { return drawStep; }
+
+
 };
 #pragma endregion
 
@@ -275,6 +278,15 @@ private:
         }
     }
 
+    void processChangeDrawstepCommand(int setting) {
+        CursorHandler.updateDrawstep(setting); // lazy !
+    }
+
+    void processMoveCommand(bool yaxis, bool negative, int setting = 0) {
+        CursorHandler.updateDeltaCursor(yaxis, negative);
+        processDrawLineCommand();
+    }
+
 public:
 
     Canvas_Handler(int& varwidth, int& varheight, Cursor_Handler& varCursH) : 
@@ -305,10 +317,30 @@ public:
         case Command::META::CHANGE_COLOUR:
             processClearColourCommand(command.setting);
             break;
+        case Command::META::CHANGE_DRAWSTEP:
+            processChangeDrawstepCommand(command.setting);
+            break;
         }
         
 
     };
+    void processMoveCommand(const Command& command) {
+        switch (static_cast<Command::MOVE>(command.action)) {
+        case Command::MOVE::UP:
+            processMoveCommand(true, true);
+            break;
+        case Command::MOVE::RIGHT:
+            processMoveCommand(false, false);
+            break;
+        case Command::MOVE::DOWN:
+            processMoveCommand(true, false);
+            break;
+        case Command::MOVE::LEFT:
+            processMoveCommand(false, true);
+            break;
+        }
+    }
+
 
 };
 #pragma endregion
@@ -338,16 +370,10 @@ struct SDL_Handler {
         return 0;
     }
 
-    void updateTexture(const std::vector<luxel>& canvas, int width) const  {
-        SDL_UpdateTexture(Texture, nullptr, canvas.data(), width * sizeof(luxel));
-    }
-
-    void renderTexture() const { 
-        SDL_RenderTexture(Renderer, Texture, nullptr, nullptr);  
-    }
-
-    void renderPresent() const {
-        SDL_RenderPresent(Renderer);
+    void refreshPresent(const std::vector<luxel>& canvas, int width) const {
+        updateTexture(canvas, width);
+        renderTexture();
+        renderPresent();
     }
 
     void cleanup() const {
@@ -358,6 +384,18 @@ struct SDL_Handler {
     }
 
 private:
+
+    void updateTexture(const std::vector<luxel>& canvas, int width) const {
+        SDL_UpdateTexture(Texture, nullptr, canvas.data(), width * sizeof(luxel));
+    }
+
+    void renderTexture() const {
+        SDL_RenderTexture(Renderer, Texture, nullptr, nullptr);
+    }
+
+    void renderPresent() const {
+        SDL_RenderPresent(Renderer);
+    }
 
     int initialiseWindow(int width, int height) {
         if (!SDL_Init(SDL_INIT_VIDEO))
@@ -392,37 +430,13 @@ private:
     Canvas_Handler& CanvasHandler;
     SDL_Handler& SDLHandler;
 
-    // IDEALLY MOVE BELOW TO SEPARATE HANDLERS.
-
-    void updateSDLTexture() {
-        SDLHandler.updateTexture(CanvasHandler.retrieveCanvas(), CanvasHandler.retrieveCanvasWidth());
-    }
-    void renderNewSDLTexture() {
-        updateSDLTexture();
-        SDLHandler.renderTexture();
-        SDLHandler.renderPresent();
-    }
-
-    void processMoveCommand(const Command& command) { // not in use
-        switch (static_cast<Command::MOVE>(command.action)) {
-        case Command::MOVE::UP:
-            //CanvasHandler.clearCanvas();
-            break;
-        default:
-            break;
-        }
-
-    };
-
-    // ON THE BASIS THAT THE ABOVE IS LARGELY HANDLED BY RESPECTIVE HANDLERS AND THIS SHOULDNT BE RESPONSIBLE.
-
     void processCommand(const Command& command) {
         switch (command.type) {
         case Command::TYPE::DRAW:
             CanvasHandler.processDrawCommand(command);
             break;
         case Command::TYPE::MOVE:
-            processMoveCommand(command);
+            CanvasHandler.processMoveCommand(command);
             break;
         case Command::TYPE::META:
             CanvasHandler.processMetaCommand(command);
@@ -435,7 +449,7 @@ public:
 
     void processCommands() {
         for (const auto& command : commandQueue) processCommand(command);
-        renderNewSDLTexture();
+        SDLHandler.refreshPresent(CanvasHandler.retrieveCanvas(), CanvasHandler.retrieveCanvasWidth());
         clearCommands();
     }
 
@@ -455,10 +469,27 @@ struct Keyboard_Handler {
 
 private:
 
-    
+    std::unordered_map<SDL_Scancode, Command> keyMapping = {
+    { SDL_SCANCODE_W, Command{Command::MOVE::UP} },
+    { SDL_SCANCODE_S, Command{Command::MOVE::DOWN} },
+    { SDL_SCANCODE_A, Command{Command::MOVE::LEFT} },
+    { SDL_SCANCODE_D, Command{Command::MOVE::RIGHT} },
+
+    { SDL_SCANCODE_G, Command{Command::DRAW::CIRCLE} },
+    { SDL_SCANCODE_L, Command{Command::DRAW::CIRCLE, 1} },
+
+    { SDL_SCANCODE_J, Command{Command::META::CHANGE_COLOUR, 1} },
+
+    { SDL_SCANCODE_Z, Command{Command::META::CHANGE_DRAWSTEP, -5} },
+    { SDL_SCANCODE_X, Command{Command::META::CHANGE_DRAWSTEP, 5} },
+
+    { SDL_SCANCODE_C, Command{Command::META::CLEAR} }
+    };
 
 public:
 
+    const std::unordered_map<SDL_Scancode, Command>& getKeyboardMapping() { return keyMapping; }
+    
 };
 #pragma endregion
 
@@ -474,6 +505,15 @@ private:
     Canvas_Handler CanvasHandler;
     SDL_Handler SDLHandler;
     Command_Handler CommandHandler;
+    Keyboard_Handler KeyboardHandler;
+
+    void harvestKeyboardState() {
+        const bool* keyboardState = SDL_GetKeyboardState(nullptr);
+
+        for (const auto& [scancode, command] : KeyboardHandler.getKeyboardMapping()) {
+            if (keyboardState[scancode]) addCommand(command);
+        }
+    }
 
 public: 
 
@@ -487,18 +527,11 @@ public:
     }
 
     void processCommands() {
+        harvestKeyboardState();
         CommandHandler.processCommands();
     }
     void addCommand(Command command) {
         CommandHandler.addCommand(command);
-    }
-    void updateDrawstep(int delta) {
-        return CursorHandler.updateDrawstep(delta);
-    }
-
-    void processCursorMovement(const std::pair<bool, bool>& yandneg) {
-        CursorHandler.updateDeltaCursor(yandneg.first, yandneg.second);
-        addCommand(Command{Command::DRAW::LINE});
     }
 
     void cleanup() const {
@@ -528,43 +561,7 @@ int main()
         while (SDL_PollEvent(&event))
         {
             if (event.type == SDL_EVENT_QUIT)
-                running = false;
-
-            if (event.type == SDL_EVENT_KEY_DOWN) {
-                switch (event.key.key) {
-                    case SDLK_W:
-                        MasterHandler.processCursorMovement({ true,true });
-                        break;
-                    case SDLK_S:
-                        MasterHandler.processCursorMovement({ true,false });
-                        break;
-                    case SDLK_A:
-                        MasterHandler.processCursorMovement({ false,true });
-                        break;
-                    case SDLK_D:
-                        MasterHandler.processCursorMovement({ false,false });
-                        break;
-                    case SDLK_G:
-                        MasterHandler.addCommand(Command{Command::DRAW::CIRCLE});
-                        break;
-                    case SDLK_L:
-                        MasterHandler.addCommand(Command{Command::DRAW::CIRCLE, 1});
-                        break;
-                    case SDLK_J:
-                        MasterHandler.addCommand(Command{Command::META::CHANGE_COLOUR, 1});
-                        break;
-                    case SDLK_Z:
-                        MasterHandler.updateDrawstep(-5);
-                        break;
-                    case SDLK_X:
-                        MasterHandler.updateDrawstep(5);
-                        break;
-                    case SDLK_C:
-                        MasterHandler.addCommand(Command{Command::META::CLEAR});
-                        break;
-                }
-            }
-            
+                running = false;        
         }
 
         MasterHandler.processCommands();
