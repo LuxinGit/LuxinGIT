@@ -13,11 +13,10 @@
 /*
 TO DO:
 
-1. SDL_GetKeyboardState to allow for simultaneous inputs.
-2. Text based interface?
-3. Boundary checking.
-4. Cursor_Handler should probably be a subsect of canvas.
 
+1. Text based interface?
+2. Brush modes
+3. Flesh out commands to make more complex
 
 
 */
@@ -161,9 +160,9 @@ private:
             deltaCursor = { 0 , 0 };
             if (!CanvasHandler.coordCheck(cursor)) {
                 if (cursor.first < 0) cursor.first = 1;
-                if (cursor.first > CanvasHandler.width) cursor.first = CanvasHandler.width - 1;
+                if (cursor.first > CanvasHandler.width) cursor.first = static_cast<int>(CanvasHandler.width - 1);
                 if (cursor.second < 0) cursor.second = 1;
-                if (cursor.second >= CanvasHandler.height) cursor.second = CanvasHandler.height - 1;
+                if (cursor.second >= CanvasHandler.height) cursor.second = static_cast<int>(CanvasHandler.height - 1);
             }
         }
 
@@ -385,8 +384,6 @@ public:
             break;
         }
     }
-
-
 
 };
 #pragma endregion
