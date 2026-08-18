@@ -77,7 +77,8 @@ public:
     enum class META {
         CLEAR = 0,
         CHANGE_COLOUR = 1,
-        CHANGE_DRAWSTEP = 2
+        CHANGE_DRAWSTEP = 2,
+        ENABLE_RAINBOW = 3
     };
 
     Command(MOVE cmd, int varsetting = 0) : Command(TYPE::MOVE, static_cast<int>(cmd), varsetting) {}
@@ -101,6 +102,16 @@ private:
     int& width; int& height;
     std::vector<luxel> canvas;
 
+    size_t indexFromCoord(std::pair<float, float> c) const {
+        // ASSUMES POSITIVE X/Y. INDEXING WITH THIS INDEX WITHOUT SIZE CHECKING MAY CAUSE OUT OF BOUNDARY MEMORY CRASH [IF COORD > LAST LUXEL INDEX].
+        return size_t(c.second) * width + size_t(c.first);
+    }
+    bool coordCheck(const std::pair<float, float>& c) {
+        if (c.first < 0 or c.first > width) return false;
+        if (c.second < 0 or c.second >= height) return false;
+        return true;
+    }
+
 #pragma region Cursor Handler
 
     struct Cursor_Handler {
@@ -112,15 +123,19 @@ private:
         std::pair<float, float> cursor = { 100, 100 };
         std::pair<float, float> newCursor = { 100, 100 };
         std::pair<float, float> deltaCursor = { 0, 0 }; // newCursor = cursor + deltaCursor at t==0, cursor = newCursor at t==1;
+        size_t pixelsDrawn = 0;
 
-        int drawStep = 5;
+        int drawStep = 2;
 
         void adjustDeltaCursor(std::pair<float, float> incoming) { deltaCursor.first += incoming.first; deltaCursor.second += incoming.second; }
       
         void updateDrawstep(int delta) {
             drawStep += delta;
-            if (drawStep < 5) drawStep = 5;
+            if (drawStep < 2) drawStep = 2;
+            if (drawStep > 10) drawStep = 10;
         } // probably should sizecheck this but we can leave that for now
+
+
 
     public:
 
@@ -137,7 +152,6 @@ private:
 
             adjustDeltaCursor(payload);
         }
-
         void calcNewCursor() {
             newCursor.first += deltaCursor.first;
             newCursor.second += deltaCursor.second;
@@ -145,6 +159,12 @@ private:
         void resetCursors() {
             cursor = newCursor;
             deltaCursor = { 0 , 0 };
+            if (!CanvasHandler.coordCheck(cursor)) {
+                if (cursor.first < 0) cursor.first = 1;
+                if (cursor.first > CanvasHandler.width) cursor.first = CanvasHandler.width - 1;
+                if (cursor.second < 0) cursor.second = 1;
+                if (cursor.second >= CanvasHandler.height) cursor.second = CanvasHandler.height - 1;
+            }
         }
 
         void processChangeDrawstepCommand(int setting) {
@@ -154,6 +174,9 @@ private:
             updateDeltaCursor(yaxis, negative);
             CanvasHandler.DrawHandler.processDrawLineCommand();
         }
+
+        void updatePixelsDrawn(int delta) { pixelsDrawn += delta; }
+        size_t& retrievePixelsDrawn() { return pixelsDrawn; }
 
         std::pair<float, float>& retrieveCursor() { return cursor; }
         std::pair<float, float>& retrieveNewCursor() { return newCursor; }
@@ -165,16 +188,6 @@ private:
 
     Cursor_Handler CursorHandler;
 
-
-public:
-
-    size_t indexFromCoord(std::pair<float, float> c) const {
-        // ASSUMES POSITIVE X/Y. INDEXING WITH THIS INDEX WITHOUT SIZE CHECKING MAY CAUSE OUT OF BOUNDARY MEMORY CRASH [IF COORD > LAST LUXEL INDEX].
-        return size_t(c.second) * width + size_t(c.first);
-    }
-
-private:
-
 #pragma region Draw Handler
 
     struct Draw_Handler {
@@ -185,14 +198,10 @@ private:
         std::array<uint8_t, 4> colour = { 200, 200, 200, 255 };
 
         void drawPoint(std::pair<float, float> c) {
+            if (!CanvasHandler.coordCheck(c)) return;
             CanvasHandler.retrieveCanvas()[CanvasHandler.indexFromCoord(c)].colour = colour;
-        }
-        void drawVerticalLine(std::pair<float, float> c, float y) {
-            bool n = y < c.second;
-            int d = 1; if (n) d = -1;
-            for (c.second; c.second != y; c.second += d) drawPoint(c);
-            drawPoint({ c.first, y });
-            return;
+            CanvasHandler.CursorHandler.updatePixelsDrawn(1);
+            if (rainbowMode) if (CanvasHandler.CursorHandler.retrievePixelsDrawn() > pixelsToRainbow) colour = getRandomColour();
         }
         void drawCircle(const std::pair<float, float>& c, int radius) {
             int x = 0;
@@ -223,6 +232,10 @@ private:
             }
         }
 
+        bool rainbowMode = false; int pixelsToRainbow = 0;
+
+
+
     public:
 
         Draw_Handler(Canvas_Handler& CanvH) : CanvasHandler(CanvH) {}
@@ -233,33 +246,40 @@ private:
         }
         void changeColour(const std::array<uint8_t, 4>& varcolour = { 200, 200, 200, 255 }) { colour = varcolour; };
 
-        void drawLine(std::pair<float, float> c, std::pair<float, float> newc) {
+        void drawLine(std::pair<int, int> origin, std::pair<int, int> destination) {
 
-            drawPoint(c);
+            int x0 = origin.first;
+            int y0 = origin.second;
+            int x1 = destination.first;
+            int y1 = destination.second;
 
-            // vertical line edge case
-            if (c.first == newc.first) {
-                drawVerticalLine(c, newc.second);
-                return;
+            int dx = std::abs(x1 - x0);
+            int dy = -std::abs(y1 - y0);
+
+            int sx = (x0 < x1) ? 1 : -1;
+            int sy = (y0 < y1) ? 1 : -1;
+
+            int error = dx + dy;
+
+            while (true) {
+
+                drawPoint({ x0, y0 });
+
+                if (x0 == x1 && y0 == y1)
+                    break;
+
+                int e2 = 2 * error;
+
+                if (e2 >= dy) {
+                    error += dy;
+                    x0 += sx;
+                }
+
+                if (e2 <= dx) {
+                    error += dx;
+                    y0 += sy;
+                }
             }
-
-            // Figure out direction (lines can be backwards)
-            bool n = newc.first < c.first;
-            int d = 1; if (n) d = -1;
-
-            float slope = (newc.second - c.second) / (newc.first - c.first);
-            float y = 0.0f;
-
-            for (c.first; c.first != newc.first; c.first += d) {
-                y = c.second + slope;
-                c.second = y;
-                drawPoint(c);
-            }
-
-            // At ending x
-            drawPoint(newc);
-
-            return;
         }
 
         void processDrawLineCommand() {
@@ -290,6 +310,10 @@ private:
                 changeColour(getRandomColour());
                 break;
             }
+        }
+        void processRainbowModeCommand(int setting = 100) {
+            rainbowMode = !rainbowMode;
+            pixelsToRainbow = setting;
         }
 
     };
@@ -337,6 +361,9 @@ public:
             break;
         case Command::META::CHANGE_DRAWSTEP:
             CursorHandler.processChangeDrawstepCommand(command.setting);
+            break;
+        case Command::META::ENABLE_RAINBOW:
+            DrawHandler.processRainbowModeCommand(command.setting);
             break;
         }
         
@@ -497,9 +524,10 @@ private:
     { SDL_SCANCODE_L, Command{Command::DRAW::CIRCLE, 1} },
 
     { SDL_SCANCODE_J, Command{Command::META::CHANGE_COLOUR, 1} },
+    { SDL_SCANCODE_E, Command{Command::META::ENABLE_RAINBOW}},
 
-    { SDL_SCANCODE_Z, Command{Command::META::CHANGE_DRAWSTEP, -5} },
-    { SDL_SCANCODE_X, Command{Command::META::CHANGE_DRAWSTEP, 5} },
+    { SDL_SCANCODE_Z, Command{Command::META::CHANGE_DRAWSTEP, -2} },
+    { SDL_SCANCODE_X, Command{Command::META::CHANGE_DRAWSTEP, 2} },
 
     { SDL_SCANCODE_C, Command{Command::META::CLEAR} }
     };
@@ -578,7 +606,11 @@ int main()
         while (SDL_PollEvent(&event))
         {
             if (event.type == SDL_EVENT_QUIT)
-                running = false;        
+                running = false;  
+            if (event.type == SDL_EVENT_KEY_DOWN && !event.key.repeat) {
+                SDL_Scancode keyPressed = event.key.scancode;
+                if (keyPressed == SDL_SCANCODE_E) MasterHandler.addCommand(Command{ Command::META::ENABLE_RAINBOW, 100 });
+            }
         }
 
         MasterHandler.processCommands();
