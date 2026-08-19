@@ -57,32 +57,125 @@ public:
 
 private:
 
-    Command(TYPE vartype, int varaction, int varsetting = 0) : type(vartype), action(varaction), setting(varsetting) {}
+    Command(TYPE vartype, int varaction, int varsetting, bool varRepeatable) : type(vartype), action(varaction), setting(varsetting), repeatable(varRepeatable) {}
 
 public:
 
-    enum class MOVE {
-        UP = 0,
-        RIGHT = 1,
-        DOWN = 2,
-        LEFT = 3
+    struct MOVE {
+
+        enum class ACTION {
+            UP = 0,
+            RIGHT = 1,
+            DOWN = 2,
+            LEFT = 3
+        };
+
+    private: 
+
+        MOVE(ACTION varAction, int varSetting = 0) : action(varAction), setting(varSetting) {}
+
+    public:
+
+        enum class UP {
+            NORMAL = 0
+        };
+        enum class RIGHT {
+            NORMAL = 0
+        };
+        enum class DOWN {
+            NORMAL = 0
+        };
+        enum class LEFT {
+            NORMAL = 0
+        };
+
+        ACTION action;
+        int setting;
+
+        MOVE(UP varSetting) : MOVE(ACTION::UP, static_cast<int>(varSetting)) {}
+        MOVE(RIGHT varSetting) : MOVE(ACTION::RIGHT, static_cast<int>(varSetting)) {}
+        MOVE(DOWN varSetting) : MOVE(ACTION::DOWN, static_cast<int>(varSetting)) {}
+        MOVE(LEFT varSetting) : MOVE(ACTION::LEFT, static_cast<int>(varSetting)) {}
+
+    };
+    struct DRAW {
+
+        enum class ACTION {
+            LINE = 0,
+            CIRCLE = 1
+        };
+
+    private:
+
+        DRAW(ACTION varAction, int varSetting = 0)
+            : action(varAction), setting(varSetting) {}
+
+    public:
+
+        enum class LINE {
+            NORMAL = 0
+        };
+        enum class CIRCLE {
+            NORMAL = 0,
+            RAINBOW = 1
+        };
+
+        ACTION action;
+        int setting;
+
+        DRAW(LINE varSetting)
+            : DRAW(ACTION::LINE, static_cast<int>(varSetting)) {}
+        DRAW(CIRCLE varSetting)
+            : DRAW(ACTION::CIRCLE, static_cast<int>(varSetting)) {}
+    };
+    struct META {
+
+        enum class ACTION {
+            CLEAR = 0,
+            CHANGE_COLOUR = 1,
+            CHANGE_DRAWSTEP = 2,
+            ENABLE_RAINBOW = 3
+        };
+
+    private:
+
+        META(ACTION varAction, int varSetting = 0)
+            : action(varAction), setting(varSetting) {}
+
+    public:
+
+        enum class CLEAR {
+            NORMAL = 0
+        };
+        enum class CHANGE_COLOUR {
+            DEFAULT = 0,
+            RANDOM = 1
+        };
+        enum class CHANGE_DRAWSTEP {
+            INCREASE = 0,
+            DECREASE = 1
+        };
+        enum class ENABLE_RAINBOW {
+            NORMAL = 0
+        };
+
+        ACTION action;
+        int setting;
+
+        META(CLEAR varSetting)
+            : META(ACTION::CLEAR, static_cast<int>(varSetting)) {}
+        META(CHANGE_COLOUR varSetting)
+            : META(ACTION::CHANGE_COLOUR, static_cast<int>(varSetting)) {}
+        META(CHANGE_DRAWSTEP varSetting)
+            : META(ACTION::CHANGE_DRAWSTEP, static_cast<int>(varSetting)) {}
+        META(ENABLE_RAINBOW varSetting)
+            : META(ACTION::ENABLE_RAINBOW, static_cast<int>(varSetting)) {}
     };
 
-    enum class DRAW {
-        LINE = 0,
-        CIRCLE = 1
-    };
 
-    enum class META {
-        CLEAR = 0,
-        CHANGE_COLOUR = 1,
-        CHANGE_DRAWSTEP = 2,
-        ENABLE_RAINBOW = 3
-    };
-
-    Command(MOVE cmd, int varsetting = 0) : Command(TYPE::MOVE, static_cast<int>(cmd), varsetting) {}
-    Command(DRAW cmd, int varsetting = 0) : Command(TYPE::DRAW, static_cast<int>(cmd), varsetting) {}
-    Command(META cmd, int varsetting = 0) : Command(TYPE::META, static_cast<int>(cmd), varsetting) {}
+    Command(MOVE cmd, bool repeatable) : Command(TYPE::MOVE, static_cast<int>(cmd.action), static_cast<int>(cmd.setting), repeatable) {}
+    Command(DRAW cmd, bool repeatable) : Command(TYPE::DRAW, static_cast<int>(cmd.action), static_cast<int>(cmd.setting), repeatable) {}
+    Command(META cmd, bool repeatable) : Command(TYPE::META, static_cast<int>(cmd.action), static_cast<int>(cmd.setting), repeatable) {}
 
     TYPE type;
     int action; // differentiates between commands.
@@ -106,11 +199,6 @@ private:
         // ASSUMES POSITIVE X/Y. INDEXING WITH THIS INDEX WITHOUT SIZE CHECKING MAY CAUSE OUT OF BOUNDARY MEMORY CRASH [IF COORD > LAST LUXEL INDEX].
         return size_t(c.second) * width + size_t(c.first);
     }
-    bool coordCheck(const std::pair<float, float>& c) {
-        if (c.first < 0 or c.first > width) return false;
-        if (c.second < 0 or c.second >= height) return false;
-        return true;
-    }
 
 #pragma region Cursor Handler
 
@@ -123,16 +211,17 @@ private:
         std::pair<float, float> cursor = { 100, 100 };
         std::pair<float, float> newCursor = { 100, 100 };
         std::pair<float, float> deltaCursor = { 0, 0 }; // newCursor = cursor + deltaCursor at t==0, cursor = newCursor at t==1;
-        size_t pixelsDrawn = 0;
+        
 
         int drawStep = 2;
+        int drawStepDelta = 2;
 
         void adjustDeltaCursor(std::pair<float, float> incoming) { deltaCursor.first += incoming.first; deltaCursor.second += incoming.second; }
       
         void updateDrawstep(int delta) {
             drawStep += delta;
             if (drawStep < 2) drawStep = 2;
-            if (drawStep > 10) drawStep = 10;
+            if (drawStep > 50) drawStep = 50;
         } // probably should sizecheck this but we can leave that for now
 
 
@@ -167,16 +256,18 @@ private:
             }
         }
 
-        void processChangeDrawstepCommand(int setting) {
-            updateDrawstep(setting); // lazy !
+        void processChangeDrawstepCommand(const Command::META::CHANGE_DRAWSTEP& setting) {
+            int tDSDelta = drawStepDelta * (setting == Command::META::CHANGE_DRAWSTEP::DECREASE ? -1 : 1); // setting == 0 if increase, == 1 if decrease;
+            updateDrawstep(tDSDelta);
         }
         void processMoveCommand(bool yaxis, bool negative, int setting = 0) {
             updateDeltaCursor(yaxis, negative);
-            CanvasHandler.DrawHandler.processDrawLineCommand();
+            calcNewCursor();
+            CanvasHandler.DrawHandler.drawLine(cursor, newCursor);
+            resetCursors();
         }
 
-        void updatePixelsDrawn(int delta) { pixelsDrawn += delta; }
-        size_t& retrievePixelsDrawn() { return pixelsDrawn; }
+        size_t pixelsDrawn = 0;
 
         std::pair<float, float>& retrieveCursor() { return cursor; }
         std::pair<float, float>& retrieveNewCursor() { return newCursor; }
@@ -197,11 +288,19 @@ private:
         Canvas_Handler& CanvasHandler;
         std::array<uint8_t, 4> colour = { 200, 200, 200, 255 };
 
-        void drawPoint(std::pair<float, float> c) {
-            if (!CanvasHandler.coordCheck(c)) return;
-            CanvasHandler.retrieveCanvas()[CanvasHandler.indexFromCoord(c)].colour = colour;
-            CanvasHandler.CursorHandler.updatePixelsDrawn(1);
-            if (rainbowMode) if (CanvasHandler.CursorHandler.retrievePixelsDrawn() > pixelsToRainbow) colour = getRandomColour();
+        void updateDrawData() {
+            CanvasHandler.CursorHandler.pixelsDrawn += 1;
+            if (rainbowMode) if (CanvasHandler.CursorHandler.pixelsDrawn > pixelsToRainbow) {
+                colour = getRandomColour();
+                CanvasHandler.CursorHandler.pixelsDrawn = 0;
+            }
+        }
+
+        void drawPoint(const std::pair<float, float>& c) {
+            luxel* ptr = CanvasHandler.retrieveLuxelFromPoint(c);
+            if (!ptr) return;
+            ptr->colour = colour;
+            updateDrawData();
         }
         void drawCircle(const std::pair<float, float>& c, int radius) {
             int x = 0;
@@ -232,7 +331,7 @@ private:
             }
         }
 
-        bool rainbowMode = false; int pixelsToRainbow = 0;
+        bool rainbowMode = false; int pixelsToRainbow = 100;
 
 
 
@@ -282,15 +381,13 @@ private:
             }
         }
 
-        void processDrawLineCommand() {
-            CanvasHandler.CursorHandler.calcNewCursor();
-            drawLine(CanvasHandler.CursorHandler.retrieveCursor(), CanvasHandler.CursorHandler.retrieveNewCursor());
-            CanvasHandler.CursorHandler.resetCursors();
+        void processDrawLineCommand(const Command::DRAW::LINE& setting) {
+            // fizzbuzz
         }
-        void processDrawCircleCommand(bool setting) {
+        void processDrawCircleCommand(const Command::DRAW::CIRCLE& setting) {
             std::pair<float, float>& c = CanvasHandler.CursorHandler.retrieveCursor();
             int radius = CanvasHandler.CursorHandler.retrieveDrawstep();
-            if (setting) {
+            if (setting == Command::DRAW::CIRCLE::RAINBOW) {
                 for (int i = 1; i <= radius; i++) {
                     colour = getRandomColour();
                     drawCircle(c, i);
@@ -301,19 +398,18 @@ private:
             else drawCircle(c, radius);
         }
 
-        void processChangeColourCommand(int setting) {
+        void processChangeColourCommand(const Command::META::CHANGE_COLOUR& setting) {
             switch (setting) {
-            case 0:
+            case Command::META::CHANGE_COLOUR::DEFAULT:
                 changeColour();
                 break;
-            case 1:
+            case Command::META::CHANGE_COLOUR::RANDOM:
                 changeColour(getRandomColour());
                 break;
             }
         }
-        void processRainbowModeCommand(int setting = 100) {
+        void processRainbowModeCommand(const Command::META::ENABLE_RAINBOW& setting) {
             rainbowMode = !rainbowMode;
-            pixelsToRainbow = setting;
         }
 
     };
@@ -327,6 +423,13 @@ private:
             l.resetLuxel();
         }
     }
+    bool coordCheck(const std::pair<float, float>& c) {
+        if (c.first < 0 or c.first > width) return false;
+        if (c.second < 0 or c.second >= height) return false;
+        return true;
+    }
+    luxel* retrieveLuxelFromIndex(const size_t& index) { return &canvas[index]; }
+    luxel* retrieveLuxelFromPoint(const std::pair<float, float>& c, bool coordCheck) { return &canvas[indexFromCoord(c)]; }
 
 public:
 
@@ -339,48 +442,51 @@ public:
     }
 
     std::vector<luxel>& retrieveCanvas() { return canvas; }
+
+    luxel* retrieveLuxelFromPoint(const std::pair<float, float>& c) { return (coordCheck(c) ? retrieveLuxelFromPoint(c, true) : nullptr); }
+
     int& retrieveCanvasWidth() { return width; }
     
     void processDrawCommand(const Command& command) {
-        switch (static_cast<Command::DRAW>(command.action)) {
-        case Command::DRAW::LINE:
-            DrawHandler.processDrawLineCommand();
+        switch (static_cast<Command::DRAW::ACTION>(command.action)) {
+        case Command::DRAW::ACTION::LINE:
+            DrawHandler.processDrawLineCommand(static_cast<Command::DRAW::LINE>(command.setting));
             break;
-        case Command::DRAW::CIRCLE:
-            DrawHandler.processDrawCircleCommand(command.setting);
+        case Command::DRAW::ACTION::CIRCLE:
+            DrawHandler.processDrawCircleCommand(static_cast<Command::DRAW::CIRCLE>(command.setting));
             break;
         }
     };
     void processMetaCommand(const Command& command) {
-        switch (static_cast<Command::META>(command.action)) {
-        case Command::META::CLEAR:
+        switch (static_cast<Command::META::ACTION>(command.action)) {
+        case Command::META::ACTION::CLEAR:
             clearCanvas();
             break;
-        case Command::META::CHANGE_COLOUR:
-            DrawHandler.processChangeColourCommand(command.setting);
+        case Command::META::ACTION::CHANGE_COLOUR:
+            DrawHandler.processChangeColourCommand(static_cast<Command::META::CHANGE_COLOUR>(command.setting));
             break;
-        case Command::META::CHANGE_DRAWSTEP:
-            CursorHandler.processChangeDrawstepCommand(command.setting);
+        case Command::META::ACTION::CHANGE_DRAWSTEP:
+            CursorHandler.processChangeDrawstepCommand(static_cast<Command::META::CHANGE_DRAWSTEP>(command.setting));
             break;
-        case Command::META::ENABLE_RAINBOW:
-            DrawHandler.processRainbowModeCommand(command.setting);
+        case Command::META::ACTION::ENABLE_RAINBOW:
+            DrawHandler.processRainbowModeCommand(static_cast<Command::META::ENABLE_RAINBOW>(command.setting));
             break;
         }
         
 
     };
     void processMoveCommand(const Command& command) {
-        switch (static_cast<Command::MOVE>(command.action)) {
-        case Command::MOVE::UP:
+        switch (static_cast<Command::MOVE::ACTION>(command.action)) {
+        case Command::MOVE::ACTION::UP:
             CursorHandler.processMoveCommand(true, true);
             break;
-        case Command::MOVE::RIGHT:
+        case  Command::MOVE::ACTION::RIGHT:
             CursorHandler.processMoveCommand(false, false);
             break;
-        case Command::MOVE::DOWN:
+        case  Command::MOVE::ACTION::DOWN:
             CursorHandler.processMoveCommand(true, false);
             break;
-        case Command::MOVE::LEFT:
+        case  Command::MOVE::ACTION::LEFT:
             CursorHandler.processMoveCommand(false, true);
             break;
         }
@@ -513,21 +619,21 @@ struct Keyboard_Handler {
 private:
 
     std::unordered_map<SDL_Scancode, Command> keyMapping = {
-    { SDL_SCANCODE_W, Command{Command::MOVE::UP} },
-    { SDL_SCANCODE_S, Command{Command::MOVE::DOWN} },
-    { SDL_SCANCODE_A, Command{Command::MOVE::LEFT} },
-    { SDL_SCANCODE_D, Command{Command::MOVE::RIGHT} },
+    { SDL_SCANCODE_W, Command{Command::MOVE::UP::NORMAL, true} },
+    { SDL_SCANCODE_S, Command{Command::MOVE::DOWN::NORMAL, true} },
+    { SDL_SCANCODE_A, Command{Command::MOVE::LEFT::NORMAL, true} },
+    { SDL_SCANCODE_D, Command{Command::MOVE::RIGHT::NORMAL, true} },
 
-    { SDL_SCANCODE_G, Command{Command::DRAW::CIRCLE} },
-    { SDL_SCANCODE_L, Command{Command::DRAW::CIRCLE, 1} },
+    { SDL_SCANCODE_G, Command{Command::DRAW::CIRCLE::NORMAL, false} },
+    { SDL_SCANCODE_L, Command{Command::DRAW::CIRCLE::RAINBOW, false} },
 
-    { SDL_SCANCODE_J, Command{Command::META::CHANGE_COLOUR, 1} },
-    { SDL_SCANCODE_E, Command{Command::META::ENABLE_RAINBOW}},
+    { SDL_SCANCODE_J, Command{Command::META::CHANGE_COLOUR::RANDOM, false} },
+    { SDL_SCANCODE_E, Command{Command::META::ENABLE_RAINBOW::NORMAL, false} },
 
-    { SDL_SCANCODE_Z, Command{Command::META::CHANGE_DRAWSTEP, -2} },
-    { SDL_SCANCODE_X, Command{Command::META::CHANGE_DRAWSTEP, 2} },
+    { SDL_SCANCODE_Z, Command{Command::META::CHANGE_DRAWSTEP::DECREASE, false} },
+    { SDL_SCANCODE_X, Command{Command::META::CHANGE_DRAWSTEP::INCREASE, false} },
 
-    { SDL_SCANCODE_C, Command{Command::META::CLEAR} }
+    { SDL_SCANCODE_C, Command{Command::META::CLEAR::NORMAL, false} }
     };
 
     Command_Handler& CommandHandler;
@@ -615,10 +721,6 @@ int main()
         {
             if (event.type == SDL_EVENT_QUIT)
                 running = false;  
-            if (event.type == SDL_EVENT_KEY_DOWN && !event.key.repeat) {
-                SDL_Scancode keyPressed = event.key.scancode;
-                if (keyPressed == SDL_SCANCODE_E) MasterHandler.addCommand(Command{ Command::META::ENABLE_RAINBOW, 100 });
-            }
         }
 
         MasterHandler.processCommands();
