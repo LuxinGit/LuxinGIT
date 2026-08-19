@@ -134,7 +134,8 @@ public:
             CLEAR = 0,
             CHANGE_COLOUR = 1,
             CHANGE_DRAWSTEP = 2,
-            ENABLE_RAINBOW = 3
+            ENABLE_RAINBOW = 3,
+            CHANGE_PEN_WIDTH = 4
         };
 
     private:
@@ -158,6 +159,10 @@ public:
         enum class ENABLE_RAINBOW {
             NORMAL = 0
         };
+        enum class CHANGE_PEN_WIDTH {
+            INCREASE = 0,
+            DECREASE = 1
+        };
 
         ACTION action;
         int setting;
@@ -170,6 +175,8 @@ public:
             : META(ACTION::CHANGE_DRAWSTEP, static_cast<int>(varSetting)) {}
         META(ENABLE_RAINBOW varSetting)
             : META(ACTION::ENABLE_RAINBOW, static_cast<int>(varSetting)) {}
+        META(CHANGE_PEN_WIDTH varSetting)
+            : META(ACTION::CHANGE_PEN_WIDTH, static_cast<int>(varSetting)) {}
     };
 
 
@@ -263,7 +270,7 @@ private:
         void processMoveCommand(bool yaxis, bool negative, int setting = 0) {
             updateDeltaCursor(yaxis, negative);
             calcNewCursor();
-            CanvasHandler.DrawHandler.drawLine(cursor, newCursor);
+            CanvasHandler.DrawHandler.drawLine(cursor, newCursor, true); // insertion point for using pen logic
             resetCursors();
         }
 
@@ -287,6 +294,8 @@ private:
 
         Canvas_Handler& CanvasHandler;
         std::array<uint8_t, 4> colour = { 200, 200, 200, 255 };
+        bool rainbowMode = false; int pixelsToRainbow = 100;
+        int pen = 1, penDelta = 1;
 
         void updateDrawData() {
             CanvasHandler.CursorHandler.pixelsDrawn += 1;
@@ -302,50 +311,8 @@ private:
             ptr->colour = colour;
             updateDrawData();
         }
-        void drawCircle(const std::pair<float, float>& c, int radius) {
-            int x = 0;
-            int y = radius;
-            int d = 1 - radius;
-
-            while (x <= y) {
-
-                drawPoint({ c.first + x, c.second + y });
-                drawPoint({ c.first - x, c.second + y });
-                drawPoint({ c.first + x, c.second - y });
-                drawPoint({ c.first - x, c.second - y });
-
-                drawPoint({ c.first + y, c.second + x });
-                drawPoint({ c.first - y, c.second + x });
-                drawPoint({ c.first + y, c.second - x });
-                drawPoint({ c.first - y, c.second - x });
-
-                x++;
-
-                if (d < 0) {
-                    d += 2 * x + 1;
-                }
-                else {
-                    y--;
-                    d += 2 * (x - y) + 1;
-                }
-            }
-        }
-
-        bool rainbowMode = false; int pixelsToRainbow = 100;
-
-
-
     public:
-
-        Draw_Handler(Canvas_Handler& CanvH) : CanvasHandler(CanvH) {}
-
-        std::array<uint8_t, 4>& getActiveColour() { return colour; }
-        std::array<uint8_t, 4> getRandomColour() {
-            return { static_cast<uint8_t>(rand() % 256),static_cast<uint8_t>(rand() % 256),static_cast<uint8_t>(rand() % 256), 255 };
-        }
-        void changeColour(const std::array<uint8_t, 4>& varcolour = { 200, 200, 200, 255 }) { colour = varcolour; };
-
-        void drawLine(std::pair<int, int> origin, std::pair<int, int> destination) {
+        void drawLine(std::pair<int, int> origin, std::pair<int, int> destination, const bool useP) {
 
             int x0 = origin.first;
             int y0 = origin.second;
@@ -362,7 +329,7 @@ private:
 
             while (true) {
 
-                drawPoint({ x0, y0 });
+                drawPoint({ x0, y0 }, useP);
 
                 if (x0 == x1 && y0 == y1)
                     break;
@@ -380,6 +347,67 @@ private:
                 }
             }
         }
+    private:
+        void drawCircle(const std::pair<float, float>& c, int radius, const bool fill = false) {
+            int x = 0;
+            int y = radius;
+            int d = 1 - radius;
+
+            while (x <= y) {
+
+                if (fill) {
+                    drawLine({ c.first - x, c.second + y }, { c.first + x, c.second + y }, false);
+                    drawLine({ c.first - x, c.second - y }, { c.first + x, c.second - y }, false);
+
+                    drawLine({ c.first - y, c.second + x }, { c.first + y, c.second + x }, false);
+                    drawLine({ c.first - y, c.second - x }, { c.first + y, c.second - x }, false);
+                }
+                else {
+                    drawPoint({ c.first + x, c.second + y });
+                    drawPoint({ c.first - x, c.second + y });
+                    drawPoint({ c.first + x, c.second - y });
+                    drawPoint({ c.first - x, c.second - y });
+
+                    drawPoint({ c.first + y, c.second + x });
+                    drawPoint({ c.first - y, c.second + x });
+                    drawPoint({ c.first + y, c.second - x });
+                    drawPoint({ c.first - y, c.second - x });
+                }
+
+                x++;
+
+                if (d < 0) {
+                    d += 2 * x + 1;
+                }
+                else {
+                    y--;
+                    d += 2 * (x - y) + 1;
+                }
+            }
+        }
+        
+        void usePen(const std::pair<float, float>& c) {
+            drawCircle(c, pen, true);
+        }
+        void updatePen(int delta) {
+            pen += delta;
+            if (pen < 1) pen = 1;
+        }
+        void drawPoint(const std::pair<float, float>& c, const bool useP) {
+            if (useP) usePen(c);
+            else drawPoint(c);
+        }
+
+    public:
+
+        Draw_Handler(Canvas_Handler& CanvH) : CanvasHandler(CanvH) {}
+
+        std::array<uint8_t, 4>& getActiveColour() { return colour; }
+        std::array<uint8_t, 4> getRandomColour() {
+            return { static_cast<uint8_t>(rand() % 256),static_cast<uint8_t>(rand() % 256),static_cast<uint8_t>(rand() % 256), 255 };
+        }
+        void changeColour(const std::array<uint8_t, 4>& varcolour = { 200, 200, 200, 255 }) { colour = varcolour; };
+
 
         void processDrawLineCommand(const Command::DRAW::LINE& setting) {
             // fizzbuzz
@@ -410,6 +438,10 @@ private:
         }
         void processRainbowModeCommand(const Command::META::ENABLE_RAINBOW& setting) {
             rainbowMode = !rainbowMode;
+        }
+        void processChangePenWidthCommand(const Command::META::CHANGE_PEN_WIDTH& setting) {
+            int pD = penDelta * (setting == Command::META::CHANGE_PEN_WIDTH::DECREASE ? -1 : 1);
+            updatePen(pD);
         }
 
     };
@@ -470,6 +502,9 @@ public:
             break;
         case Command::META::ACTION::ENABLE_RAINBOW:
             DrawHandler.processRainbowModeCommand(static_cast<Command::META::ENABLE_RAINBOW>(command.setting));
+            break;
+        case Command::META::ACTION::CHANGE_PEN_WIDTH:
+            DrawHandler.processChangePenWidthCommand(static_cast<Command::META::CHANGE_PEN_WIDTH>(command.setting));
             break;
         }
         
@@ -632,6 +667,8 @@ private:
 
     { SDL_SCANCODE_Z, Command{Command::META::CHANGE_DRAWSTEP::DECREASE, false} },
     { SDL_SCANCODE_X, Command{Command::META::CHANGE_DRAWSTEP::INCREASE, false} },
+    { SDL_SCANCODE_V, Command{Command::META::CHANGE_PEN_WIDTH::DECREASE, false}},
+    { SDL_SCANCODE_B, Command{Command::META::CHANGE_PEN_WIDTH::INCREASE, false}},
 
     { SDL_SCANCODE_C, Command{Command::META::CLEAR::NORMAL, false} }
     };
