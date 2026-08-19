@@ -87,6 +87,7 @@ public:
     TYPE type;
     int action; // differentiates between commands.
     int setting = 0; // for passing additional information ?
+    bool repeatable = true;
 
 };
 
@@ -529,9 +530,24 @@ private:
     { SDL_SCANCODE_C, Command{Command::META::CLEAR} }
     };
 
+    Command_Handler& CommandHandler;
+    std::array<bool, SDL_SCANCODE_COUNT> previousKeyboardState{};
+
 public:
 
+    void harvestKeyboardState() {
+        const bool* keyboardState = SDL_GetKeyboardState(nullptr);
+        for (const auto& [scancode, command] : getKeyboardMapping()) {
+            
+            if (keyboardState[scancode] &&
+                (command.repeatable || !previousKeyboardState[scancode])) CommandHandler.addCommand(command);
+
+            previousKeyboardState[scancode] = keyboardState[scancode];
+        } 
+    }
     const std::unordered_map<SDL_Scancode, Command>& getKeyboardMapping() { return keyMapping; }
+
+    Keyboard_Handler(Command_Handler& CommH) : CommandHandler(CommH) {}
     
 };
 #pragma endregion
@@ -549,27 +565,22 @@ private:
     Command_Handler CommandHandler;
     Keyboard_Handler KeyboardHandler;
 
-    void harvestKeyboardState() {
-        const bool* keyboardState = SDL_GetKeyboardState(nullptr);
 
-        for (const auto& [scancode, command] : KeyboardHandler.getKeyboardMapping()) {
-            if (keyboardState[scancode]) addCommand(command);
-        }
-    }
 
 public: 
 
     Master_Handler(int varwidth, int varheight) : 
         width(varwidth), height(varheight), 
         CanvasHandler(width, height), 
-        CommandHandler(CanvasHandler, SDLHandler) {};
+        CommandHandler(CanvasHandler, SDLHandler),
+        KeyboardHandler(CommandHandler) {};
 
     int initialiseSDL() {
         return (SDLHandler.initialiseSDL(width, height, CanvasHandler.retrieveCanvas()));
     }
 
     void processCommands() {
-        harvestKeyboardState();
+        KeyboardHandler.harvestKeyboardState();
         CommandHandler.processCommands();
     }
     void addCommand(Command command) {
