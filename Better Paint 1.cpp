@@ -16,7 +16,8 @@ TO DO:
 
 1. Text based interface?
 2. Brush modes
-3. Flesh out commands to make more complex
+3. Fix move commands not being continuous (or rather, fix the fact that a line is being drawn every move command).
+4. Add visual cursor
 
 
 */
