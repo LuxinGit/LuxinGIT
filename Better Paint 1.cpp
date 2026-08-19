@@ -135,14 +135,13 @@ public:
             CHANGE_COLOUR = 1,
             CHANGE_DRAWSTEP = 2,
             ENABLE_RAINBOW = 3,
-            CHANGE_PEN_WIDTH = 4
+            CHANGE_PEN_WIDTH = 4,
+            PEN_DOWN = 5
         };
 
     private:
-
         META(ACTION varAction, int varSetting = 0)
             : action(varAction), setting(varSetting) {}
-
     public:
 
         enum class CLEAR {
@@ -163,6 +162,9 @@ public:
             INCREASE = 0,
             DECREASE = 1
         };
+        enum class PEN_DOWN {
+            NORMAL = 0
+        };
 
         ACTION action;
         int setting;
@@ -177,6 +179,8 @@ public:
             : META(ACTION::ENABLE_RAINBOW, static_cast<int>(varSetting)) {}
         META(CHANGE_PEN_WIDTH varSetting)
             : META(ACTION::CHANGE_PEN_WIDTH, static_cast<int>(varSetting)) {}
+        META(PEN_DOWN varSetting)
+            : META(ACTION::PEN_DOWN, static_cast<int>(varSetting)) {}
     };
 
 
@@ -208,7 +212,6 @@ private:
     }
 
 #pragma region Cursor Handler
-
     struct Cursor_Handler {
 
     private:
@@ -220,8 +223,8 @@ private:
         std::pair<float, float> deltaCursor = { 0, 0 }; // newCursor = cursor + deltaCursor at t==0, cursor = newCursor at t==1;
         
 
-        int drawStep = 2;
-        int drawStepDelta = 2;
+        int drawStep = 2, drawStepDelta = 2;
+        bool penDown = true;
 
         void adjustDeltaCursor(std::pair<float, float> incoming) { deltaCursor.first += incoming.first; deltaCursor.second += incoming.second; }
       
@@ -270,8 +273,11 @@ private:
         void processMoveCommand(bool yaxis, bool negative, int setting = 0) {
             updateDeltaCursor(yaxis, negative);
             calcNewCursor();
-            CanvasHandler.DrawHandler.drawLine(cursor, newCursor, true); // insertion point for using pen logic
+            if(penDown) CanvasHandler.DrawHandler.drawLine(cursor, newCursor, true); // insertion point for using pen logic
             resetCursors();
+        }
+        void processPenDownChange(const Command::META::PEN_DOWN& setting) {
+            penDown = !penDown;
         }
 
         size_t pixelsDrawn = 0;
@@ -287,18 +293,16 @@ private:
     Cursor_Handler CursorHandler;
 
 #pragma region Draw Handler
-
     struct Draw_Handler {
 
     private:
 
         Canvas_Handler& CanvasHandler;
         std::array<uint8_t, 4> colour = { 200, 200, 200, 255 };
-        bool rainbowMode = false; int pixelsToRainbow = 100;
+        bool rainbowMode = false; int pixelsToRainbow = 1000;
         int pen = 1, penDelta = 1;
 
-        void updateDrawData() {
-            CanvasHandler.CursorHandler.pixelsDrawn += 1;
+        void checkDrawData() {
             if (rainbowMode) if (CanvasHandler.CursorHandler.pixelsDrawn > pixelsToRainbow) {
                 colour = getRandomColour();
                 CanvasHandler.CursorHandler.pixelsDrawn = 0;
@@ -309,7 +313,7 @@ private:
             luxel* ptr = CanvasHandler.retrieveLuxelFromPoint(c);
             if (!ptr) return;
             ptr->colour = colour;
-            updateDrawData();
+            CanvasHandler.CursorHandler.pixelsDrawn += 1;
         }
     public:
         void drawLine(std::pair<int, int> origin, std::pair<int, int> destination, const bool useP) {
@@ -388,6 +392,7 @@ private:
         
         void usePen(const std::pair<float, float>& c) {
             drawCircle(c, pen, true);
+            checkDrawData();
         }
         void updatePen(int delta) {
             pen += delta;
@@ -407,7 +412,6 @@ private:
             return { static_cast<uint8_t>(rand() % 256),static_cast<uint8_t>(rand() % 256),static_cast<uint8_t>(rand() % 256), 255 };
         }
         void changeColour(const std::array<uint8_t, 4>& varcolour = { 200, 200, 200, 255 }) { colour = varcolour; };
-
 
         void processDrawLineCommand(const Command::DRAW::LINE& setting) {
             // fizzbuzz
@@ -445,7 +449,6 @@ private:
         }
 
     };
-
 #pragma endregion
 
     Draw_Handler DrawHandler;
@@ -506,8 +509,11 @@ public:
         case Command::META::ACTION::CHANGE_PEN_WIDTH:
             DrawHandler.processChangePenWidthCommand(static_cast<Command::META::CHANGE_PEN_WIDTH>(command.setting));
             break;
+
+        case Command::META::ACTION::PEN_DOWN:
+            CursorHandler.processPenDownChange(static_cast<Command::META::PEN_DOWN>(command.setting));
+            break;
         }
-        
 
     };
     void processMoveCommand(const Command& command) {
@@ -659,6 +665,8 @@ private:
     { SDL_SCANCODE_A, Command{Command::MOVE::LEFT::NORMAL, true} },
     { SDL_SCANCODE_D, Command{Command::MOVE::RIGHT::NORMAL, true} },
 
+    { SDL_SCANCODE_1, Command{Command::META::PEN_DOWN::NORMAL, false}},
+
     { SDL_SCANCODE_G, Command{Command::DRAW::CIRCLE::NORMAL, false} },
     { SDL_SCANCODE_L, Command{Command::DRAW::CIRCLE::RAINBOW, false} },
 
@@ -667,6 +675,7 @@ private:
 
     { SDL_SCANCODE_Z, Command{Command::META::CHANGE_DRAWSTEP::DECREASE, false} },
     { SDL_SCANCODE_X, Command{Command::META::CHANGE_DRAWSTEP::INCREASE, false} },
+
     { SDL_SCANCODE_V, Command{Command::META::CHANGE_PEN_WIDTH::DECREASE, false}},
     { SDL_SCANCODE_B, Command{Command::META::CHANGE_PEN_WIDTH::INCREASE, false}},
 
