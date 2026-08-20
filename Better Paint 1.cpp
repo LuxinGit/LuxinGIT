@@ -2,6 +2,7 @@
 //
 
 #include <iostream>
+#include <string>
 #include <SDL3/SDL.h>
 #include <vector>
 #include <array>
@@ -10,6 +11,7 @@
 #include <vector>
 #include <map>
 #include <unordered_map>
+#include <algorithm>
 /*
 TO DO:
 
@@ -196,6 +198,28 @@ public:
 
 };
 
+enum class COMMAND {
+    MOVE_UP,
+    MOVE_DOWN,
+    MOVE_LEFT,
+    MOVE_RIGHT,
+
+    PEN_DOWN,
+
+    DRAW_CIRCLE,
+    DRAW_CIRCLE_RAINBOW,
+
+    RANDOM_COLOUR,
+    ENABLE_RAINBOW,
+
+    DRAWSTEP_DECREASE,
+    DRAWSTEP_INCREASE,
+
+    PEN_WIDTH_DECREASE,
+    PEN_WIDTH_INCREASE,
+
+    CLEAR
+};
 
 #pragma endregion
 
@@ -204,95 +228,63 @@ struct Canvas_Handler {
 
 private: 
 
-    int& width; int& height;
-    std::vector<luxel> canvas;
-
-    size_t indexFromCoord(std::pair<float, float> c) const {
-        // ASSUMES POSITIVE X/Y. INDEXING WITH THIS INDEX WITHOUT SIZE CHECKING MAY CAUSE OUT OF BOUNDARY MEMORY CRASH [IF COORD > LAST LUXEL INDEX].
-        return size_t(c.second) * width + size_t(c.first);
-    }
-
 #pragma region Cursor Handler
     struct Cursor_Handler {
 
-    private:
-
+        Cursor_Handler(Canvas_Handler& varCanvH) : CanvasHandler(varCanvH) {}
         Canvas_Handler& CanvasHandler;
 
         std::pair<float, float> cursor = { 100, 100 };
-        std::pair<float, float> newCursor = { 100, 100 };
         std::pair<float, float> deltaCursor = { 0, 0 }; // newCursor = cursor + deltaCursor at t==0, cursor = newCursor at t==1;
         
-
-        int drawStep = 2, drawStepDelta = 2;
+        int drawStep = 1, drawStepDelta = 1;
         bool penDown = true;
+        size_t pixelsDrawn = 0;
 
-        void adjustDeltaCursor(std::pair<float, float> incoming) { deltaCursor.first += incoming.first; deltaCursor.second += incoming.second; }
-      
-        void updateDrawstep(int delta) {
-            drawStep += delta;
-            if (drawStep < 2) drawStep = 2;
-            if (drawStep > 50) drawStep = 50;
-        } // probably should sizecheck this but we can leave that for now
-
-
-
-    public:
-
-        Cursor_Handler(Canvas_Handler& varCanvH) : CanvasHandler(varCanvH) {}
-
-
-        void updateDeltaCursor(bool yaxis, bool negative) {
-            std::pair<float, float> payload = { 0,0 };
-            int tempstep = drawStep;
-            if (negative) tempstep *= -1;
-
-            if (yaxis) payload.second += tempstep;
-            else payload.first += tempstep;
-
-            adjustDeltaCursor(payload);
-        }
-        void calcNewCursor() {
-            newCursor.first += deltaCursor.first;
-            newCursor.second += deltaCursor.second;
+        void resetPoint(float& f) {
+            f = std::clamp(f, 0.0f, static_cast<float>(CanvasHandler.width - 1));
         }
         void resetCursors() {
-            cursor = newCursor;
+            cursor = CanvasHandler.addCoords(cursor, deltaCursor);
             deltaCursor = { 0 , 0 };
             if (!CanvasHandler.coordCheck(cursor)) {
-                if (cursor.first < 0) cursor.first = 1;
-                if (cursor.first > CanvasHandler.width) cursor.first = static_cast<int>(CanvasHandler.width - 1);
-                if (cursor.second < 0) cursor.second = 1;
-                if (cursor.second >= CanvasHandler.height) cursor.second = static_cast<int>(CanvasHandler.height - 1);
+                resetPoint(cursor.first); resetPoint(cursor.second);
             }
+        }
+      
+        void updateDrawstep(int delta) {
+            drawStep = std::clamp(drawStep + delta, 1, 50);
+        } 
+
+        void checkCursorLine() {
+            if (penDown) CanvasHandler.DrawHandler.drawLine(cursor, CanvasHandler.addCoords(cursor, deltaCursor), true);
+            resetCursors();
         }
 
         void processChangeDrawstepCommand(const Command::META::CHANGE_DRAWSTEP& setting) {
-            int tDSDelta = drawStepDelta * (setting == Command::META::CHANGE_DRAWSTEP::DECREASE ? -1 : 1); // setting == 0 if increase, == 1 if decrease;
-            updateDrawstep(tDSDelta);
-        }
-        void processMoveCommand(bool yaxis, bool negative, int setting = 0) {
-            updateDeltaCursor(yaxis, negative);
-            calcNewCursor();
-            if(penDown) CanvasHandler.DrawHandler.drawLine(cursor, newCursor, true); // insertion point for using pen logic
-            resetCursors();
-        }
-        void processPenDownChange(const Command::META::PEN_DOWN& setting) {
-            penDown = !penDown;
+            updateDrawstep(drawStepDelta * (setting == Command::META::CHANGE_DRAWSTEP::DECREASE ? -1 : 1));
         }
 
-        size_t pixelsDrawn = 0;
+        void processMoveCommand(const Command& command) {
+            switch (static_cast<Command::MOVE::ACTION>(command.action)) {
+            case Command::MOVE::ACTION::UP:
+                deltaCursor.second -= drawStep;
+                break;
+            case  Command::MOVE::ACTION::RIGHT:
+                deltaCursor.first += drawStep;
+                break;
+            case  Command::MOVE::ACTION::DOWN:
+                deltaCursor.second += drawStep;
+                break;
+            case  Command::MOVE::ACTION::LEFT:
+                deltaCursor.first -= drawStep;
+                break;
+            }
+        }
 
-        std::pair<float, float>& retrieveCursor() { return cursor; }
-        std::pair<float, float>& retrieveNewCursor() { return newCursor; }
-        int& retrieveDrawstep() { return drawStep; }
-
-
+        
     };
 #pragma endregion
-
-    Cursor_Handler CursorHandler;
-
 #pragma region Draw Handler
     struct Draw_Handler {
 
@@ -418,17 +410,16 @@ private:
             // fizzbuzz
         }
         void processDrawCircleCommand(const Command::DRAW::CIRCLE& setting) {
-            std::pair<float, float>& c = CanvasHandler.CursorHandler.retrieveCursor();
-            int radius = CanvasHandler.CursorHandler.retrieveDrawstep();
+
             if (setting == Command::DRAW::CIRCLE::RAINBOW) {
-                for (int i = 1; i <= radius; i++) {
+                for (int i = 1; i <= CanvasHandler.CursorHandler.drawStep; i++) {
                     colour = getRandomColour();
-                    drawCircle(c, i);
+                    drawCircle(CanvasHandler.CursorHandler.cursor, i);
                 }
                 colour = { 200, 200, 200, 255 };
                 return;
             }
-            else drawCircle(c, radius);
+            else drawCircle(CanvasHandler.CursorHandler.cursor, CanvasHandler.CursorHandler.drawStep);
         }
 
         void processChangeColourCommand(const Command::META::CHANGE_COLOUR& setting) {
@@ -452,18 +443,31 @@ private:
     };
 #pragma endregion
 
+    Cursor_Handler CursorHandler;
     Draw_Handler DrawHandler;
 
+    int& width; int& height;
+
+    std::vector<luxel> canvas;
     void clearCanvas() {
         for (luxel& l : canvas) {
             l.resetLuxel();
         }
+    }
+
+    size_t indexFromCoord(std::pair<float, float> c) const {
+        // ASSUMES POSITIVE X/Y. INDEXING WITH THIS INDEX WITHOUT SIZE CHECKING MAY CAUSE OUT OF BOUNDARY MEMORY CRASH [IF COORD > LAST LUXEL INDEX].
+        return size_t(c.second) * width + size_t(c.first);
     }
     bool coordCheck(const std::pair<float, float>& c) {
         if (c.first < 0 or c.first > width) return false;
         if (c.second < 0 or c.second >= height) return false;
         return true;
     }
+    std::pair<float, float> addCoords(const std::pair<float, float>& c1, const std::pair<float, float>& c2) {
+        return { c1.first + c2.first, c1.second + c2.second };
+    }
+
     luxel* retrieveLuxelFromIndex(const size_t& index) { return &canvas[index]; }
     luxel* retrieveLuxelFromPoint(const std::pair<float, float>& c, bool coordCheck) { return &canvas[indexFromCoord(c)]; }
 
@@ -482,6 +486,8 @@ public:
     luxel* retrieveLuxelFromPoint(const std::pair<float, float>& c) { return (coordCheck(c) ? retrieveLuxelFromPoint(c, true) : nullptr); }
 
     int& retrieveCanvasWidth() { return width; }
+
+    void refreshCursor() { CursorHandler.checkCursorLine(); }
     
     void processDrawCommand(const Command& command) {
         switch (static_cast<Command::DRAW::ACTION>(command.action)) {
@@ -512,26 +518,13 @@ public:
             break;
 
         case Command::META::ACTION::PEN_DOWN:
-            CursorHandler.processPenDownChange(static_cast<Command::META::PEN_DOWN>(command.setting));
+            CursorHandler.penDown = !CursorHandler.penDown;
             break;
         }
 
     };
     void processMoveCommand(const Command& command) {
-        switch (static_cast<Command::MOVE::ACTION>(command.action)) {
-        case Command::MOVE::ACTION::UP:
-            CursorHandler.processMoveCommand(true, true);
-            break;
-        case  Command::MOVE::ACTION::RIGHT:
-            CursorHandler.processMoveCommand(false, false);
-            break;
-        case  Command::MOVE::ACTION::DOWN:
-            CursorHandler.processMoveCommand(true, false);
-            break;
-        case  Command::MOVE::ACTION::LEFT:
-            CursorHandler.processMoveCommand(false, true);
-            break;
-        }
+        CursorHandler.processMoveCommand(command);
     }
 
 };
@@ -610,7 +603,6 @@ private:
 #pragma endregion
 
 #pragma region Command Handler
-
 struct Command_Handler {
 
 private:
@@ -638,8 +630,32 @@ private:
 
 public:
 
+    inline static const std::unordered_map<COMMAND, Command> commandMapping = {
+        { COMMAND::MOVE_UP,             Command{Command::MOVE::UP::NORMAL, true} },
+        { COMMAND::MOVE_DOWN,           Command{Command::MOVE::DOWN::NORMAL, true} },
+        { COMMAND::MOVE_LEFT,           Command{Command::MOVE::LEFT::NORMAL, true} },
+        { COMMAND::MOVE_RIGHT,          Command{Command::MOVE::RIGHT::NORMAL, true} },
+
+        { COMMAND::PEN_DOWN,            Command{Command::META::PEN_DOWN::NORMAL, false} },
+
+        { COMMAND::DRAW_CIRCLE,         Command{Command::DRAW::CIRCLE::NORMAL, false} },
+        { COMMAND::DRAW_CIRCLE_RAINBOW, Command{Command::DRAW::CIRCLE::RAINBOW, false} },
+
+        { COMMAND::RANDOM_COLOUR,       Command{Command::META::CHANGE_COLOUR::RANDOM, false} },
+        { COMMAND::ENABLE_RAINBOW,      Command{Command::META::ENABLE_RAINBOW::NORMAL, false} },
+
+        { COMMAND::DRAWSTEP_DECREASE,   Command{Command::META::CHANGE_DRAWSTEP::DECREASE, false} },
+        { COMMAND::DRAWSTEP_INCREASE,   Command{Command::META::CHANGE_DRAWSTEP::INCREASE, false} },
+
+        { COMMAND::PEN_WIDTH_DECREASE,  Command{Command::META::CHANGE_PEN_WIDTH::DECREASE, false} },
+        { COMMAND::PEN_WIDTH_INCREASE,  Command{Command::META::CHANGE_PEN_WIDTH::INCREASE, false} },
+
+        { COMMAND::CLEAR,               Command{Command::META::CLEAR::NORMAL, false} }
+    };
+
     void processCommands() {
         for (const auto& command : commandQueue) processCommand(command);
+        CanvasHandler.refreshCursor();
         SDLHandler.refreshPresent(CanvasHandler.retrieveCanvas(), CanvasHandler.retrieveCanvasWidth());
         clearCommands();
     }
@@ -660,27 +676,27 @@ struct Keyboard_Handler {
 
 private:
 
-    std::unordered_map<SDL_Scancode, Command> keyMapping = {
-    { SDL_SCANCODE_W, Command{Command::MOVE::UP::NORMAL, true} },
-    { SDL_SCANCODE_S, Command{Command::MOVE::DOWN::NORMAL, true} },
-    { SDL_SCANCODE_A, Command{Command::MOVE::LEFT::NORMAL, true} },
-    { SDL_SCANCODE_D, Command{Command::MOVE::RIGHT::NORMAL, true} },
+    std::unordered_map<SDL_Scancode, COMMAND> keyMapping = {
+        { SDL_SCANCODE_W, COMMAND::MOVE_UP },
+        { SDL_SCANCODE_S, COMMAND::MOVE_DOWN },
+        { SDL_SCANCODE_A, COMMAND::MOVE_LEFT },
+        { SDL_SCANCODE_D, COMMAND::MOVE_RIGHT },
 
-    { SDL_SCANCODE_1, Command{Command::META::PEN_DOWN::NORMAL, false}},
+        { SDL_SCANCODE_1, COMMAND::PEN_DOWN },
 
-    { SDL_SCANCODE_G, Command{Command::DRAW::CIRCLE::NORMAL, false} },
-    { SDL_SCANCODE_L, Command{Command::DRAW::CIRCLE::RAINBOW, false} },
+        { SDL_SCANCODE_G, COMMAND::DRAW_CIRCLE },
+        { SDL_SCANCODE_L, COMMAND::DRAW_CIRCLE_RAINBOW },
 
-    { SDL_SCANCODE_J, Command{Command::META::CHANGE_COLOUR::RANDOM, false} },
-    { SDL_SCANCODE_E, Command{Command::META::ENABLE_RAINBOW::NORMAL, false} },
+        { SDL_SCANCODE_J, COMMAND::RANDOM_COLOUR },
+        { SDL_SCANCODE_E, COMMAND::ENABLE_RAINBOW },
 
-    { SDL_SCANCODE_Z, Command{Command::META::CHANGE_DRAWSTEP::DECREASE, false} },
-    { SDL_SCANCODE_X, Command{Command::META::CHANGE_DRAWSTEP::INCREASE, false} },
+        { SDL_SCANCODE_Z, COMMAND::DRAWSTEP_DECREASE },
+        { SDL_SCANCODE_X, COMMAND::DRAWSTEP_INCREASE },
 
-    { SDL_SCANCODE_V, Command{Command::META::CHANGE_PEN_WIDTH::DECREASE, false}},
-    { SDL_SCANCODE_B, Command{Command::META::CHANGE_PEN_WIDTH::INCREASE, false}},
+        { SDL_SCANCODE_V, COMMAND::PEN_WIDTH_DECREASE },
+        { SDL_SCANCODE_B, COMMAND::PEN_WIDTH_INCREASE },
 
-    { SDL_SCANCODE_C, Command{Command::META::CLEAR::NORMAL, false} }
+        { SDL_SCANCODE_C, COMMAND::CLEAR }
     };
 
     Command_Handler& CommandHandler;
@@ -690,18 +706,66 @@ public:
 
     void harvestKeyboardState() {
         const bool* keyboardState = SDL_GetKeyboardState(nullptr);
-        for (const auto& [scancode, command] : getKeyboardMapping()) {
-            
+        for (const auto& [scancode, binding] : keyMapping) {
+            Command comm = Command_Handler::commandMapping.at(binding);
             if (keyboardState[scancode] &&
-                (command.repeatable || !previousKeyboardState[scancode])) CommandHandler.addCommand(command);
+                (comm.repeatable || !previousKeyboardState[scancode])) CommandHandler.addCommand(comm);
 
             previousKeyboardState[scancode] = keyboardState[scancode];
         } 
     }
-    const std::unordered_map<SDL_Scancode, Command>& getKeyboardMapping() { return keyMapping; }
 
     Keyboard_Handler(Command_Handler& CommH) : CommandHandler(CommH) {}
     
+};
+#pragma endregion
+
+#pragma region CLI Handler
+struct CLI_Handler {
+private:
+
+    inline static const std::unordered_map<std::string, COMMAND> stringMapping = {
+    { "move_up",             COMMAND::MOVE_UP },
+    { "move_down",           COMMAND::MOVE_DOWN },
+    { "move_left",           COMMAND::MOVE_LEFT },
+    { "move_right",          COMMAND::MOVE_RIGHT },
+
+    { "pen_down",            COMMAND::PEN_DOWN },
+
+    { "draw_circle",         COMMAND::DRAW_CIRCLE },
+    { "draw_circle_rainbow", COMMAND::DRAW_CIRCLE_RAINBOW },
+
+    { "random_colour",       COMMAND::RANDOM_COLOUR },
+    { "enable_rainbow",      COMMAND::ENABLE_RAINBOW },
+
+    { "drawstep_decrease",   COMMAND::DRAWSTEP_DECREASE },
+    { "drawstep_increase",   COMMAND::DRAWSTEP_INCREASE },
+
+    { "pen_width_decrease",  COMMAND::PEN_WIDTH_DECREASE },
+    { "pen_width_increase",  COMMAND::PEN_WIDTH_INCREASE },
+
+    { "clear",               COMMAND::CLEAR }
+    };
+
+    std::string harvestInput(const std::string& Question, bool linebreak = true) {
+        std::cout << Question << std::endl;
+        std::string output; 
+        std::cin >> output;
+        if(linebreak) std::cout << std::endl;
+    }
+    int convertInt(const std::string& input) {
+        int output = 0;
+        try { output = std::stoi(input); }
+        catch (...) { return 0; }
+        return output;
+    }
+    int harvestIntput(const std::string& Question, bool linebreak = true) {
+        return convertInt(harvestInput(Question, linebreak));
+    }
+    std::pair<float, float> inputCoord(const std::string& Question) {
+        return { static_cast<float>(harvestIntput(Question, false)), static_cast<float>(harvestIntput(", ", true)) };
+    }
+
 };
 #pragma endregion
 
@@ -717,8 +781,6 @@ private:
     SDL_Handler SDLHandler;
     Command_Handler CommandHandler;
     Keyboard_Handler KeyboardHandler;
-
-
 
 public: 
 
