@@ -12,6 +12,7 @@
 #include <map>
 #include <unordered_map>
 #include <algorithm>
+#include <variant>
 /*
 TO DO:
 
@@ -34,11 +35,11 @@ struct Master_Handler;
 
 #pragma region Luxels
 struct luxel {
+
     std::array<uint8_t, 4> colour;
 
     luxel() { colour = { 255, 255, 255, 255 }; } // 0 = R, 1 = G, 2 = B, 3 = Opacity
     
-
     void resetLuxel() {
         colour = { 255, 255, 255, 255 };
     }
@@ -58,49 +59,53 @@ public:
         META = 2
     };
 
+    using Payload = std::variant<std::monostate, int, std::pair<float, float>, std::array<uint8_t, 4>>;
+
 private:
 
-    Command(TYPE vartype, int varaction, int varsetting, bool varRepeatable) : type(vartype), action(varaction), setting(varsetting), repeatable(varRepeatable) {}
+    Command(TYPE vartype, int varaction, int varsetting, bool varRepeatable, Payload varPayload = {}) :
+        type(vartype), action(varaction), setting(varsetting), repeatable(varRepeatable), payload(varPayload) {}
 
 public:
+
+#pragma region MOVE
 
     struct MOVE {
 
         enum class ACTION {
-            UP = 0,
-            RIGHT = 1,
-            DOWN = 2,
-            LEFT = 3
+            DIRECTION = 0,
+            SET = 1
         };
 
-    private: 
+    private:
 
         MOVE(ACTION varAction, int varSetting = 0) : action(varAction), setting(varSetting) {}
 
     public:
 
-        enum class UP {
-            NORMAL = 0
+        enum class DIRECTION {
+            RIGHT = 0,
+            DOWN = 1,
+            LEFT = 2,
+            UP = 3
         };
-        enum class RIGHT {
-            NORMAL = 0
-        };
-        enum class DOWN {
-            NORMAL = 0
-        };
-        enum class LEFT {
-            NORMAL = 0
+        enum class SET {
+            RESET_TO_ORIGIN = 0,
+            USE_PAYLOAD = 1
         };
 
         ACTION action;
         int setting;
 
-        MOVE(UP varSetting) : MOVE(ACTION::UP, static_cast<int>(varSetting)) {}
-        MOVE(RIGHT varSetting) : MOVE(ACTION::RIGHT, static_cast<int>(varSetting)) {}
-        MOVE(DOWN varSetting) : MOVE(ACTION::DOWN, static_cast<int>(varSetting)) {}
-        MOVE(LEFT varSetting) : MOVE(ACTION::LEFT, static_cast<int>(varSetting)) {}
+        MOVE(DIRECTION varSetting) : MOVE(ACTION::DIRECTION, static_cast<int>(varSetting)) {}
+        MOVE(SET varSetting) : MOVE(ACTION::SET, static_cast<int>(varSetting)) {}
 
     };
+
+#pragma endregion
+
+#pragma region DRAW
+
     struct DRAW {
 
         enum class ACTION {
@@ -131,6 +136,11 @@ public:
         DRAW(CIRCLE varSetting)
             : DRAW(ACTION::CIRCLE, static_cast<int>(varSetting)) {}
     };
+
+#pragma endregion
+
+#pragma region META
+
     struct META {
 
         enum class ACTION {
@@ -139,7 +149,8 @@ public:
             CHANGE_DRAWSTEP = 2,
             ENABLE_RAINBOW = 3,
             CHANGE_PEN_WIDTH = 4,
-            PEN_DOWN = 5
+            PEN_DOWN = 5,
+            SAVE_ORIGIN = 6
         };
 
     private:
@@ -152,20 +163,22 @@ public:
         };
         enum class CHANGE_COLOUR {
             DEFAULT = 0,
-            RANDOM = 1
+            USE_PAYLOAD = 1,
+            RANDOM = 2
         };
         enum class CHANGE_DRAWSTEP {
-            INCREASE = 0,
-            DECREASE = 1
+            USE_PAYLOAD = 0
         };
         enum class ENABLE_RAINBOW {
             NORMAL = 0
         };
         enum class CHANGE_PEN_WIDTH {
-            INCREASE = 0,
-            DECREASE = 1
+            USE_PAYLOAD = 0
         };
         enum class PEN_DOWN {
+            NORMAL = 0
+        };
+        enum class SAVE_ORIGIN {
             NORMAL = 0
         };
 
@@ -184,17 +197,21 @@ public:
             : META(ACTION::CHANGE_PEN_WIDTH, static_cast<int>(varSetting)) {}
         META(PEN_DOWN varSetting)
             : META(ACTION::PEN_DOWN, static_cast<int>(varSetting)) {}
+        META(SAVE_ORIGIN varSetting)
+            : META(ACTION::SAVE_ORIGIN, static_cast<int>(varSetting)) {}
     };
 
+#pragma endregion
 
-    Command(MOVE cmd, bool repeatable) : Command(TYPE::MOVE, static_cast<int>(cmd.action), static_cast<int>(cmd.setting), repeatable) {}
-    Command(DRAW cmd, bool repeatable) : Command(TYPE::DRAW, static_cast<int>(cmd.action), static_cast<int>(cmd.setting), repeatable) {}
-    Command(META cmd, bool repeatable) : Command(TYPE::META, static_cast<int>(cmd.action), static_cast<int>(cmd.setting), repeatable) {}
+    Command(MOVE cmd, bool repeatable, Payload payload = {}) : Command(TYPE::MOVE, static_cast<int>(cmd.action), static_cast<int>(cmd.setting), repeatable, payload) {}
+    Command(DRAW cmd, bool repeatable, Payload payload = {}) : Command(TYPE::DRAW, static_cast<int>(cmd.action), static_cast<int>(cmd.setting), repeatable, payload) {}
+    Command(META cmd, bool repeatable, Payload payload = {}) : Command(TYPE::META, static_cast<int>(cmd.action), static_cast<int>(cmd.setting), repeatable, payload) {}
 
     TYPE type;
     int action; // differentiates between commands.
-    int setting = 0; // for passing additional information ?
+    int setting; // settings within commands.
     bool repeatable = true;
+    Payload payload;
 
 };
 
@@ -203,22 +220,57 @@ enum class COMMAND {
     MOVE_DOWN,
     MOVE_LEFT,
     MOVE_RIGHT,
-
-    PEN_DOWN,
+    MOVE_RESET,
+    MOVE_SET_POINT,
+    MOVE_SAVE_ORIGIN,
 
     DRAW_CIRCLE,
     DRAW_CIRCLE_RAINBOW,
 
-    RANDOM_COLOUR,
+    COLOUR_RESET,
+    COLOUR_RANDOM,
+    COLOUR_SET,
+
     ENABLE_RAINBOW,
 
     DRAWSTEP_DECREASE,
     DRAWSTEP_INCREASE,
 
+    PEN_DOWN,
     PEN_WIDTH_DECREASE,
     PEN_WIDTH_INCREASE,
 
     CLEAR
+};
+
+inline static const std::unordered_map<COMMAND, Command> commandMapping = {
+    // ANY CONSTANTS DEFINED HERE SHOULD USE constructCommand() TO PASS INFORMATION
+    // CONSTANTS DEFINED HERE ARE SET FOR COMMANDS THAT MUST HAVE PAYLOAD INFORMATION TO RUN.
+    { COMMAND::MOVE_UP,             Command{Command::MOVE::DIRECTION::UP, true} },
+    { COMMAND::MOVE_DOWN,           Command{Command::MOVE::DIRECTION::DOWN, true} },
+    { COMMAND::MOVE_LEFT,           Command{Command::MOVE::DIRECTION::LEFT, true} },
+    { COMMAND::MOVE_RIGHT,          Command{Command::MOVE::DIRECTION::RIGHT, true} },
+    { COMMAND::MOVE_RESET,          Command{Command::MOVE::SET::RESET_TO_ORIGIN, false} },
+
+    { COMMAND::PEN_DOWN,            Command{Command::META::PEN_DOWN::NORMAL, false} },
+
+    { COMMAND::DRAW_CIRCLE,         Command{Command::DRAW::CIRCLE::NORMAL, false} },
+    { COMMAND::DRAW_CIRCLE_RAINBOW, Command{Command::DRAW::CIRCLE::RAINBOW, false} },
+
+    { COMMAND::COLOUR_RESET,        Command{Command::META::CHANGE_COLOUR::DEFAULT, false} },
+    { COMMAND::COLOUR_RANDOM,       Command{Command::META::CHANGE_COLOUR::RANDOM, false} },
+    { COMMAND::COLOUR_SET,          Command{Command::META::CHANGE_COLOUR::USE_PAYLOAD, false, std::array<uint8_t, 4>{200, 200, 200, 255}} },
+
+    { COMMAND::ENABLE_RAINBOW,      Command{Command::META::ENABLE_RAINBOW::NORMAL, false} },
+
+    { COMMAND::DRAWSTEP_DECREASE,   Command{Command::META::CHANGE_DRAWSTEP::USE_PAYLOAD, false, -1} },
+    { COMMAND::DRAWSTEP_INCREASE,   Command{Command::META::CHANGE_DRAWSTEP::USE_PAYLOAD, false,  1} },
+
+    { COMMAND::PEN_WIDTH_DECREASE,  Command{Command::META::CHANGE_PEN_WIDTH::USE_PAYLOAD, false, -1} },
+    { COMMAND::PEN_WIDTH_INCREASE,  Command{Command::META::CHANGE_PEN_WIDTH::USE_PAYLOAD, false, 1} },
+
+    { COMMAND::CLEAR,               Command{Command::META::CLEAR::NORMAL, false} },
+    { COMMAND::MOVE_SAVE_ORIGIN,    Command{Command::META::SAVE_ORIGIN::NORMAL, false} },
 };
 
 #pragma endregion
@@ -234,50 +286,70 @@ private:
         Cursor_Handler(Canvas_Handler& varCanvH) : CanvasHandler(varCanvH) {}
         Canvas_Handler& CanvasHandler;
 
+        std::pair<float, float> origin = { 100, 100 };
         std::pair<float, float> cursor = { 100, 100 };
-        std::pair<float, float> deltaCursor = { 0, 0 }; // newCursor = cursor + deltaCursor at t==0, cursor = newCursor at t==1;
+        std::pair<float, float> deltaCursor = { 0, 0 };
         
         int drawStep = 1, drawStepDelta = 1;
         bool penDown = true;
         size_t pixelsDrawn = 0;
 
-        void resetPoint(float& f) {
-            f = std::clamp(f, 0.0f, static_cast<float>(CanvasHandler.width - 1));
+        static void resetPoint(float& f, const int& width) {
+            f = std::clamp(f, 0.0f, static_cast<float>(width - 1));
         }
         void resetCursors() {
             cursor = CanvasHandler.addCoords(cursor, deltaCursor);
             deltaCursor = { 0 , 0 };
             if (!CanvasHandler.coordCheck(cursor)) {
-                resetPoint(cursor.first); resetPoint(cursor.second);
+                resetPoint(cursor.first, CanvasHandler.width); resetPoint(cursor.second, CanvasHandler.width);
             }
         }
-      
-        void updateDrawstep(int delta) {
-            drawStep = std::clamp(drawStep + delta, 1, 50);
-        } 
 
         void checkCursorLine() {
             if (penDown) CanvasHandler.DrawHandler.drawLine(cursor, CanvasHandler.addCoords(cursor, deltaCursor), true);
             resetCursors();
         }
 
-        void processChangeDrawstepCommand(const Command::META::CHANGE_DRAWSTEP& setting) {
-            updateDrawstep(drawStepDelta * (setting == Command::META::CHANGE_DRAWSTEP::DECREASE ? -1 : 1));
+        void updateDrawstep(int delta) {
+            drawStep = std::clamp(drawStep + delta, 1, 50);
         }
+        void processChangeDrawstepCommand(const Command& Command) {
+            updateDrawstep(std::get<int>(Command.payload));
+        } 
 
-        void processMoveCommand(const Command& command) {
-            switch (static_cast<Command::MOVE::ACTION>(command.action)) {
-            case Command::MOVE::ACTION::UP:
+        void processDirectionCommand(const Command& command) {
+            switch (static_cast<Command::MOVE::DIRECTION>(command.setting)) {
+            case Command::MOVE::DIRECTION::UP:
                 deltaCursor.second -= drawStep;
                 break;
-            case  Command::MOVE::ACTION::RIGHT:
+            case  Command::MOVE::DIRECTION::RIGHT:
                 deltaCursor.first += drawStep;
                 break;
-            case  Command::MOVE::ACTION::DOWN:
+            case  Command::MOVE::DIRECTION::DOWN:
                 deltaCursor.second += drawStep;
                 break;
-            case  Command::MOVE::ACTION::LEFT:
+            case  Command::MOVE::DIRECTION::LEFT:
                 deltaCursor.first -= drawStep;
+                break;
+            }
+        }
+        void processSetCommand(const Command& command) {
+            switch (static_cast<Command::MOVE::SET>(command.setting)) {
+            case Command::MOVE::SET::RESET_TO_ORIGIN:
+                cursor = origin;
+                break;
+            case Command::MOVE::SET::USE_PAYLOAD:
+                cursor = std::get<std::pair<float, float>>(command.payload);
+                break;
+            }
+        }
+        void processMoveCommand(const Command& command) {
+            switch (static_cast<Command::MOVE::ACTION>(command.action)) {
+            case Command::MOVE::ACTION::DIRECTION:
+                processDirectionCommand(command);
+                break;
+            case Command::MOVE::ACTION::SET:
+                processSetCommand(command);
                 break;
             }
         }
@@ -387,10 +459,6 @@ private:
             drawCircle(c, pen, true);
             checkDrawData();
         }
-        void updatePen(int delta) {
-            pen += delta;
-            if (pen < 1) pen = 1;
-        }
         void drawPoint(const std::pair<float, float>& c, const bool useP) {
             if (useP) usePen(c);
             else drawPoint(c);
@@ -401,7 +469,7 @@ private:
         Draw_Handler(Canvas_Handler& CanvH) : CanvasHandler(CanvH) {}
 
         std::array<uint8_t, 4>& getActiveColour() { return colour; }
-        std::array<uint8_t, 4> getRandomColour() {
+        static std::array<uint8_t, 4> getRandomColour() {
             return { static_cast<uint8_t>(rand() % 256),static_cast<uint8_t>(rand() % 256),static_cast<uint8_t>(rand() % 256), 255 };
         }
         void changeColour(const std::array<uint8_t, 4>& varcolour = { 200, 200, 200, 255 }) { colour = varcolour; };
@@ -409,23 +477,31 @@ private:
         void processDrawLineCommand(const Command::DRAW::LINE& setting) {
             // fizzbuzz
         }
-        void processDrawCircleCommand(const Command::DRAW::CIRCLE& setting) {
+        void processDrawCircleCommand(const Command& command) {
+            auto setting = static_cast<Command::DRAW::CIRCLE>(command.setting);
+            
+            int radius = std::holds_alternative<int>(command.payload)
+                ? std::get<int>(command.payload)
+                : CanvasHandler.CursorHandler.drawStep;
 
             if (setting == Command::DRAW::CIRCLE::RAINBOW) {
-                for (int i = 1; i <= CanvasHandler.CursorHandler.drawStep; i++) {
+                for (int i = 1; i <= radius; i++) {
                     colour = getRandomColour();
                     drawCircle(CanvasHandler.CursorHandler.cursor, i);
                 }
                 colour = { 200, 200, 200, 255 };
                 return;
             }
-            else drawCircle(CanvasHandler.CursorHandler.cursor, CanvasHandler.CursorHandler.drawStep);
+            else drawCircle(CanvasHandler.CursorHandler.cursor, radius);
         }
 
-        void processChangeColourCommand(const Command::META::CHANGE_COLOUR& setting) {
-            switch (setting) {
+        void processChangeColourCommand(const Command& command) {
+            switch (static_cast<Command::META::CHANGE_COLOUR>(command.setting)) {
             case Command::META::CHANGE_COLOUR::DEFAULT:
                 changeColour();
+                break;
+            case Command::META::CHANGE_COLOUR::USE_PAYLOAD:
+                changeColour(std::get<std::array<uint8_t, 4>>(command.payload));
                 break;
             case Command::META::CHANGE_COLOUR::RANDOM:
                 changeColour(getRandomColour());
@@ -435,9 +511,8 @@ private:
         void processRainbowModeCommand(const Command::META::ENABLE_RAINBOW& setting) {
             rainbowMode = !rainbowMode;
         }
-        void processChangePenWidthCommand(const Command::META::CHANGE_PEN_WIDTH& setting) {
-            int pD = penDelta * (setting == Command::META::CHANGE_PEN_WIDTH::DECREASE ? -1 : 1);
-            updatePen(pD);
+        void processChangePenWidthCommand(const Command& command) {
+            pen = std::clamp(pen + std::get<int>(command.payload), 1, 50);
         }
 
     };
@@ -455,10 +530,14 @@ private:
         }
     }
 
-    size_t indexFromCoord(std::pair<float, float> c) const {
+    static inline size_t indexFromCoord(const std::pair<float, float>& c, const int& w) {
         // ASSUMES POSITIVE X/Y. INDEXING WITH THIS INDEX WITHOUT SIZE CHECKING MAY CAUSE OUT OF BOUNDARY MEMORY CRASH [IF COORD > LAST LUXEL INDEX].
-        return size_t(c.second) * width + size_t(c.first);
+        return size_t(c.second) * w + size_t(c.first);
     }
+    size_t indexFromCoord(const std::pair<float, float>& c) const {
+        return indexFromCoord(c, width);
+    }
+
     bool coordCheck(const std::pair<float, float>& c) {
         if (c.first < 0 or c.first > width) return false;
         if (c.second < 0 or c.second >= height) return false;
@@ -487,6 +566,8 @@ public:
 
     int& retrieveCanvasWidth() { return width; }
 
+    void setCursor(const std::pair<float, float>& c) { CursorHandler.cursor = c; }
+    void setDrawStep(const int& d) { CursorHandler.drawStep = d; }
     void refreshCursor() { CursorHandler.checkCursorLine(); }
     
     void processDrawCommand(const Command& command) {
@@ -495,7 +576,7 @@ public:
             DrawHandler.processDrawLineCommand(static_cast<Command::DRAW::LINE>(command.setting));
             break;
         case Command::DRAW::ACTION::CIRCLE:
-            DrawHandler.processDrawCircleCommand(static_cast<Command::DRAW::CIRCLE>(command.setting));
+            DrawHandler.processDrawCircleCommand(command);
             break;
         }
     };
@@ -505,23 +586,24 @@ public:
             clearCanvas();
             break;
         case Command::META::ACTION::CHANGE_COLOUR:
-            DrawHandler.processChangeColourCommand(static_cast<Command::META::CHANGE_COLOUR>(command.setting));
+            DrawHandler.processChangeColourCommand(command);
             break;
         case Command::META::ACTION::CHANGE_DRAWSTEP:
-            CursorHandler.processChangeDrawstepCommand(static_cast<Command::META::CHANGE_DRAWSTEP>(command.setting));
+            CursorHandler.processChangeDrawstepCommand(command);
             break;
         case Command::META::ACTION::ENABLE_RAINBOW:
             DrawHandler.processRainbowModeCommand(static_cast<Command::META::ENABLE_RAINBOW>(command.setting));
             break;
         case Command::META::ACTION::CHANGE_PEN_WIDTH:
-            DrawHandler.processChangePenWidthCommand(static_cast<Command::META::CHANGE_PEN_WIDTH>(command.setting));
+            DrawHandler.processChangePenWidthCommand(command);
             break;
-
         case Command::META::ACTION::PEN_DOWN:
             CursorHandler.penDown = !CursorHandler.penDown;
             break;
+        case Command::META::ACTION::SAVE_ORIGIN:
+            CursorHandler.origin = CursorHandler.cursor;
+            break;
         }
-
     };
     void processMoveCommand(const Command& command) {
         CursorHandler.processMoveCommand(command);
@@ -603,6 +685,7 @@ private:
 #pragma endregion
 
 #pragma region Command Handler
+
 struct Command_Handler {
 
 private:
@@ -627,31 +710,7 @@ private:
         }
     }
 
-
 public:
-
-    inline static const std::unordered_map<COMMAND, Command> commandMapping = {
-        { COMMAND::MOVE_UP,             Command{Command::MOVE::UP::NORMAL, true} },
-        { COMMAND::MOVE_DOWN,           Command{Command::MOVE::DOWN::NORMAL, true} },
-        { COMMAND::MOVE_LEFT,           Command{Command::MOVE::LEFT::NORMAL, true} },
-        { COMMAND::MOVE_RIGHT,          Command{Command::MOVE::RIGHT::NORMAL, true} },
-
-        { COMMAND::PEN_DOWN,            Command{Command::META::PEN_DOWN::NORMAL, false} },
-
-        { COMMAND::DRAW_CIRCLE,         Command{Command::DRAW::CIRCLE::NORMAL, false} },
-        { COMMAND::DRAW_CIRCLE_RAINBOW, Command{Command::DRAW::CIRCLE::RAINBOW, false} },
-
-        { COMMAND::RANDOM_COLOUR,       Command{Command::META::CHANGE_COLOUR::RANDOM, false} },
-        { COMMAND::ENABLE_RAINBOW,      Command{Command::META::ENABLE_RAINBOW::NORMAL, false} },
-
-        { COMMAND::DRAWSTEP_DECREASE,   Command{Command::META::CHANGE_DRAWSTEP::DECREASE, false} },
-        { COMMAND::DRAWSTEP_INCREASE,   Command{Command::META::CHANGE_DRAWSTEP::INCREASE, false} },
-
-        { COMMAND::PEN_WIDTH_DECREASE,  Command{Command::META::CHANGE_PEN_WIDTH::DECREASE, false} },
-        { COMMAND::PEN_WIDTH_INCREASE,  Command{Command::META::CHANGE_PEN_WIDTH::INCREASE, false} },
-
-        { COMMAND::CLEAR,               Command{Command::META::CLEAR::NORMAL, false} }
-    };
 
     void processCommands() {
         for (const auto& command : commandQueue) processCommand(command);
@@ -661,14 +720,21 @@ public:
     }
 
     void addCommand(Command command) {
-        commandQueue.emplace_back(command);
+        commandQueue.emplace_back(std::move(command));
     }
+    void constructCommand(COMMAND command, Command::Payload payload = {}) {
+        Command result = commandMapping.at(command);
+        result.payload = payload;
+        addCommand(result);
+    }
+
     void clearCommands() { commandQueue = {}; }
 
     Command_Handler(Canvas_Handler& varCanvH, SDL_Handler& varSDLH)
         : CanvasHandler(varCanvH), SDLHandler(varSDLH) {}
 
 };
+
 #pragma endregion
 
 #pragma region Keyboard Handler
@@ -681,13 +747,14 @@ private:
         { SDL_SCANCODE_S, COMMAND::MOVE_DOWN },
         { SDL_SCANCODE_A, COMMAND::MOVE_LEFT },
         { SDL_SCANCODE_D, COMMAND::MOVE_RIGHT },
+        { SDL_SCANCODE_Q, COMMAND::MOVE_RESET },
 
         { SDL_SCANCODE_1, COMMAND::PEN_DOWN },
 
         { SDL_SCANCODE_G, COMMAND::DRAW_CIRCLE },
         { SDL_SCANCODE_L, COMMAND::DRAW_CIRCLE_RAINBOW },
 
-        { SDL_SCANCODE_J, COMMAND::RANDOM_COLOUR },
+        { SDL_SCANCODE_J, COMMAND::COLOUR_RANDOM },
         { SDL_SCANCODE_E, COMMAND::ENABLE_RAINBOW },
 
         { SDL_SCANCODE_Z, COMMAND::DRAWSTEP_DECREASE },
@@ -696,7 +763,8 @@ private:
         { SDL_SCANCODE_V, COMMAND::PEN_WIDTH_DECREASE },
         { SDL_SCANCODE_B, COMMAND::PEN_WIDTH_INCREASE },
 
-        { SDL_SCANCODE_C, COMMAND::CLEAR }
+        { SDL_SCANCODE_C, COMMAND::CLEAR },
+        { SDL_SCANCODE_2, COMMAND::MOVE_SAVE_ORIGIN },
     };
 
     Command_Handler& CommandHandler;
@@ -707,9 +775,9 @@ public:
     void harvestKeyboardState() {
         const bool* keyboardState = SDL_GetKeyboardState(nullptr);
         for (const auto& [scancode, binding] : keyMapping) {
-            Command comm = Command_Handler::commandMapping.at(binding);
+            Command comm = commandMapping.at(binding);
             if (keyboardState[scancode] &&
-                (comm.repeatable || !previousKeyboardState[scancode])) CommandHandler.addCommand(comm);
+                (comm.repeatable || !previousKeyboardState[scancode])) CommandHandler.addCommand(comm); // NOT USING CONSTRUCTCOMMAND AS KEYBOARD INPUTS CARRY NO ADDITIONAL DATA
 
             previousKeyboardState[scancode] = keyboardState[scancode];
         } 
@@ -724,6 +792,8 @@ public:
 struct CLI_Handler {
 private:
 
+    Canvas_Handler& CanvasHandler;
+
     inline static const std::unordered_map<std::string, COMMAND> stringMapping = {
     { "move_up",             COMMAND::MOVE_UP },
     { "move_down",           COMMAND::MOVE_DOWN },
@@ -735,7 +805,7 @@ private:
     { "draw_circle",         COMMAND::DRAW_CIRCLE },
     { "draw_circle_rainbow", COMMAND::DRAW_CIRCLE_RAINBOW },
 
-    { "random_colour",       COMMAND::RANDOM_COLOUR },
+    { "random_colour",       COMMAND::COLOUR_RANDOM },
     { "enable_rainbow",      COMMAND::ENABLE_RAINBOW },
 
     { "drawstep_decrease",   COMMAND::DRAWSTEP_DECREASE },
@@ -763,7 +833,11 @@ private:
         return convertInt(harvestInput(Question, linebreak));
     }
     std::pair<float, float> inputCoord(const std::string& Question) {
-        return { static_cast<float>(harvestIntput(Question, false)), static_cast<float>(harvestIntput(", ", true)) };
+        return { static_cast<float>(harvestIntput(Question + "\nx = ", false)), static_cast<float>(harvestIntput(", y = ", true))};
+    }
+
+    void setCursor() {
+        CanvasHandler.setCursor(inputCoord("Enter new cursor coordinates:"));
     }
 
 };
@@ -797,9 +871,6 @@ public:
     void processCommands() {
         KeyboardHandler.harvestKeyboardState();
         CommandHandler.processCommands();
-    }
-    void addCommand(Command command) {
-        CommandHandler.addCommand(command);
     }
 
     void cleanup() const {
