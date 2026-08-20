@@ -745,7 +745,8 @@ private:
 public:
 
     void processCommands();
-
+    
+    int commandQueueSize() { return commandQueue.size(); }
     void addCommand(Command command) {
         commandQueue.emplace_back(std::move(command));
     }
@@ -1024,6 +1025,9 @@ Options:
             MasterHandler.CommandHandler.processCommands();
             break;
         case 3:
+            if (MasterHandler.CommandHandler.commandQueueSize())
+                if (harvestInput("You have unexecuted commands.  Execute them? [Y]") == "Y") MasterHandler.CommandHandler.processCommands();
+                else MasterHandler.CommandHandler.clearCommands();
             return;
         default:
             continue;
@@ -1037,7 +1041,7 @@ void CLI_Handler::beginCLILoop() {
 #pragma endregion
 
 #pragma region Command_Handler
-void::Command_Handler::processCommand(const Command& command) {
+void Command_Handler::processCommand(const Command& command) {
     switch (command.type) {
     case Command::TYPE::DRAW:
         MasterHandler.CanvasHandler.processDrawCommand(command);
