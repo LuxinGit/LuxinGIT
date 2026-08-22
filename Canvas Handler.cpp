@@ -1,8 +1,8 @@
 #include "Canvas Handler.h"
 
 luxel::luxel() { colour = { 255, 255, 255, 255 }; }
-    void luxel::resetLuxel() {
-    colour = { 255, 255, 255, 255 };
+void luxel::resetLuxel() {
+    colour = DEFAULT_BACKGROUND_COLOUR;
 }
 
 
@@ -53,29 +53,40 @@ void Canvas_Handler::processDrawCommand(const Command& command) {
     }
 };
 void Canvas_Handler::processMetaCommand(const Command& command) {
-    switch (static_cast<Command::META::ACTION>(command.action)) {
-    case Command::META::ACTION::CLEAR:
-        clearCanvas();
-        break;
-    case Command::META::ACTION::CHANGE_COLOUR:
-        DrawHandler.processChangeColourCommand(command);
-        break;
-    case Command::META::ACTION::CHANGE_DRAWSTEP:
-        CursorHandler.processChangeDrawstepCommand(command);
-        break;
-    case Command::META::ACTION::ENABLE_RAINBOW:
-        DrawHandler.processRainbowModeCommand(command);
-        break;
-    case Command::META::ACTION::CHANGE_PEN_WIDTH:
-        DrawHandler.processChangePenWidthCommand(command);
-        break;
-    case Command::META::ACTION::PEN_DOWN:
-        CursorHandler.penDown = !CursorHandler.penDown;
-        break;
-    case Command::META::ACTION::SAVE_ORIGIN:
-        CursorHandler.origin = CursorHandler.cursor;
-        break;
-    }
+    using Action = Command::META::ACTION;
+    switch (static_cast<Action>(command.action)) {
+        case Action::RESET:
+            switch (static_cast<Command::META::RESET>(command.setting)) {
+            case Command::META::RESET::RESET_CANVAS:
+                clearCanvas();
+                break;
+            case Command::META::RESET::RESET_CURSOR:
+                CursorHandler.cursor =      DEFAULT_CURSOR_POINT;
+                CursorHandler.origin =      DEFAULT_CURSOR_POINT;
+                CursorHandler.drawStep =    DEFAULT_DRAWSTEP;
+                DrawHandler.pen =           DEFAULT_PENWIDTH;
+                break;
+            }
+            break;
+        case Action::CHANGE_COLOUR:
+            DrawHandler.processChangeColourCommand(command);
+            break;
+        case Action::CHANGE_DRAWSTEP:
+            CursorHandler.processChangeDrawstepCommand(command);
+            break;
+        case Action::ENABLE_RAINBOW:
+            DrawHandler.processRainbowModeCommand(command);
+            break;
+        case Action::CHANGE_PEN_WIDTH:
+            DrawHandler.processChangePenWidthCommand(command);
+            break;
+        case Action::PEN_DOWN:
+            CursorHandler.penDown = !CursorHandler.penDown;
+            break;
+        case Action::SAVE_ORIGIN:
+            CursorHandler.origin = CursorHandler.cursor;
+            break;
+        }
 };
 void Canvas_Handler::processMoveCommand(const Command& command) {
     CursorHandler.processMoveCommand(command);

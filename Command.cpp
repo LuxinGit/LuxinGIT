@@ -33,8 +33,8 @@ Command::DRAW::DRAW(ACTION varAction, int varSetting)
 
 Command::META::META(ACTION varAction, int varSetting)
     : action(varAction), setting(varSetting) {}
-    Command::META::META(CLEAR varSetting)
-        : META(ACTION::CLEAR, static_cast<int>(varSetting)) {}
+    Command::META::META(RESET varSetting)
+        : META(ACTION::RESET, static_cast<int>(varSetting)) {}
     Command::META::META(CHANGE_COLOUR varSetting)
         : META(ACTION::CHANGE_COLOUR, static_cast<int>(varSetting)) {}
     Command::META::META(CHANGE_DRAWSTEP varSetting)

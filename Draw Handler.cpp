@@ -14,6 +14,11 @@ void Draw_Handler::drawPoint(const std::pair<float, float>& c) {
     ptr->colour = colour;
     CanvasHandler.CursorHandler.pixelsDrawn += 1;
 }
+void Draw_Handler::drawPoint(const std::pair<float, float>& c, const bool useP) {
+    if (useP) drawCircle(c, pen, true);
+    else drawPoint(c);
+    checkDrawData();
+}
 
 void Draw_Handler::drawLine(std::pair<int, int> origin, std::pair<int, int> destination, const bool useP) {
 
@@ -50,8 +55,7 @@ void Draw_Handler::drawLine(std::pair<int, int> origin, std::pair<int, int> dest
         }
     }
 }
-
-void Draw_Handler::drawCircle(const std::pair<float, float>& c, int radius, const bool fill) {
+void Draw_Handler::drawCircle(const std::pair<float, float>& c, int radius, const bool fill, const bool useP) {
     int x = 0;
     int y = radius;
     int d = 1 - radius;
@@ -66,15 +70,15 @@ void Draw_Handler::drawCircle(const std::pair<float, float>& c, int radius, cons
             drawLine({ c.first - y, c.second - x }, { c.first + y, c.second - x }, false);
         }
         else {
-            drawPoint({ c.first + x, c.second + y });
-            drawPoint({ c.first - x, c.second + y });
-            drawPoint({ c.first + x, c.second - y });
-            drawPoint({ c.first - x, c.second - y });
+            drawPoint({ c.first + x, c.second + y }, useP);
+            drawPoint({ c.first - x, c.second + y }, useP);
+            drawPoint({ c.first + x, c.second - y }, useP);
+            drawPoint({ c.first - x, c.second - y }, useP);
 
-            drawPoint({ c.first + y, c.second + x });
-            drawPoint({ c.first - y, c.second + x });
-            drawPoint({ c.first + y, c.second - x });
-            drawPoint({ c.first - y, c.second - x });
+            drawPoint({ c.first + y, c.second + x }, useP);
+            drawPoint({ c.first - y, c.second + x }, useP);
+            drawPoint({ c.first + y, c.second - x }, useP);
+            drawPoint({ c.first - y, c.second - x }, useP);
         }
 
         x++;
@@ -87,15 +91,6 @@ void Draw_Handler::drawCircle(const std::pair<float, float>& c, int radius, cons
             d += 2 * (x - y) + 1;
         }
     }
-}
-
-void Draw_Handler::usePen(const std::pair<float, float>& c) {
-    drawCircle(c, pen, true);
-    checkDrawData();
-}
-void Draw_Handler::drawPoint(const std::pair<float, float>& c, const bool useP) {
-    if (useP) usePen(c);
-    else drawPoint(c);
 }
 
 std::array<uint8_t, 4> Draw_Handler::getRandomColour() {
@@ -115,12 +110,12 @@ void Draw_Handler::processDrawCircleCommand(const Command& command) {
     if (setting == Command::DRAW::CIRCLE::RAINBOW) {
         for (int i = 1; i <= radius; i++) {
             colour = getRandomColour();
-            drawCircle(CanvasHandler.CursorHandler.cursor, i);
+            drawCircle(CanvasHandler.CursorHandler.cursor, i, false, true);
         }
         colour = { 200, 200, 200, 255 };
         return;
     }
-    else drawCircle(CanvasHandler.CursorHandler.cursor, radius);
+    else drawCircle(CanvasHandler.CursorHandler.cursor, radius, false, true);
 }
 void Draw_Handler::processChangeColourCommand(const Command& command) {
     switch (static_cast<Command::META::CHANGE_COLOUR>(command.setting)) {
@@ -151,7 +146,18 @@ void Draw_Handler::processRainbowModeCommand(const Command& command) {
     }
 }
 void Draw_Handler::processChangePenWidthCommand(const Command& command) {
-    pen = std::clamp(pen + std::get<int>(command.payload), 1, 50);
+    
+    using Setting = Command::META::CHANGE_PEN_WIDTH;
+
+    switch (static_cast<Setting>(command.setting)) {
+        case (Setting::ADD_PAYLOAD):
+            pen = std::clamp(pen + std::get<int>(command.payload), 1, 50);
+            break;
+        case (Setting::SET_TO_PAYLOAD):
+            pen = std::clamp(std::get<int>(command.payload), 1, 50);
+            break;
+    }
+
 }
 
 Draw_Handler::Draw_Handler(Canvas_Handler& CanvH) : CanvasHandler(CanvH) {}

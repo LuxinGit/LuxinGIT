@@ -116,12 +116,12 @@ Options:
             createCommand();
             break;
         case 2:
+            if (harvestInput("Reset Cursor after execution? [Y]") == "Y") MasterHandler.CommandHandler.constructCommand(COMMAND::RESET_CURSOR);
             MasterHandler.CommandHandler.processCommands();
             break;
         case 3:
-            if (MasterHandler.CommandHandler.commandQueueSize())
-                if (harvestInput("You have unexecuted commands.  Execute them? [Y]") == "Y") MasterHandler.CommandHandler.processCommands();
-                else MasterHandler.CommandHandler.clearCommands();
+            if (MasterHandler.CommandHandler.commandQueueSize()) if (harvestInput("You have unexecuted commands.  Continue? [Y]") != "Y") break;
+            MasterHandler.CommandHandler.clearCommands();
             return;
         default:
             continue;

@@ -25,7 +25,6 @@ TO DO:
 
 */
 
-#pragma region Main
 int main()
 {
 
@@ -55,4 +54,3 @@ int main()
     MasterHandler.cleanup();
     return 0;
 }
-#pragma endregion

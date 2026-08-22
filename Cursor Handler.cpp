@@ -24,7 +24,7 @@ void Cursor_Handler::checkCursorLine() {
 void Cursor_Handler::processChangeDrawstepCommand(const Command& command) {
     using setting = Command::META::CHANGE_DRAWSTEP;
     switch (static_cast<setting>(command.setting)) {
-    case setting::USE_PAYLOAD:
+    case setting::ADD_PAYLOAD:
         drawStep = std::clamp(drawStep + std::get<int>(command.payload), 1, 50);
         break;
     case setting::SET_TO_PAYLOAD:

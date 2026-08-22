@@ -31,13 +31,15 @@ private:
 
     { "step_down",       COMMAND::DRAWSTEP_DECREASE },
     { "step_up",         COMMAND::DRAWSTEP_INCREASE },
-    { "step",            COMMAND::DRAWSTEP_SET },
+    { "step_set",        COMMAND::DRAWSTEP_SET },
 
     { "pen",             COMMAND::PEN_DOWN },
     { "pen_thinner",     COMMAND::PEN_WIDTH_DECREASE },
     { "pen_thicker",     COMMAND::PEN_WIDTH_INCREASE },
+    { "pen_set",         COMMAND::PEN_SET },
 
-    { "clear",           COMMAND::CLEAR }
+    { "reset_canvas",    COMMAND::RESET_CANVAS },
+    { "reset_cursor",    COMMAND::RESET_CURSOR }
     };
 
     std::string harvestInput(const std::string& Question, bool linebreak = true);

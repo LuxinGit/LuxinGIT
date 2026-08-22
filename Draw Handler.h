@@ -6,32 +6,32 @@
 
 struct Canvas_Handler;
 
+static constexpr std::array<uint8_t, 4> DEFAULT_DRAW_COLOUR = { 200, 200, 200, 255 };
+static constexpr std::array<uint8_t, 4> DEFAULT_BACKGROUND_COLOUR = { 255, 255, 255, 255 };
+static constexpr int                    DEFAULT_PENWIDTH = 2;
+
 struct Draw_Handler {
 
     Canvas_Handler& CanvasHandler;
-    std::array<uint8_t, 4> colour = { 200, 200, 200, 255 };
+    std::array<uint8_t, 4> colour =     DEFAULT_DRAW_COLOUR;
+    int pen =                           DEFAULT_PENWIDTH;
+    
     bool rainbowMode = false; int pixelsToRainbow = 1000;
-    int pen = 1, penDelta = 1;
+
+    Draw_Handler(Canvas_Handler& CanvH);
 
     void checkDrawData();
 
     void drawPoint(const std::pair<float, float>& c);
-
-    void drawLine(std::pair<int, int> origin, std::pair<int, int> destination, const bool useP);
-
-    void drawCircle(const std::pair<float, float>& c, int radius, const bool fill = false);
-
-    void usePen(const std::pair<float, float>& c);
-
     void drawPoint(const std::pair<float, float>& c, const bool useP);
 
-    Draw_Handler(Canvas_Handler& CanvH);
+    void drawLine(std::pair<int, int> origin, std::pair<int, int> destination, const bool useP);
+    void drawCircle(const std::pair<float, float>& c, int radius, const bool fill = false, const bool useP = false);
 
     static std::array<uint8_t, 4> getRandomColour();
 
     void processDrawLineCommand(const Command::DRAW::LINE& setting);
     void processDrawCircleCommand(const Command& command);
-
     void processChangeColourCommand(const Command& command);
     void processRainbowModeCommand(const Command& command);
     void processChangePenWidthCommand(const Command& command);

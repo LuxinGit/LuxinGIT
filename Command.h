@@ -75,7 +75,7 @@ public:
         struct META {
 
             enum class ACTION {
-                CLEAR = 0,
+                RESET = 0,
                 CHANGE_COLOUR = 1,
                 CHANGE_DRAWSTEP = 2,
                 ENABLE_RAINBOW = 3,
@@ -84,8 +84,9 @@ public:
                 SAVE_ORIGIN = 6
             };
 
-            enum class CLEAR {
-                NORMAL = 0
+            enum class RESET {
+                RESET_CANVAS = 0,
+                RESET_CURSOR = 1
             };
             enum class CHANGE_COLOUR {
                 DEFAULT = 0,
@@ -93,7 +94,7 @@ public:
                 RANDOM = 2
             };
             enum class CHANGE_DRAWSTEP {
-                USE_PAYLOAD = 0,
+                ADD_PAYLOAD = 0,
                 SET_TO_PAYLOAD = 1
             };
             enum class ENABLE_RAINBOW {
@@ -101,7 +102,8 @@ public:
                 USE_PAYLOAD = 1
             };
             enum class CHANGE_PEN_WIDTH {
-                USE_PAYLOAD = 0
+                ADD_PAYLOAD = 0,
+                SET_TO_PAYLOAD = 1
             };
             enum class PEN_DOWN {
                 NORMAL = 0
@@ -119,7 +121,7 @@ public:
             ACTION action;
             int setting;
 
-            META(CLEAR varSetting);
+            META(RESET varSetting);
             META(CHANGE_COLOUR varSetting);
             META(CHANGE_DRAWSTEP varSetting);
             META(ENABLE_RAINBOW varSetting);
@@ -198,10 +200,12 @@ enum class COMMAND {
     PEN_DOWN,
     PEN_WIDTH_DECREASE,
     PEN_WIDTH_INCREASE,
+    PEN_SET,
 
     CLI_OPEN,
 
-    CLEAR,
+    RESET_CANVAS,
+    RESET_CURSOR,
 
     INVALID
 };
@@ -214,28 +218,30 @@ inline static const std::unordered_map<COMMAND, Command> commandMapping = {
     { COMMAND::MOVE_LEFT,           Command{Command::MOVE::DIRECTION::LEFT, true} },
     { COMMAND::MOVE_RIGHT,          Command{Command::MOVE::DIRECTION::RIGHT, true} },
     { COMMAND::MOVE_RESET,          Command{Command::MOVE::SET::RESET_TO_ORIGIN, false} },
-    { COMMAND::MOVE_SET_POINT,      Command{Command::MOVE::SET::USE_PAYLOAD, false, std::pair<float,float>{ 100.0f, 100.0f }} },
+    { COMMAND::MOVE_SET_POINT,      Command{Command::MOVE::SET::USE_PAYLOAD, false, DEFAULT_CURSOR_POINT} },
 
     { COMMAND::DRAW_CIRCLE,         Command{Command::DRAW::CIRCLE::NORMAL, false} },
     { COMMAND::DRAW_CIRCLE_RAINBOW, Command{Command::DRAW::CIRCLE::RAINBOW, false} },
 
     { COMMAND::COLOUR_RESET,        Command{Command::META::CHANGE_COLOUR::DEFAULT, false} },
     { COMMAND::COLOUR_RANDOM,       Command{Command::META::CHANGE_COLOUR::RANDOM, false} },
-    { COMMAND::COLOUR_SET,          Command{Command::META::CHANGE_COLOUR::USE_PAYLOAD, false, std::array<uint8_t, 4>{200, 200, 200, 255}} },
+    { COMMAND::COLOUR_SET,          Command{Command::META::CHANGE_COLOUR::USE_PAYLOAD, false, DEFAULT_DRAW_COLOUR} },
 
     { COMMAND::RAINBOW_DEFAULT,     Command{Command::META::ENABLE_RAINBOW::DEFAULT, false} },
     { COMMAND::RAINBOW_SET,         Command{Command::META::ENABLE_RAINBOW::USE_PAYLOAD, false, 1000} },
 
-    { COMMAND::DRAWSTEP_DECREASE,   Command{Command::META::CHANGE_DRAWSTEP::USE_PAYLOAD, false, -1} },
-    { COMMAND::DRAWSTEP_INCREASE,   Command{Command::META::CHANGE_DRAWSTEP::USE_PAYLOAD, false,  1} },
+    { COMMAND::DRAWSTEP_DECREASE,   Command{Command::META::CHANGE_DRAWSTEP::ADD_PAYLOAD, false, -1} },
+    { COMMAND::DRAWSTEP_INCREASE,   Command{Command::META::CHANGE_DRAWSTEP::ADD_PAYLOAD, false,  1} },
     { COMMAND::DRAWSTEP_SET,        Command{Command::META::CHANGE_DRAWSTEP::SET_TO_PAYLOAD, false,  1} },
 
 
     { COMMAND::PEN_DOWN,            Command{Command::META::PEN_DOWN::NORMAL, false} },
-    { COMMAND::PEN_WIDTH_DECREASE,  Command{Command::META::CHANGE_PEN_WIDTH::USE_PAYLOAD, false, -1} },
-    { COMMAND::PEN_WIDTH_INCREASE,  Command{Command::META::CHANGE_PEN_WIDTH::USE_PAYLOAD, false, 1} },
+    { COMMAND::PEN_WIDTH_DECREASE,  Command{Command::META::CHANGE_PEN_WIDTH::ADD_PAYLOAD, false, -1} },
+    { COMMAND::PEN_WIDTH_INCREASE,  Command{Command::META::CHANGE_PEN_WIDTH::ADD_PAYLOAD, false, 1} },
+    { COMMAND::PEN_SET,             Command{Command::META::CHANGE_PEN_WIDTH::SET_TO_PAYLOAD, false, 1} },
 
-    { COMMAND::CLEAR,               Command{Command::META::CLEAR::NORMAL, false} },
+    { COMMAND::RESET_CANVAS,        Command{Command::META::RESET::RESET_CANVAS, false} },
+    { COMMAND::RESET_CURSOR,        Command{Command::META::RESET::RESET_CURSOR, false} },
     { COMMAND::MOVE_SAVE_ORIGIN,    Command{Command::META::SAVE_ORIGIN::NORMAL, false} },
 
     { COMMAND::CLI_OPEN,            Command{Command::APP::CLI::OPEN, false} },
