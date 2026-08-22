@@ -1,6 +1,6 @@
 #include "Canvas Handler.h"
 
-luxel::luxel() { colour = { 255, 255, 255, 255 }; }
+luxel::luxel() { colour = DEFAULT_BACKGROUND_COLOUR; }
 void luxel::resetLuxel() {
     colour = DEFAULT_BACKGROUND_COLOUR;
 }

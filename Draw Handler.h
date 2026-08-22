@@ -3,12 +3,9 @@
 #include <array>
 
 #include "Command.h"
+#include "CONSTANTS.h"
 
 struct Canvas_Handler;
-
-static constexpr std::array<uint8_t, 4> DEFAULT_DRAW_COLOUR = { 200, 200, 200, 255 };
-static constexpr std::array<uint8_t, 4> DEFAULT_BACKGROUND_COLOUR = { 255, 255, 255, 255 };
-static constexpr int                    DEFAULT_PENWIDTH = 2;
 
 struct Draw_Handler {
 

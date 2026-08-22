@@ -20,7 +20,6 @@
 TO DO:
 
 1. Brush modes
-2. Add visual cursor
 
 
 */

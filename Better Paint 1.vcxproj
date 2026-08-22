@@ -137,6 +137,7 @@
     <ClCompile Include="CLI Handler.cpp" />
     <ClCompile Include="Command Handler.cpp" />
     <ClCompile Include="Command.cpp" />
+    <ClCompile Include="CONSTANTS.h" />
     <ClCompile Include="Cursor Handler.cpp" />
     <ClCompile Include="Draw Handler.cpp" />
     <ClCompile Include="Keyboard Handler.cpp" />
