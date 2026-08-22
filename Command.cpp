@@ -29,6 +29,8 @@ Command::DRAW::DRAW(ACTION varAction, int varSetting)
         : DRAW(ACTION::LINE, static_cast<int>(varSetting)) {}
     Command::DRAW::DRAW(CIRCLE varSetting)
         : DRAW(ACTION::CIRCLE, static_cast<int>(varSetting)) {}
+    Command::DRAW::DRAW(POINT varSetting)
+        : DRAW(ACTION::POINT, static_cast<int>(varSetting)) {}
 
 
 Command::META::META(ACTION varAction, int varSetting)
@@ -50,4 +52,4 @@ Command::META::META(ACTION varAction, int varSetting)
 
 
 Command::APP::APP(ACTION varAction, int varSetting) : action(varAction), setting(varSetting) {}
-    Command::APP::APP(CLI varSetting) : APP(ACTION::CLI, static_cast<int>(varSetting)) {}
+    Command::APP::APP(INPUT_MODE varSetting) : APP(ACTION::INPUT_MODE, static_cast<int>(varSetting)) {}

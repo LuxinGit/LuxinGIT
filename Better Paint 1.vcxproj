@@ -142,6 +142,7 @@
     <ClCompile Include="Draw Handler.cpp" />
     <ClCompile Include="Keyboard Handler.cpp" />
     <ClCompile Include="Master Handler.cpp" />
+    <ClCompile Include="Mouse Handler.cpp" />
     <ClCompile Include="SDL Handler.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -153,6 +154,7 @@
     <ClInclude Include="Draw Handler.h" />
     <ClInclude Include="Keyboard Handler.h" />
     <ClInclude Include="Master Handler.h" />
+    <ClInclude Include="Mouse Handler.h" />
     <ClInclude Include="SDL Handler.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

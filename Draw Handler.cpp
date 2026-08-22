@@ -97,6 +97,17 @@ std::array<uint8_t, 4> Draw_Handler::getRandomColour() {
     return { static_cast<uint8_t>(rand() % 256),static_cast<uint8_t>(rand() % 256),static_cast<uint8_t>(rand() % 256), 255 };
 }
 
+void Draw_Handler::processDrawPointCommand(const Command& command) {
+    using Setting = Command::DRAW::POINT;
+    switch (static_cast<Setting>(command.setting)) {
+    case Setting::USE_CURSOR:
+        drawPoint(CanvasHandler.CursorHandler.cursor, true);
+        break;
+    case Setting::USE_PAYLOAD:
+        drawPoint(std::get<std::pair<float, float>>(command.payload), true);
+        break;
+    }
+}
 void Draw_Handler::processDrawLineCommand(const Command::DRAW::LINE& setting) {
     // fizzbuzz
 }
@@ -159,5 +170,20 @@ void Draw_Handler::processChangePenWidthCommand(const Command& command) {
     }
 
 }
+
+void Draw_Handler::processDrawCommand(const Command& command) {
+    using Action = Command::DRAW::ACTION;
+    switch (static_cast<Action>(command.action)) {
+    case Action::LINE:
+        processDrawLineCommand(static_cast<Command::DRAW::LINE>(command.setting));
+        break;
+    case Action::CIRCLE:
+        processDrawCircleCommand(command);
+        break;
+    case Action::POINT:
+        processDrawPointCommand(command);
+        break;
+    }
+};
 
 Draw_Handler::Draw_Handler(Canvas_Handler& CanvH) : CanvasHandler(CanvH) {}

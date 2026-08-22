@@ -8,9 +8,9 @@ struct Canvas_Handler;
 
 struct SDL_Handler {
 
-    SDL_Window* Window;
-    SDL_Renderer* Renderer;
-    SDL_Texture* Texture;
+    SDL_Window* Window =        nullptr;
+    SDL_Renderer* Renderer =    nullptr;
+    SDL_Texture* Texture =      nullptr;
 
     Canvas_Handler& CanvasHandler;
 
@@ -18,7 +18,7 @@ struct SDL_Handler {
 
     ~SDL_Handler();
 
-    int initialiseSDL();
+    void initialiseSDL();
 
     void refreshPresent();
     

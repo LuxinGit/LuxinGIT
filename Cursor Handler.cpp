@@ -9,15 +9,14 @@ void Cursor_Handler::resetPoint(float& f, const int& width) {
     f = std::clamp(f, 0.0f, static_cast<float>(width - 1));
 }
 void Cursor_Handler::resetCursors() {
-    cursor = CanvasHandler.addCoords(cursor, deltaCursor);
-    deltaCursor = { 0 , 0 };
-    if (!CanvasHandler.coordCheck(cursor)) {
-        resetPoint(cursor.first, CanvasHandler.width); resetPoint(cursor.second, CanvasHandler.width);
+    if (!CanvasHandler.coordCheck(deltaCursor)) {
+        resetPoint(deltaCursor.first, CanvasHandler.width); resetPoint(deltaCursor.second, CanvasHandler.width);
     }
+    cursor = deltaCursor;
 }
 
 void Cursor_Handler::refreshCursor() {
-    if (penDown) CanvasHandler.DrawHandler.drawLine(cursor, CanvasHandler.addCoords(cursor, deltaCursor), true);
+    if (penDown) CanvasHandler.DrawHandler.drawLine(cursor, deltaCursor, true);
     resetCursors();
 }
 
@@ -52,10 +51,10 @@ void Cursor_Handler::processDirectionCommand(const Command& command) {
 void Cursor_Handler::processSetCommand(const Command& command) {
     switch (static_cast<Command::MOVE::SET>(command.setting)) {
     case Command::MOVE::SET::RESET_TO_ORIGIN:
-        cursor = origin;
+        deltaCursor = origin;
         break;
     case Command::MOVE::SET::USE_PAYLOAD:
-        cursor = std::get<std::pair<float, float>>(command.payload);
+        deltaCursor = std::get<std::pair<float, float>>(command.payload);
         break;
     }
 }

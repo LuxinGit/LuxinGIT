@@ -40,16 +40,6 @@ luxel* Canvas_Handler::retrieveLuxelFromIndex(const size_t& index) { return &can
 luxel* Canvas_Handler::retrieveLuxelFromPoint(const std::pair<float, float>& c, bool coordCheck) { return &canvas[indexFromCoord(c)]; }
 luxel* Canvas_Handler::retrieveLuxelFromPoint(const std::pair<float, float>& c) { return (coordCheck(c) ? retrieveLuxelFromPoint(c, true) : nullptr); }
 
-void Canvas_Handler::processDrawCommand(const Command& command) {
-    switch (static_cast<Command::DRAW::ACTION>(command.action)) {
-    case Command::DRAW::ACTION::LINE:
-        DrawHandler.processDrawLineCommand(static_cast<Command::DRAW::LINE>(command.setting));
-        break;
-    case Command::DRAW::ACTION::CIRCLE:
-        DrawHandler.processDrawCircleCommand(command);
-        break;
-    }
-};
 void Canvas_Handler::processMetaCommand(const Command& command) {
     using Action = Command::META::ACTION;
     switch (static_cast<Action>(command.action)) {

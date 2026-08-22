@@ -51,7 +51,8 @@ public:
 
             enum class ACTION {
                 LINE = 0,
-                CIRCLE = 1
+                CIRCLE = 1,
+                POINT = 2
             };
 
             enum class LINE {
@@ -60,6 +61,10 @@ public:
             enum class CIRCLE {
                 NORMAL = 0,
                 RAINBOW = 1
+            };
+            enum class POINT {
+                USE_PAYLOAD = 0,
+                USE_CURSOR = 1
             };
 
         private:
@@ -73,6 +78,7 @@ public:
 
             DRAW(LINE varSetting);
             DRAW(CIRCLE varSetting);
+            DRAW(POINT varSetting);
         };
         struct META {
 
@@ -108,7 +114,8 @@ public:
                 SET_TO_PAYLOAD = 1
             };
             enum class PEN_DOWN {
-                NORMAL = 0
+                DISCRETE = 0,
+                CONTINUOUS = 1
             };
             enum class SAVE_ORIGIN {
                 NORMAL = 0
@@ -135,11 +142,12 @@ public:
         struct APP {
 
             enum class ACTION {
-                CLI = 0
+                INPUT_MODE = 0,
             };
 
-            enum class CLI {
-                OPEN = 0
+            enum class INPUT_MODE {
+                CLI = 0,
+                MOUSE = 1
             };
 
         private:
@@ -148,7 +156,7 @@ public:
 
         public:
 
-            APP(CLI varSetting);
+            APP(INPUT_MODE varSetting);
 
             ACTION action;
             int setting;
@@ -187,6 +195,7 @@ enum class COMMAND {
 
     DRAW_CIRCLE,
     DRAW_CIRCLE_RAINBOW,
+    DRAW_POINT,
 
     COLOUR_RESET,
     COLOUR_RANDOM,
@@ -204,7 +213,8 @@ enum class COMMAND {
     PEN_WIDTH_INCREASE,
     PEN_SET,
 
-    CLI_OPEN,
+    INPUT_CLI_ENABLE,
+    INPUT_MOUSE_ENABLE,
 
     RESET_CANVAS,
     RESET_CURSOR,
@@ -237,7 +247,7 @@ inline static const std::unordered_map<COMMAND, Command> commandMapping = {
     { COMMAND::DRAWSTEP_SET,        Command{Command::META::CHANGE_DRAWSTEP::SET_TO_PAYLOAD, false,  1} },
 
 
-    { COMMAND::PEN_DOWN,            Command{Command::META::PEN_DOWN::NORMAL, false} },
+    { COMMAND::PEN_DOWN,            Command{Command::META::PEN_DOWN::DISCRETE, false} },
     { COMMAND::PEN_WIDTH_DECREASE,  Command{Command::META::CHANGE_PEN_WIDTH::ADD_PAYLOAD, false, -1} },
     { COMMAND::PEN_WIDTH_INCREASE,  Command{Command::META::CHANGE_PEN_WIDTH::ADD_PAYLOAD, false, 1} },
     { COMMAND::PEN_SET,             Command{Command::META::CHANGE_PEN_WIDTH::SET_TO_PAYLOAD, false, 1} },
@@ -246,7 +256,8 @@ inline static const std::unordered_map<COMMAND, Command> commandMapping = {
     { COMMAND::RESET_CURSOR,        Command{Command::META::RESET::RESET_CURSOR, false} },
     { COMMAND::MOVE_SAVE_ORIGIN,    Command{Command::META::SAVE_ORIGIN::NORMAL, false} },
 
-    { COMMAND::CLI_OPEN,            Command{Command::APP::CLI::OPEN, false} },
+    { COMMAND::INPUT_CLI_ENABLE,            Command{Command::APP::INPUT_MODE::CLI, false} },
+    { COMMAND::INPUT_MOUSE_ENABLE,            Command{Command::APP::INPUT_MODE::MOUSE, false} },
 
 };
 

@@ -27,10 +27,13 @@ struct Draw_Handler {
 
     static std::array<uint8_t, 4> getRandomColour();
 
+    void processDrawPointCommand(const Command& command);
     void processDrawLineCommand(const Command::DRAW::LINE& setting);
     void processDrawCircleCommand(const Command& command);
     void processChangeColourCommand(const Command& command);
     void processRainbowModeCommand(const Command& command);
     void processChangePenWidthCommand(const Command& command);
+
+    void processDrawCommand(const Command& command);
 
 };

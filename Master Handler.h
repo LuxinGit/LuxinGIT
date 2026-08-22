@@ -5,6 +5,7 @@
 #include "Command Handler.h"
 #include "Keyboard Handler.h"
 #include "CLI Handler.h"
+#include "Mouse Handler.h"
 
 struct Master_Handler {
 
@@ -19,10 +20,9 @@ public:
     Command_Handler CommandHandler;
     Keyboard_Handler KeyboardHandler;
     CLI_Handler CLIHandler;
+    Mouse_Handler MouseHandler;
 
     Master_Handler(int varwidth, int varheight);
-
-    int initialiseSDL();
 
     void processCommands();
 

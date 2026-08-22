@@ -2,21 +2,18 @@
 #include "Canvas Handler.h"
 
 
-SDL_Handler::SDL_Handler(Canvas_Handler& varCanvH) : CanvasHandler(varCanvH) {
-    Window = nullptr;
-    Renderer = nullptr;
-    Texture = nullptr; // if adding multiple this will need to be rethought, maybe map?
-}
+SDL_Handler::SDL_Handler(Canvas_Handler& varCanvH)
+    : CanvasHandler(varCanvH) { initialiseSDL(); }
 SDL_Handler::~SDL_Handler() {
     cleanup();
 }
 
-int SDL_Handler::initialiseSDL() {
-    if (initialiseWindow()) return 1;
-    if (initialiseRenderer()) return 1;
-    if (initialiseTexture()) return 1;
+void SDL_Handler::initialiseSDL() {
+    if (initialiseWindow()) return;
+    if (initialiseRenderer()) return;
+    if (initialiseTexture()) return;
     SDL_UpdateTexture(Texture, nullptr, CanvasHandler.canvas.data(), CanvasHandler.width * sizeof(luxel));
-    return 0;
+
 }
 
 void SDL_Handler::cleanup() const {

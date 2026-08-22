@@ -10,6 +10,7 @@ struct CLI_Handler {
 private:
 
     Master_Handler& MasterHandler;
+    bool enable_CLI = ENABLE_CLI;
 
     inline static const std::unordered_map<std::string, COMMAND> stringMapping = {
     { "up",              COMMAND::MOVE_UP },

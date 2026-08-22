@@ -33,8 +33,6 @@ int main()
 
     Master_Handler MasterHandler(width, height);
 
-    if (MasterHandler.initialiseSDL()) return 1;
-
     while (running) {
 
         SDL_Event event;

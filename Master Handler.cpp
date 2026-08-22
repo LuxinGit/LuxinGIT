@@ -5,15 +5,18 @@ Master_Handler::Master_Handler(int varwidth, int varheight) :
     CanvasHandler(width, height),
     CommandHandler(*this),
     KeyboardHandler(CommandHandler),
+    MouseHandler(CanvasHandler.CursorHandler.deltaCursor, CommandHandler),
     SDLHandler(CanvasHandler),
-    CLIHandler(*this) {};
+    CLIHandler(*this) 
+{
+    if (ENABLE_CLI) CLIHandler.beginCLILoop();
+    if (ENABLE_MOUSE) SDL_HideCursor();
+};
 
-int Master_Handler::initialiseSDL() {
-    return (SDLHandler.initialiseSDL());
-}
 
 void Master_Handler::processCommands() {
     KeyboardHandler.harvestKeyboardState();
+    MouseHandler.harvestMouseState();
     CommandHandler.processCommands();
     SDLHandler.refreshPresent();
 }

@@ -10,10 +10,24 @@ void Command_Handler::constructCommand(COMMAND command, Command::Payload payload
     addCommand(result);
 }
 
+void Command_Handler::processAppCommand(const Command& command) {
+    using App = Command::APP;
+    switch (static_cast<App::ACTION>(command.action)) {
+    case App::ACTION::INPUT_MODE:
+        switch (static_cast<App::INPUT_MODE>(command.setting)) {
+        case App::INPUT_MODE::CLI:
+            MasterHandler.CLIHandler.beginCLILoop();
+            break;
+        case App::INPUT_MODE::MOUSE:
+            MasterHandler.MouseHandler.processMouseAppCommand();
+            break;
+        }
+    }
+}
 void Command_Handler::processCommand(const Command& command) {
     switch (command.type) {
     case Command::TYPE::DRAW:
-        MasterHandler.CanvasHandler.processDrawCommand(command);
+        MasterHandler.CanvasHandler.DrawHandler.processDrawCommand(command);
         break;
     case Command::TYPE::MOVE:
         MasterHandler.CanvasHandler.processMoveCommand(command);
@@ -22,7 +36,7 @@ void Command_Handler::processCommand(const Command& command) {
         MasterHandler.CanvasHandler.processMetaCommand(command);
         break;
     case Command::TYPE::APP:
-        MasterHandler.CLIHandler.beginCLILoop();
+        processAppCommand(command);
         break;
     }
 }

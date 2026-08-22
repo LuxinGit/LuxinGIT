@@ -20,6 +20,7 @@ public:
 
 private:
     void processCommand(const Command& command);
+    void processAppCommand(const Command& command);
 public:
     void processCommands();
 

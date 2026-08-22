@@ -33,7 +33,8 @@ private:
         { SDL_SCANCODE_C, COMMAND::RESET_CANVAS },
         { SDL_SCANCODE_9, COMMAND::RESET_CURSOR },
         { SDL_SCANCODE_2, COMMAND::MOVE_SAVE_ORIGIN },
-        { SDL_SCANCODE_0, COMMAND::CLI_OPEN }
+        { SDL_SCANCODE_0, COMMAND::INPUT_CLI_ENABLE },
+        { SDL_SCANCODE_3, COMMAND::INPUT_MOUSE_ENABLE },
     };
 
     Command_Handler& CommandHandler;
