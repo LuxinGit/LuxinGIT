@@ -26,7 +26,7 @@ void SDL_Handler::cleanup() const {
     SDL_Quit();
 }
 
-void SDL_Handler::updateTexture() const {
+void SDL_Handler::updateCanvasTexture() const {
     SDL_UpdateTexture(Texture, nullptr, CanvasHandler.canvas.data(), CanvasHandler.width * sizeof(luxel));
 }
 void SDL_Handler::renderTexture() const {
@@ -35,15 +35,20 @@ void SDL_Handler::renderTexture() const {
 void SDL_Handler::renderPresent() const {
     SDL_RenderPresent(Renderer);
 }
-void SDL_Handler::renderCrosshair(const std::pair<float, float>& c, const int& r) const {
-    SDL_RenderLine(Renderer, c.first - r, c.second, c.first + r, c.second);
-    SDL_RenderLine(Renderer, c.first, c.second - r, c.first, c.second + r);
+void SDL_Handler::renderCrosshair() const {
+    if (CanvasHandler.CursorHandler.enableCrosshair)
+    {
+        auto [x, y] = CanvasHandler.CursorHandler.cursor;
+        int r = CanvasHandler.CursorHandler.crosshairRadius;
+        SDL_RenderLine(Renderer, x - r, y, x + r, y);
+        SDL_RenderLine(Renderer, x, y - r, x, y + r);
+    }
 };
 void SDL_Handler::refreshPresent() {
     CanvasHandler.CursorHandler.refreshCursor();
-    updateTexture();
+    updateCanvasTexture();
     renderTexture();
-    if (CanvasHandler.CursorHandler.enableCrosshair) renderCrosshair(CanvasHandler.CursorHandler.cursor, CanvasHandler.CursorHandler.crosshairRadius);
+    renderCrosshair();
     renderPresent();
 }
 

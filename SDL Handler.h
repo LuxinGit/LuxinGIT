@@ -26,9 +26,9 @@ struct SDL_Handler {
 
 private:
 
-    void updateTexture() const;
+    void updateCanvasTexture() const;
     void renderTexture() const;
-    void renderCrosshair(const std::pair<float, float>& c, const int& r) const;
+    void renderCrosshair() const;
     void renderPresent() const;
 
     int initialiseWindow();
