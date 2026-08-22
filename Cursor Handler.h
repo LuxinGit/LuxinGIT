@@ -6,6 +6,7 @@ struct Canvas_Handler;
 
 static constexpr std::pair<float, float>        DEFAULT_CURSOR_POINT = { 100, 100 }; // IF YOU MAKE A CANVAS SMALLER THAN 100, 100 THAT'S ON YOU // ALSO THAT SHOULD STILL BE FINE
 static constexpr int                            DEFAULT_DRAWSTEP = 1;
+static constexpr int                            DEFAULT_CROSSHAIR_RADIUS = 5;
 
 struct Cursor_Handler {
 
@@ -18,12 +19,14 @@ struct Cursor_Handler {
     std::pair<float, float> deltaCursor =       { {}, {} };
     int                     drawStep =          DEFAULT_DRAWSTEP;
     bool penDown = true;
+    bool enableCrosshair = true;
+    int crosshairRadius =                       DEFAULT_CROSSHAIR_RADIUS;
     size_t pixelsDrawn = 0;
 
     static void resetPoint(float& f, const int& width);
     void resetCursors();
 
-    void checkCursorLine();
+    void refreshCursor();
 
     void processChangeDrawstepCommand(const Command& command);
     void processDirectionCommand(const Command& command);

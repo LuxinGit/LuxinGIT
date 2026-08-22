@@ -28,8 +28,6 @@ void Command_Handler::processCommand(const Command& command) {
 }
 void Command_Handler::processCommands() {
     for (const auto& command : commandQueue) processCommand(command);
-    MasterHandler.CanvasHandler.refreshCursor();
-    MasterHandler.SDLHandler.refreshPresent(MasterHandler.CanvasHandler.canvas, MasterHandler.CanvasHandler.width);
     clearCommands();
 }
 

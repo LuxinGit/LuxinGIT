@@ -41,8 +41,6 @@ struct Canvas_Handler {
 
     Canvas_Handler(int& varwidth, int& varheight);
 
-    void refreshCursor();
-
     void processDrawCommand(const Command& command);
     void processMetaCommand(const Command& command);
     void processMoveCommand(const Command& command);

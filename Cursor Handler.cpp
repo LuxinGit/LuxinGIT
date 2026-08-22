@@ -16,7 +16,7 @@ void Cursor_Handler::resetCursors() {
     }
 }
 
-void Cursor_Handler::checkCursorLine() {
+void Cursor_Handler::refreshCursor() {
     if (penDown) CanvasHandler.DrawHandler.drawLine(cursor, CanvasHandler.addCoords(cursor, deltaCursor), true);
     resetCursors();
 }

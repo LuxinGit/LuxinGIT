@@ -218,14 +218,14 @@ inline static const std::unordered_map<COMMAND, Command> commandMapping = {
     { COMMAND::MOVE_LEFT,           Command{Command::MOVE::DIRECTION::LEFT, true} },
     { COMMAND::MOVE_RIGHT,          Command{Command::MOVE::DIRECTION::RIGHT, true} },
     { COMMAND::MOVE_RESET,          Command{Command::MOVE::SET::RESET_TO_ORIGIN, false} },
-    { COMMAND::MOVE_SET_POINT,      Command{Command::MOVE::SET::USE_PAYLOAD, false, DEFAULT_CURSOR_POINT} },
+    { COMMAND::MOVE_SET_POINT,      Command{Command::MOVE::SET::USE_PAYLOAD, false, std::pair<float,float>{100.0f, 100.0f}} },
 
     { COMMAND::DRAW_CIRCLE,         Command{Command::DRAW::CIRCLE::NORMAL, false} },
     { COMMAND::DRAW_CIRCLE_RAINBOW, Command{Command::DRAW::CIRCLE::RAINBOW, false} },
 
     { COMMAND::COLOUR_RESET,        Command{Command::META::CHANGE_COLOUR::DEFAULT, false} },
     { COMMAND::COLOUR_RANDOM,       Command{Command::META::CHANGE_COLOUR::RANDOM, false} },
-    { COMMAND::COLOUR_SET,          Command{Command::META::CHANGE_COLOUR::USE_PAYLOAD, false, DEFAULT_DRAW_COLOUR} },
+    { COMMAND::COLOUR_SET,          Command{Command::META::CHANGE_COLOUR::USE_PAYLOAD, false, std::array<uint8_t, 4>{200,200,200,255}} },
 
     { COMMAND::RAINBOW_DEFAULT,     Command{Command::META::ENABLE_RAINBOW::DEFAULT, false} },
     { COMMAND::RAINBOW_SET,         Command{Command::META::ENABLE_RAINBOW::USE_PAYLOAD, false, 1000} },
