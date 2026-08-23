@@ -35,9 +35,9 @@ struct Canvas_Handler {
     bool coordCheck(const std::pair<float, float>& c) const;
     std::pair<float, float> addCoords(const std::pair<float, float>& c1, const std::pair<float, float>& c2);
 
-    luxel* retrieveLuxelFromIndex(const size_t& index);
-    luxel* retrieveLuxelFromPoint(const std::pair<float, float>& c, bool coordCheck);
-    luxel* retrieveLuxelFromPoint(const std::pair<float, float>& c);
+    luxel* getLuxelFromIndex(const size_t& index);
+    luxel* getLuxelFromCoord(const std::pair<float, float>& c, bool coordCheck);
+    luxel* getLuxelFromCoord(const std::pair<float, float>& c);
 
     Canvas_Handler(int& varwidth, int& varheight);
 

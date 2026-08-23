@@ -9,7 +9,7 @@ void Draw_Handler::checkDrawData() {
 }
 
 void Draw_Handler::drawPoint(const std::pair<float, float>& c) {
-    luxel* ptr = CanvasHandler.retrieveLuxelFromPoint(c);
+    luxel* ptr = CanvasHandler.getLuxelFromCoord(c);
     if (!ptr) return;
     ptr->colour = colour;
     CanvasHandler.CursorHandler.pixelsDrawn += 1;
@@ -93,6 +93,35 @@ void Draw_Handler::drawCircle(const std::pair<float, float>& c, int radius, cons
     }
 }
 
+void Draw_Handler::fill(const std::pair<int, int>& oc, const std::array<uint8_t, 4>& nColour) {
+    
+    const std::array<uint8_t, 4> oColour = CanvasHandler.getLuxelFromCoord(oc)->colour;
+
+    if (oColour == nColour) return;
+
+    std::vector<std::pair<int, int>> pixelStack = { oc };
+
+    while (!pixelStack.empty()) {
+
+        std::pair<int, int> c = pixelStack.back();
+        luxel* l = CanvasHandler.getLuxelFromCoord(c);
+
+        if (!l or l->colour != oColour) {
+            pixelStack.pop_back(); 
+            continue;
+        }
+
+        l->colour = nColour;
+        pixelStack.pop_back();
+        pixelStack.emplace_back(c.first + 1, c.second);
+        pixelStack.emplace_back(c.first - 1, c.second);
+        pixelStack.emplace_back(c.first, c.second + 1);
+        pixelStack.emplace_back(c.first, c.second - 1);
+
+    }
+
+}
+
 std::array<uint8_t, 4> Draw_Handler::getRandomColour() {
     return { static_cast<uint8_t>(rand() % 256),static_cast<uint8_t>(rand() % 256),static_cast<uint8_t>(rand() % 256), 255 };
 }
@@ -171,6 +200,17 @@ void Draw_Handler::processChangePenWidthCommand(const Command& command) {
 
 }
 
+void Draw_Handler::processFillCommand(const Command& command) {
+    using Setting = Command::DRAW::FILL;
+    switch (static_cast<Setting>(command.setting)) {
+    case Setting::USE_PAYLOAD:
+        fill(CanvasHandler.CursorHandler.cursor, std::get<std::array<uint8_t,4>>(command.payload));
+        break;
+    case Setting::USE_DRAW_COLOUR:
+        fill(CanvasHandler.CursorHandler.cursor, colour);
+        break;
+    }
+}
 void Draw_Handler::processDrawCommand(const Command& command) {
     using Action = Command::DRAW::ACTION;
     switch (static_cast<Action>(command.action)) {
@@ -183,7 +223,12 @@ void Draw_Handler::processDrawCommand(const Command& command) {
     case Action::POINT:
         processDrawPointCommand(command);
         break;
+    case Action::FILL:
+        processFillCommand(command);
+        break;
     }
+
 };
+
 
 Draw_Handler::Draw_Handler(Canvas_Handler& CanvH) : CanvasHandler(CanvH) {}

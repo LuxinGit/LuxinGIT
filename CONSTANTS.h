@@ -19,3 +19,8 @@ static constexpr int							DEFAULT_PENWIDTH = 2;
 
 static constexpr bool							ENABLE_MOUSE = true;
 static constexpr bool							ENABLE_CLI = false;
+
+// CANVAS
+
+static constexpr int							DEFAULT_CANVAS_WIDTH = 800;
+static constexpr int							DEFAULT_CANVAS_HEIGHT = 600;

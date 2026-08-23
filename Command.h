@@ -52,7 +52,8 @@ public:
             enum class ACTION {
                 LINE = 0,
                 CIRCLE = 1,
-                POINT = 2
+                POINT = 2,
+                FILL = 10
             };
 
             enum class LINE {
@@ -67,6 +68,11 @@ public:
                 USE_CURSOR = 1
             };
 
+            enum class FILL {
+                USE_PAYLOAD = 0,
+                USE_DRAW_COLOUR = 1
+            };
+
         private:
 
             DRAW(ACTION varAction, int varSetting = 0);
@@ -79,6 +85,7 @@ public:
             DRAW(LINE varSetting);
             DRAW(CIRCLE varSetting);
             DRAW(POINT varSetting);
+            DRAW(FILL varSetting);
         };
         struct META {
 
@@ -196,6 +203,9 @@ enum class COMMAND {
     DRAW_CIRCLE,
     DRAW_CIRCLE_RAINBOW,
     DRAW_POINT,
+    
+    DRAW_FILL_PAYLOAD,
+    DRAW_FILL_DRAWCOLOUR,
 
     COLOUR_RESET,
     COLOUR_RANDOM,
@@ -235,6 +245,8 @@ inline static const std::unordered_map<COMMAND, Command> commandMapping = {
 
     { COMMAND::DRAW_CIRCLE,         Command{Command::DRAW::CIRCLE::NORMAL, false} },
     { COMMAND::DRAW_CIRCLE_RAINBOW, Command{Command::DRAW::CIRCLE::RAINBOW, false} },
+    { COMMAND::DRAW_FILL_PAYLOAD,   Command{Command::DRAW::FILL::USE_PAYLOAD, false} },
+    { COMMAND::DRAW_FILL_DRAWCOLOUR,Command{Command::DRAW::FILL::USE_DRAW_COLOUR, false} },
 
     { COMMAND::COLOUR_RESET,        Command{Command::META::CHANGE_COLOUR::DEFAULT, false} },
     { COMMAND::COLOUR_RANDOM,       Command{Command::META::CHANGE_COLOUR::RANDOM, false} },

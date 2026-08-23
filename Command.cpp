@@ -31,6 +31,8 @@ Command::DRAW::DRAW(ACTION varAction, int varSetting)
         : DRAW(ACTION::CIRCLE, static_cast<int>(varSetting)) {}
     Command::DRAW::DRAW(POINT varSetting)
         : DRAW(ACTION::POINT, static_cast<int>(varSetting)) {}
+    Command::DRAW::DRAW(FILL varSetting)
+        : DRAW(ACTION::FILL, static_cast<int>(varSetting)) {}
 
 
 Command::META::META(ACTION varAction, int varSetting)

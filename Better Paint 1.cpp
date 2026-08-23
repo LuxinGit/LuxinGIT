@@ -26,12 +26,9 @@ TO DO:
 
 int main()
 {
-
-    // DEFINES
-    int width = 800, height = 600;
     bool running = true;
 
-    Master_Handler MasterHandler(width, height);
+    Master_Handler MasterHandler(DEFAULT_CANVAS_WIDTH, DEFAULT_CANVAS_HEIGHT);
 
     while (running) {
 

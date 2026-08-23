@@ -25,6 +25,8 @@ struct Draw_Handler {
     void drawLine(std::pair<int, int> origin, std::pair<int, int> destination, const bool useP);
     void drawCircle(const std::pair<float, float>& c, int radius, const bool fill = false, const bool useP = false);
 
+    void fill(const std::pair<int, int>& origin, const std::array<uint8_t, 4>& nColour);
+
     static std::array<uint8_t, 4> getRandomColour();
 
     void processDrawPointCommand(const Command& command);
@@ -34,6 +36,7 @@ struct Draw_Handler {
     void processRainbowModeCommand(const Command& command);
     void processChangePenWidthCommand(const Command& command);
 
+    void processFillCommand(const Command& command);
     void processDrawCommand(const Command& command);
 
 };

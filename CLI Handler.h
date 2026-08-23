@@ -23,6 +23,7 @@ private:
 
     { "circle",          COMMAND::DRAW_CIRCLE },
     { "rainbow_circle",  COMMAND::DRAW_CIRCLE_RAINBOW },
+    { "fill",            COMMAND::DRAW_FILL_PAYLOAD },
 
     { "default_colour",  COMMAND::COLOUR_RESET },
     { "random_colour",   COMMAND::COLOUR_RANDOM },

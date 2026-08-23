@@ -3,7 +3,9 @@
 #include "Cursor Handler.h"
 #include "Canvas Handler.h"
 
-Cursor_Handler::Cursor_Handler(Canvas_Handler& varCanvH) : CanvasHandler(varCanvH) {}
+Cursor_Handler::Cursor_Handler(Canvas_Handler& varCanvH) : CanvasHandler(varCanvH) {
+    if (ENABLE_MOUSE) penDown = false;
+}
 
 void Cursor_Handler::resetPoint(float& f, const int& width) {
     f = std::clamp(f, 0.0f, static_cast<float>(width - 1));

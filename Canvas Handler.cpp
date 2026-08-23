@@ -36,9 +36,9 @@ std::pair<float, float> Canvas_Handler::addCoords(const std::pair<float, float>&
     return { c1.first + c2.first, c1.second + c2.second };
 }
 
-luxel* Canvas_Handler::retrieveLuxelFromIndex(const size_t& index) { return &canvas[index]; }
-luxel* Canvas_Handler::retrieveLuxelFromPoint(const std::pair<float, float>& c, bool coordCheck) { return &canvas[indexFromCoord(c)]; }
-luxel* Canvas_Handler::retrieveLuxelFromPoint(const std::pair<float, float>& c) { return (coordCheck(c) ? retrieveLuxelFromPoint(c, true) : nullptr); }
+luxel* Canvas_Handler::getLuxelFromIndex(const size_t& index) { return &canvas[index]; }
+luxel* Canvas_Handler::getLuxelFromCoord(const std::pair<float, float>& c, bool coordCheck) { return &canvas[indexFromCoord(c)]; }
+luxel* Canvas_Handler::getLuxelFromCoord(const std::pair<float, float>& c) { return (coordCheck(c) ? getLuxelFromCoord(c, true) : nullptr); }
 
 void Canvas_Handler::processMetaCommand(const Command& command) {
     using Action = Command::META::ACTION;

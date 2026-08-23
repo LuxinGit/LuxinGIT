@@ -24,6 +24,7 @@ void Mouse_Handler::harvestMouseState() {
 Mouse_Handler::Mouse_Handler(std::pair<float, float>& cursor, Command_Handler& varCommH)
     : x(cursor.first), y(cursor.second), CommandHandler(varCommH) {
     if (enable_mouse) SDL_HideCursor();
+    
 }
 
 void Mouse_Handler::processMouseAppCommand() {
