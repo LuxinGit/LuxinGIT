@@ -69,7 +69,7 @@ void Canvas_Handler::processMetaCommand(const Command& command) {
             DrawHandler.processChangePenWidthCommand(command);
             break;
         case Action::PEN_DOWN:
-            CursorHandler.penDown = !CursorHandler.penDown;
+            CursorHandler.processChangePenDownCommand(command);
             break;
         case Action::SAVE_ORIGIN:
             CursorHandler.origin = CursorHandler.cursor;

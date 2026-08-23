@@ -209,6 +209,7 @@ enum class COMMAND {
     DRAWSTEP_SET,
 
     PEN_DOWN,
+    PEN_HELD_DOWN,
     PEN_WIDTH_DECREASE,
     PEN_WIDTH_INCREASE,
     PEN_SET,
@@ -248,6 +249,7 @@ inline static const std::unordered_map<COMMAND, Command> commandMapping = {
 
 
     { COMMAND::PEN_DOWN,            Command{Command::META::PEN_DOWN::DISCRETE, false} },
+    { COMMAND::PEN_HELD_DOWN,       Command{Command::META::PEN_DOWN::CONTINUOUS, true} },
     { COMMAND::PEN_WIDTH_DECREASE,  Command{Command::META::CHANGE_PEN_WIDTH::ADD_PAYLOAD, false, -1} },
     { COMMAND::PEN_WIDTH_INCREASE,  Command{Command::META::CHANGE_PEN_WIDTH::ADD_PAYLOAD, false, 1} },
     { COMMAND::PEN_SET,             Command{Command::META::CHANGE_PEN_WIDTH::SET_TO_PAYLOAD, false, 1} },
@@ -256,8 +258,8 @@ inline static const std::unordered_map<COMMAND, Command> commandMapping = {
     { COMMAND::RESET_CURSOR,        Command{Command::META::RESET::RESET_CURSOR, false} },
     { COMMAND::MOVE_SAVE_ORIGIN,    Command{Command::META::SAVE_ORIGIN::NORMAL, false} },
 
-    { COMMAND::INPUT_CLI_ENABLE,            Command{Command::APP::INPUT_MODE::CLI, false} },
-    { COMMAND::INPUT_MOUSE_ENABLE,            Command{Command::APP::INPUT_MODE::MOUSE, false} },
+    { COMMAND::INPUT_CLI_ENABLE,    Command{Command::APP::INPUT_MODE::CLI, false} },
+    { COMMAND::INPUT_MOUSE_ENABLE,  Command{Command::APP::INPUT_MODE::MOUSE, false} },
 
 };
 

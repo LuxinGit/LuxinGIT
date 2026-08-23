@@ -7,7 +7,7 @@
 #include <vector>
 
 std::unordered_map<SDL_MouseButtonFlags, COMMAND> mouseBindings = {
-    { SDL_BUTTON_LMASK, COMMAND::PEN_DOWN }
+    { SDL_BUTTON_LMASK, COMMAND::PEN_HELD_DOWN }
 };
 
 void Mouse_Handler::harvestMouseState() {
@@ -22,7 +22,9 @@ void Mouse_Handler::harvestMouseState() {
 }
 
 Mouse_Handler::Mouse_Handler(std::pair<float, float>& cursor, Command_Handler& varCommH)
-    : x(cursor.first), y(cursor.second), CommandHandler(varCommH) {}
+    : x(cursor.first), y(cursor.second), CommandHandler(varCommH) {
+    if (enable_mouse) SDL_HideCursor();
+}
 
 void Mouse_Handler::processMouseAppCommand() {
 

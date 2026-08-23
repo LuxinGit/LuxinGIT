@@ -10,7 +10,6 @@ Master_Handler::Master_Handler(int varwidth, int varheight) :
     CLIHandler(*this) 
 {
     if (ENABLE_CLI) CLIHandler.beginCLILoop();
-    if (ENABLE_MOUSE) SDL_HideCursor();
 };
 
 

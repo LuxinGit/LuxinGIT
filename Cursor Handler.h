@@ -16,6 +16,7 @@ struct Cursor_Handler {
     std::pair<float, float> deltaCursor =       DEFAULT_CURSOR_POINT;
     int                     drawStep =          DEFAULT_DRAWSTEP;
     bool penDown = true;
+    bool penContinuous = false;
     bool enableCrosshair = true;
     int crosshairRadius =                       DEFAULT_CROSSHAIR_RADIUS;
     size_t pixelsDrawn = 0;
@@ -25,6 +26,7 @@ struct Cursor_Handler {
 
     void refreshCursor();
 
+    void processChangePenDownCommand(const Command& command);
     void processChangeDrawstepCommand(const Command& command);
     void processDirectionCommand(const Command& command);
     void processSetCommand(const Command& command);

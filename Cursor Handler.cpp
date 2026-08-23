@@ -17,9 +17,24 @@ void Cursor_Handler::resetCursors() {
 
 void Cursor_Handler::refreshCursor() {
     if (penDown) CanvasHandler.DrawHandler.drawLine(cursor, deltaCursor, true);
+    if (penContinuous) {
+        penContinuous = false; penDown = false;
+    }
     resetCursors();
 }
 
+void Cursor_Handler::processChangePenDownCommand(const Command& command) {
+    using Setting = Command::META::PEN_DOWN;
+    switch (static_cast<Setting>(command.setting)) {
+    case (Setting::CONTINUOUS):
+        penContinuous = true;
+        penDown = true;
+        break;
+    case (Setting::DISCRETE):
+        penDown = !penDown;
+        break;
+    }
+}
 void Cursor_Handler::processChangeDrawstepCommand(const Command& command) {
     using setting = Command::META::CHANGE_DRAWSTEP;
     switch (static_cast<setting>(command.setting)) {
