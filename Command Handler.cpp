@@ -6,6 +6,7 @@ void Command_Handler::addCommand(Command command) {
 }
 void Command_Handler::constructCommand(COMMAND_ID command, Command::Payload payload) {
     Command_Definition result = *COMMAND_ID_DEF_MAP[command];
+    result.command.payload = payload;
     addCommand(result.command);
 }
 

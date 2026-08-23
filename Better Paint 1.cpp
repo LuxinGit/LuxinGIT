@@ -44,7 +44,6 @@ int main()
 
     }
 
-    // Clean up
     MasterHandler.cleanup();
     return 0;
 }
