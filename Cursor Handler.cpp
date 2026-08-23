@@ -25,63 +25,90 @@ void Cursor_Handler::refreshCursor() {
     resetCursors();
 }
 
-void Cursor_Handler::processChangePenDownCommand(const Command& command) {
-    using Setting = Command::META::PEN_DOWN;
-    switch (static_cast<Setting>(command.setting)) {
-    case (Setting::CONTINUOUS):
-        penContinuous = true;
-        penDown = true;
+void Cursor_Handler::processCommand(const Command& command) {
+    switch (command.type) {
+    case Command::TYPE::META:
+        processMetaCommand(command);
         break;
-    case (Setting::DISCRETE):
-        penDown = !penDown;
+    case Command::TYPE::MOVE:
+        processMoveCommand(command);
         break;
     }
 }
-void Cursor_Handler::processChangeDrawstepCommand(const Command& command) {
-    using setting = Command::META::CHANGE_DRAWSTEP;
-    switch (static_cast<setting>(command.setting)) {
-    case setting::ADD_PAYLOAD:
-        drawStep = std::clamp(drawStep + std::get<int>(command.payload), 1, 50);
-        break;
-    case setting::SET_TO_PAYLOAD:
-        drawStep = std::clamp(std::get<int>(command.payload), 1, 50);
-        break;
-    }
 
-}
-void Cursor_Handler::processDirectionCommand(const Command& command) {
-    switch (static_cast<Command::MOVE::DIRECTION>(command.setting)) {
-    case Command::MOVE::DIRECTION::UP:
-        deltaCursor.second -= drawStep;
-        break;
-    case  Command::MOVE::DIRECTION::RIGHT:
-        deltaCursor.first += drawStep;
-        break;
-    case  Command::MOVE::DIRECTION::DOWN:
-        deltaCursor.second += drawStep;
-        break;
-    case  Command::MOVE::DIRECTION::LEFT:
-        deltaCursor.first -= drawStep;
-        break;
+    void Cursor_Handler::processMetaCommand(const Command& command) {
+        using Action = Command::META::ACTION;
+        switch (static_cast<Action>(command.action)) {
+        case Action::CHANGE_DRAWSTEP:
+            processChangeDrawstepCommand(command);
+            break;
+        case Action::PEN_DOWN:
+            processChangePenDownCommand(command);
+            break;
+        case Action::SAVE_ORIGIN:
+            origin = cursor;
+            break;
+        }
     }
-}
-void Cursor_Handler::processSetCommand(const Command& command) {
-    switch (static_cast<Command::MOVE::SET>(command.setting)) {
-    case Command::MOVE::SET::RESET_TO_ORIGIN:
-        deltaCursor = origin;
-        break;
-    case Command::MOVE::SET::USE_PAYLOAD:
-        deltaCursor = std::get<std::pair<float, float>>(command.payload);
-        break;
+        void Cursor_Handler::processChangeDrawstepCommand(const Command& command) {
+            using setting = Command::META::CHANGE_DRAWSTEP;
+            switch (static_cast<setting>(command.setting)) {
+            case setting::ADD_PAYLOAD:
+                drawStep = std::clamp(drawStep + std::get<int>(command.payload), 1, 50);
+                break;
+            case setting::SET_TO_PAYLOAD:
+                drawStep = std::clamp(std::get<int>(command.payload), 1, 50);
+                break;
+            }
+
+        }
+        void Cursor_Handler::processChangePenDownCommand(const Command& command) {
+            using Setting = Command::META::PEN_DOWN;
+            switch (static_cast<Setting>(command.setting)) {
+            case (Setting::CONTINUOUS):
+                penContinuous = true;
+                penDown = true;
+                break;
+            case (Setting::DISCRETE):
+                penDown = !penDown;
+                break;
+            }
+        }
+
+    void Cursor_Handler::processMoveCommand(const Command& command) {
+        switch (static_cast<Command::MOVE::ACTION>(command.action)) {
+        case Command::MOVE::ACTION::DIRECTION:
+            processDirectionCommand(command);
+            break;
+        case Command::MOVE::ACTION::SET:
+            processSetCommand(command);
+            break;
+        }
     }
-}
-void Cursor_Handler::processMoveCommand(const Command& command) {
-    switch (static_cast<Command::MOVE::ACTION>(command.action)) {
-    case Command::MOVE::ACTION::DIRECTION:
-        processDirectionCommand(command);
-        break;
-    case Command::MOVE::ACTION::SET:
-        processSetCommand(command);
-        break;
-    }
-}
+        void Cursor_Handler::processDirectionCommand(const Command& command) {
+            switch (static_cast<Command::MOVE::DIRECTION>(command.setting)) {
+            case Command::MOVE::DIRECTION::UP:
+                deltaCursor.second -= drawStep;
+                break;
+            case  Command::MOVE::DIRECTION::RIGHT:
+                deltaCursor.first += drawStep;
+                break;
+            case  Command::MOVE::DIRECTION::DOWN:
+                deltaCursor.second += drawStep;
+                break;
+            case  Command::MOVE::DIRECTION::LEFT:
+                deltaCursor.first -= drawStep;
+                break;
+            }
+        }
+        void Cursor_Handler::processSetCommand(const Command& command) {
+            switch (static_cast<Command::MOVE::SET>(command.setting)) {
+            case Command::MOVE::SET::RESET_TO_ORIGIN:
+                deltaCursor = origin;
+                break;
+            case Command::MOVE::SET::USE_PAYLOAD:
+                deltaCursor = std::get<std::pair<float, float>>(command.payload);
+                break;
+            }
+        }
+

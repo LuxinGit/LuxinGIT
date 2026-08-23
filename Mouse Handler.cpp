@@ -1,14 +1,9 @@
 #include "Mouse Handler.h"
-#include "SDL3/SDL.h"
-#include "Command.h"
 #include "Command Handler.h"
 
-#include <unordered_map>
 #include <vector>
 
-std::unordered_map<SDL_MouseButtonFlags, COMMAND> mouseBindings = {
-    { SDL_BUTTON_LMASK, COMMAND::PEN_HELD_DOWN }
-};
+
 
 void Mouse_Handler::harvestMouseState() {
 
@@ -27,11 +22,31 @@ Mouse_Handler::Mouse_Handler(std::pair<float, float>& cursor, Command_Handler& v
     
 }
 
-void Mouse_Handler::processMouseAppCommand() {
 
-    enable_mouse = !enable_mouse;
 
-    if (enable_mouse) SDL_HideCursor();
-    else SDL_ShowCursor();
-
+void Mouse_Handler::processCommand(const Command& command) {
+    switch (command.type) {
+    case Command::TYPE::APP:
+        processAppCommand(command);
+        break;
+    }
 }
+
+    void Mouse_Handler::processAppCommand(const Command& command) {
+
+        using action = Command::APP::ACTION;
+        switch (static_cast<action>(command.action)) {
+        case (action::INPUT_MODE):
+            switch (static_cast<Command::APP::INPUT_MODE>(command.setting)) {
+            case (Command::APP::INPUT_MODE::MOUSE):
+                processMouseCommand(command);
+                break;
+            }
+        }
+    }
+        void Mouse_Handler::processMouseCommand(const Command& command) {
+            enable_mouse = !enable_mouse;
+
+            if (enable_mouse) SDL_HideCursor();
+            else SDL_ShowCursor();
+        }

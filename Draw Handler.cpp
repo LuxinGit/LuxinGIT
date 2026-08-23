@@ -126,92 +126,76 @@ std::array<uint8_t, 4> Draw_Handler::getRandomColour() {
     return { static_cast<uint8_t>(rand() % 256),static_cast<uint8_t>(rand() % 256),static_cast<uint8_t>(rand() % 256), 255 };
 }
 
-void Draw_Handler::processDrawPointCommand(const Command& command) {
-    using Setting = Command::DRAW::POINT;
-    switch (static_cast<Setting>(command.setting)) {
-    case Setting::USE_CURSOR:
-        drawPoint(CanvasHandler.CursorHandler.cursor, true);
+
+void Draw_Handler::processCommand(const Command& command) {
+    switch (command.type) {
+    case Command::TYPE::META:
+        processMetaCommand(command);
         break;
-    case Setting::USE_PAYLOAD:
-        drawPoint(std::get<std::pair<float, float>>(command.payload), true);
+    case Command::TYPE::DRAW:
+        processDrawCommand(command);
         break;
     }
 }
-void Draw_Handler::processDrawLineCommand(const Command::DRAW::LINE& setting) {
-    // fizzbuzz
-}
-void Draw_Handler::processDrawCircleCommand(const Command& command) {
-    auto setting = static_cast<Command::DRAW::CIRCLE>(command.setting);
 
-    int radius = std::holds_alternative<int>(command.payload)
-        ? std::get<int>(command.payload)
-        : CanvasHandler.CursorHandler.drawStep;
-
-    if (setting == Command::DRAW::CIRCLE::RAINBOW) {
-        for (int i = 1; i <= radius; i++) {
-            colour = getRandomColour();
-            drawCircle(CanvasHandler.CursorHandler.cursor, i, false, true);
+    void Draw_Handler::processMetaCommand(const Command& command) {
+        using Action = Command::META::ACTION;
+        switch (static_cast<Action>(command.action)) {
+        case Action::CHANGE_COLOUR:
+            processChangeColourCommand(command);
+            break;
+        case Action::ENABLE_RAINBOW:
+            processRainbowModeCommand(command);
+            break;
+        case Action::CHANGE_PEN_WIDTH:
+            processChangePenWidthCommand(command);
+            break;
         }
-        colour = { 200, 200, 200, 255 };
-        return;
-    }
-    else drawCircle(CanvasHandler.CursorHandler.cursor, radius, false, true);
-}
-void Draw_Handler::processChangeColourCommand(const Command& command) {
-    switch (static_cast<Command::META::CHANGE_COLOUR>(command.setting)) {
-    case Command::META::CHANGE_COLOUR::DEFAULT:
-        colour = { 200, 200, 200, 255 };
-        break;
-    case Command::META::CHANGE_COLOUR::USE_PAYLOAD:
-        colour = std::get<std::array<uint8_t, 4>>(command.payload);
-        break;
-    case Command::META::CHANGE_COLOUR::RANDOM:
-        colour = getRandomColour();
-        break;
-    }
-}
-void Draw_Handler::processRainbowModeCommand(const Command& command) {
-    using setting = Command::META::ENABLE_RAINBOW;
-    switch (static_cast<setting>(command.setting)) {
-    case setting::USE_PAYLOAD:
-    {
-        int candidate = std::get<int>(command.payload);
-        if (candidate != pixelsToRainbow) pixelsToRainbow = candidate;
-        else rainbowMode = !rainbowMode;
-        break; // scoping candidate to allow us to declare in this case branch without affecting other
-    }
-    case setting::DEFAULT:
-        rainbowMode = !rainbowMode;
-        break;
-    }
-}
-void Draw_Handler::processChangePenWidthCommand(const Command& command) {
-    
-    using Setting = Command::META::CHANGE_PEN_WIDTH;
+    };
+        void Draw_Handler::processChangeColourCommand(const Command& command) {
+            switch (static_cast<Command::META::CHANGE_COLOUR>(command.setting)) {
+            case Command::META::CHANGE_COLOUR::DEFAULT:
+                colour = { 200, 200, 200, 255 };
+                break;
+            case Command::META::CHANGE_COLOUR::USE_PAYLOAD:
+                colour = std::get<std::array<uint8_t, 4>>(command.payload);
+                break;
+            case Command::META::CHANGE_COLOUR::RANDOM:
+                colour = getRandomColour();
+                break;
+            }
+        }
+        void Draw_Handler::processRainbowModeCommand(const Command& command) {
+            using setting = Command::META::ENABLE_RAINBOW;
+            switch (static_cast<setting>(command.setting)) {
+            case setting::USE_PAYLOAD:
+            {
+                int candidate = std::get<int>(command.payload);
+                if (candidate != pixelsToRainbow) pixelsToRainbow = candidate;
+                else rainbowMode = !rainbowMode;
+                break; // scoping candidate to allow us to declare in this case branch without affecting other
+            }
+            case setting::DEFAULT:
+                rainbowMode = !rainbowMode;
+                break;
+            }
+        }
+        void Draw_Handler::processChangePenWidthCommand(const Command& command) {
 
-    switch (static_cast<Setting>(command.setting)) {
-        case (Setting::ADD_PAYLOAD):
-            pen = std::clamp(pen + std::get<int>(command.payload), 1, 50);
-            break;
-        case (Setting::SET_TO_PAYLOAD):
-            pen = std::clamp(std::get<int>(command.payload), 1, 50);
-            break;
-    }
+            using Setting = Command::META::CHANGE_PEN_WIDTH;
 
-}
+            switch (static_cast<Setting>(command.setting)) {
+            case (Setting::ADD_PAYLOAD):
+                pen = std::clamp(pen + std::get<int>(command.payload), 1, 50);
+                break;
+            case (Setting::SET_TO_PAYLOAD):
+                pen = std::clamp(std::get<int>(command.payload), 1, 50);
+                break;
+            }
 
-void Draw_Handler::processFillCommand(const Command& command) {
-    using Setting = Command::DRAW::FILL;
-    switch (static_cast<Setting>(command.setting)) {
-    case Setting::USE_PAYLOAD:
-        fill(CanvasHandler.CursorHandler.cursor, std::get<std::array<uint8_t,4>>(command.payload));
-        break;
-    case Setting::USE_DRAW_COLOUR:
-        fill(CanvasHandler.CursorHandler.cursor, colour);
-        break;
-    }
-}
-void Draw_Handler::processDrawCommand(const Command& command) {
+        }
+
+    void Draw_Handler::processDrawCommand(const Command& command) {
     using Action = Command::DRAW::ACTION;
     switch (static_cast<Action>(command.action)) {
     case Action::LINE:
@@ -229,6 +213,49 @@ void Draw_Handler::processDrawCommand(const Command& command) {
     }
 
 };
+        void Draw_Handler::processDrawPointCommand(const Command& command) {
+            using Setting = Command::DRAW::POINT;
+            switch (static_cast<Setting>(command.setting)) {
+            case Setting::USE_CURSOR:
+                drawPoint(CanvasHandler.CursorHandler.cursor, true);
+                break;
+            case Setting::USE_PAYLOAD:
+                drawPoint(std::get<std::pair<float, float>>(command.payload), true);
+                break;
+            }
+        }
+        void Draw_Handler::processDrawLineCommand(const Command::DRAW::LINE& setting) {
+            // fizzbuzz
+        }
+        void Draw_Handler::processDrawCircleCommand(const Command& command) {
+            auto setting = static_cast<Command::DRAW::CIRCLE>(command.setting);
+
+            int radius = std::holds_alternative<int>(command.payload)
+                ? std::get<int>(command.payload)
+                : CanvasHandler.CursorHandler.drawStep;
+
+            if (setting == Command::DRAW::CIRCLE::RAINBOW) {
+                for (int i = 1; i <= radius; i++) {
+                    colour = getRandomColour();
+                    drawCircle(CanvasHandler.CursorHandler.cursor, i, false, true);
+                }
+                colour = { 200, 200, 200, 255 };
+                return;
+            }
+            else drawCircle(CanvasHandler.CursorHandler.cursor, radius, false, true);
+        }
+        void Draw_Handler::processFillCommand(const Command& command) {
+            using Setting = Command::DRAW::FILL;
+            switch (static_cast<Setting>(command.setting)) {
+            case Setting::USE_PAYLOAD:
+                fill(CanvasHandler.CursorHandler.cursor, std::get<std::array<uint8_t, 4>>(command.payload));
+                break;
+            case Setting::USE_DRAW_COLOUR:
+                fill(CanvasHandler.CursorHandler.cursor, colour);
+                break;
+            }
+        }
+
 
 
 Draw_Handler::Draw_Handler(Canvas_Handler& CanvH) : CanvasHandler(CanvH) {}

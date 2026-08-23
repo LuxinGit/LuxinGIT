@@ -5,10 +5,10 @@
 
 void Keyboard_Handler::harvestKeyboardState() {
     const bool* keyboardState = SDL_GetKeyboardState(nullptr);
-    for (const auto& [scancode, binding] : keyMapping) {
-        Command comm = commandMapping.at(binding);
+    for (const auto& [scancode, id] : keyBindings) {
         if (keyboardState[scancode] &&
-            (comm.repeatable || !previousKeyboardState[scancode])) CommandHandler.addCommand(comm); // NOT USING CONSTRUCTCOMMAND AS KEYBOARD INPUTS CARRY NO ADDITIONAL DATA
+            (COMMAND_ID_DEF_MAP.at(id)->command.repeatable || !previousKeyboardState[scancode])) 
+            CommandHandler.constructCommand(id); 
 
         previousKeyboardState[scancode] = keyboardState[scancode];
     }

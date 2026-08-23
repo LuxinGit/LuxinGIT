@@ -4,16 +4,48 @@
 #include <unordered_map>
 #include <array>
 
-Command::Command(Command::TYPE vartype, int varaction, int varsetting, bool varRepeatable, Command::Payload varPayload) :
-    type(vartype), action(varaction), setting(varsetting), repeatable(varRepeatable), payload(varPayload) {} //cpp
-    Command::Command(MOVE cmd, bool repeatable, Payload payload)
-        : Command(TYPE::MOVE, static_cast<int>(cmd.action), static_cast<int>(cmd.setting), repeatable, payload) {}
-    Command::Command(DRAW cmd, bool repeatable, Payload payload)
-        : Command(TYPE::DRAW, static_cast<int>(cmd.action), static_cast<int>(cmd.setting), repeatable, payload) {}
-    Command::Command(META cmd, bool repeatable, Payload payload)
-        : Command(TYPE::META, static_cast<int>(cmd.action), static_cast<int>(cmd.setting), repeatable, payload) {}
-    Command::Command(APP cmd, bool repeatable, Payload payload)
-        : Command(TYPE::APP, static_cast<int>(cmd.action), static_cast<int>(cmd.setting), repeatable, payload) {}
+Command::Command(COMMAND_ID varID, Command::TYPE vartype, int varaction, int varsetting, bool varRepeatable, Command::Payload varPayload) :
+    type(vartype), action(varaction), setting(varsetting), repeatable(varRepeatable), ID(varID), payload(varPayload) {} //cpp
+    Command::Command(COMMAND_ID varID, MOVE cmd, bool repeatable, Payload payload)
+        : Command(
+            varID,
+            TYPE::MOVE,
+            static_cast<int>(cmd.action),
+            static_cast<int>(cmd.setting),
+            repeatable,
+            payload
+        )
+    {}
+    Command::Command(COMMAND_ID varID, DRAW cmd, bool repeatable, Payload payload)
+        : Command(
+            varID,
+            TYPE::DRAW,
+            static_cast<int>(cmd.action),
+            static_cast<int>(cmd.setting),
+            repeatable,
+            payload
+        )
+    {}
+    Command::Command(COMMAND_ID varID, META cmd, bool repeatable, Payload payload)
+        : Command(
+            varID,
+            TYPE::META,
+            static_cast<int>(cmd.action),
+            static_cast<int>(cmd.setting),
+            repeatable,
+            payload
+        )
+    {}
+    Command::Command(COMMAND_ID varID, APP cmd, bool repeatable, Payload payload)
+        : Command(
+            varID,
+            TYPE::APP,
+            static_cast<int>(cmd.action),
+            static_cast<int>(cmd.setting),
+            repeatable,
+            payload
+        )
+    {}
 
 
 Command::MOVE::MOVE(ACTION varAction, int varSetting) : action(varAction), setting(varSetting) {}

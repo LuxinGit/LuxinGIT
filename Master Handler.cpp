@@ -9,6 +9,7 @@ Master_Handler::Master_Handler(int varwidth, int varheight) :
     SDLHandler(CanvasHandler),
     CLIHandler(*this) 
 {
+    initialiseBindings();
     if (ENABLE_CLI) CLIHandler.beginCLILoop();
 };
 
@@ -22,4 +23,21 @@ void Master_Handler::processCommands() {
 
 void Master_Handler::cleanup() const {
     SDLHandler.cleanup();
+}
+
+void Master_Handler::initialiseBindings() {
+    for (const auto& def : COMMAND_REPO) {
+
+        const COMMAND_ID ID = def.command.ID;
+        COMMAND_ID_DEF_MAP.emplace(ID, &def);
+
+        if (def.keyBinding)
+            KeyboardHandler.keyBindings.emplace(*def.keyBinding, ID);
+
+        if (def.mouseBinding)
+            MouseHandler.mouseBindings.emplace(*def.mouseBinding, ID);
+
+        if (def.cliBinding)
+            CLIHandler.stringMapping.emplace(*def.cliBinding, ID);
+    }
 }

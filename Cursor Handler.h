@@ -23,14 +23,16 @@ struct Cursor_Handler {
 
     static void resetPoint(float& f, const int& width);
     void resetCursors();
-
     void refreshCursor();
 
-    void processChangePenDownCommand(const Command& command);
-    void processChangeDrawstepCommand(const Command& command);
-    void processDirectionCommand(const Command& command);
-    void processSetCommand(const Command& command);
-    void processMoveCommand(const Command& command);
+    void processCommand(const Command& command);
+        
+    private:
+        void processMetaCommand(const Command& command);
+            void processChangePenDownCommand(const Command& command);
+            void processChangeDrawstepCommand(const Command& command);
 
-
+        void processMoveCommand(const Command& command);
+            void processDirectionCommand(const Command& command);
+            void processSetCommand(const Command& command);
 };

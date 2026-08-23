@@ -89,7 +89,7 @@ void CLI_Handler::createCommand() {
 
     // NO INPUT CHECKS.  WE DIE LIKE REAL MEN.
 
-    COMMAND command = COMMAND::INVALID;
+    COMMAND_ID command = COMMAND_ID::INVALID;
 
     std::string commandName = harvestInput("Please enter the name of the command: ");
     if (stringMapping.contains(commandName)) command = stringMapping.at(commandName);
@@ -116,7 +116,7 @@ Options:
             createCommand();
             break;
         case 2:
-            if (harvestInput("Reset Cursor after execution? [Y]") == "Y") MasterHandler.CommandHandler.constructCommand(COMMAND::RESET_CURSOR);
+            if (harvestInput("Reset Cursor after execution? [Y]") == "Y") MasterHandler.CommandHandler.constructCommand(COMMAND_ID::RESET_CURSOR);
             MasterHandler.CommandHandler.processCommands();
             break;
         case 3:
@@ -133,4 +133,29 @@ void CLI_Handler::beginCLILoop() {
     CLI_Loop();
 }
 
+void CLI_Handler::processCommand(const Command& command) {
+    switch (command.type) {
+    case Command::TYPE::APP:
+        processAppCommand(command);
+        break;
+    }
+}
+
+    void CLI_Handler::processAppCommand(const Command& command) {
+
+        using action = Command::APP::ACTION;
+        switch (static_cast<action>(command.action)) {
+        case (action::INPUT_MODE):
+            switch (static_cast<Command::APP::INPUT_MODE>(command.setting)) {
+            case (Command::APP::INPUT_MODE::CLI):
+                processCLICommand(command);
+                break;
+            }
+        }
+    }
+        void CLI_Handler::processCLICommand(const Command& command) {
+            beginCLILoop();
+        }
+
 CLI_Handler::  CLI_Handler(Master_Handler& mastH) : MasterHandler(mastH) {}
+

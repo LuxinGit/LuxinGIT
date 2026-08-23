@@ -1,7 +1,11 @@
 #pragma once
 
 #include <utility>
+#include <unordered_map>
+#include <SDL3/SDL.h>
+
 #include "CONSTANTS.h"
+#include "Command.h"
 
 struct Command_Handler;
 
@@ -16,9 +20,16 @@ private:
 
 public:
 
+	std::unordered_map<SDL_MouseButtonFlags, COMMAND_ID> mouseBindings{};
+
 	void harvestMouseState();
-	void processMouseAppCommand();
 
 	Mouse_Handler(std::pair<float, float>& cursor, Command_Handler& varCommH);
+
+
+	void processCommand(const Command& command);
 	
+	private:
+		void processAppCommand(const Command& command);
+			void processMouseCommand(const Command& command);
 };

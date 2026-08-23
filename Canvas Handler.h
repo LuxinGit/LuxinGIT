@@ -41,7 +41,10 @@ struct Canvas_Handler {
 
     Canvas_Handler(int& varwidth, int& varheight);
 
-    void processMetaCommand(const Command& command);
-    void processMoveCommand(const Command& command);
+    void processCommand(const Command& command);
+
+private:
+        void processMetaCommand(const Command& command);
+            void processResetCommand(const Command& command);
 
 };

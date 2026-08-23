@@ -13,6 +13,8 @@ private:
 
     int width; int height;
 
+    void initialiseBindings();
+
 public:
 
     Canvas_Handler CanvasHandler;

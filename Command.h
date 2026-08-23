@@ -3,8 +3,54 @@
 #include <variant>
 #include <unordered_map>
 #include <array>
+#include <optional>
+#include <string>
+
+#include <SDL3/SDL.h>
 
 #include "CONSTANTS.h"
+
+enum class COMMAND_ID {
+    MOVE_UP,
+    MOVE_DOWN,
+    MOVE_LEFT,
+    MOVE_RIGHT,
+    MOVE_RESET,
+    MOVE_SET_POINT,
+    MOVE_SAVE_ORIGIN,
+
+    DRAW_CIRCLE,
+    DRAW_CIRCLE_RAINBOW,
+    DRAW_POINT,
+
+    DRAW_FILL_PAYLOAD,
+    DRAW_FILL_DRAWCOLOUR,
+
+    COLOUR_RESET,
+    COLOUR_RANDOM,
+    COLOUR_SET,
+
+    RAINBOW_DEFAULT,
+    RAINBOW_SET,
+
+    DRAWSTEP_DECREASE,
+    DRAWSTEP_INCREASE,
+    DRAWSTEP_SET,
+
+    PEN_DOWN,
+    PEN_HELD_DOWN,
+    PEN_WIDTH_DECREASE,
+    PEN_WIDTH_INCREASE,
+    PEN_SET,
+
+    INPUT_CLI_ENABLE,
+    INPUT_MOUSE_ENABLE,
+
+    RESET_CANVAS,
+    RESET_CURSOR,
+
+    INVALID
+};
 
 struct Command {
 
@@ -174,14 +220,14 @@ public:
 
 private:
 
-    Command(TYPE vartype, int varaction, int varsetting, bool varRepeatable, Payload varPayload = {}); 
+    Command(COMMAND_ID varID, TYPE vartype, int varaction, int varsetting, bool varRepeatable, Payload varPayload = {});
 
 public:
 
-    Command(MOVE cmd, bool repeatable, Payload payload = {});
-    Command(DRAW cmd, bool repeatable, Payload payload = {});
-    Command(META cmd, bool repeatable, Payload payload = {});
-    Command(APP cmd, bool repeatable, Payload payload = {});
+    Command(COMMAND_ID varID, MOVE cmd, bool repeatable, Payload payload = {});
+    Command(COMMAND_ID varID, DRAW cmd, bool repeatable, Payload payload = {});
+    Command(COMMAND_ID varID, META cmd, bool repeatable, Payload payload = {});
+    Command(COMMAND_ID varID, APP cmd, bool repeatable, Payload payload = {});
 
     TYPE type;
     int action; // differentiates between commands.
@@ -189,89 +235,279 @@ public:
     bool repeatable;
     Payload payload;
 
+    COMMAND_ID ID;
+
 };
 
-enum class COMMAND {
-    MOVE_UP,
-    MOVE_DOWN,
-    MOVE_LEFT,
-    MOVE_RIGHT,
-    MOVE_RESET,
-    MOVE_SET_POINT,
-    MOVE_SAVE_ORIGIN,
+enum class COMMAND_PROCESSOR_ID {
+    CANVAS_HANDLER,
+    CURSOR_HANDLER,
+    DRAW_HANDLER,
 
-    DRAW_CIRCLE,
-    DRAW_CIRCLE_RAINBOW,
-    DRAW_POINT,
+    CLI_HANDLER,
+    KEYBOARD_HANDLER,
+    MOUSE_HANDLER
+};
+
+struct Command_Definition {
+
+    Command command;
+    COMMAND_PROCESSOR_ID processor;
+
+    std::optional<SDL_Scancode> keyBinding;
+    std::optional<SDL_MouseButtonFlags> mouseBinding;
+    std::optional<std::string_view> cliBinding;
+
+};
+
+inline std::unordered_map<COMMAND_ID, const Command_Definition*> COMMAND_ID_DEF_MAP = {};
+
+inline static const auto COMMAND_REPO = std::to_array<Command_Definition>({
+
+    // MOVEMENT
+    {
+        Command{COMMAND_ID::MOVE_UP, Command::MOVE::DIRECTION::UP, true},
+        COMMAND_PROCESSOR_ID::CURSOR_HANDLER,
+        SDL_SCANCODE_W,
+        std::nullopt,
+        "up"
+    },
+    {
+        Command{COMMAND_ID::MOVE_DOWN, Command::MOVE::DIRECTION::DOWN, true},
+        COMMAND_PROCESSOR_ID::CURSOR_HANDLER,
+        SDL_SCANCODE_S,
+        std::nullopt,
+        "down"
+    },
+    {
+        Command{COMMAND_ID::MOVE_LEFT, Command::MOVE::DIRECTION::LEFT, true},
+        COMMAND_PROCESSOR_ID::CURSOR_HANDLER,
+        SDL_SCANCODE_A,
+        std::nullopt,
+        "left"
+    },
+    {
+        Command{COMMAND_ID::MOVE_RIGHT, Command::MOVE::DIRECTION::RIGHT, true},
+        COMMAND_PROCESSOR_ID::CURSOR_HANDLER,
+        SDL_SCANCODE_D,
+        std::nullopt,
+        "right"
+    },
+    {
+        Command{COMMAND_ID::MOVE_RESET, Command::MOVE::SET::RESET_TO_ORIGIN, false},
+        COMMAND_PROCESSOR_ID::CURSOR_HANDLER,
+        SDL_SCANCODE_Q,
+        std::nullopt,
+        "reset"
+    },
+    {
+        Command{COMMAND_ID::MOVE_SET_POINT, Command::MOVE::SET::USE_PAYLOAD, false, DEFAULT_CURSOR_POINT},
+        COMMAND_PROCESSOR_ID::CURSOR_HANDLER,
+        std::nullopt,
+        std::nullopt,
+        "move"
+    },
+    {
+        Command{COMMAND_ID::MOVE_SAVE_ORIGIN, Command::META::SAVE_ORIGIN::NORMAL, false},
+        COMMAND_PROCESSOR_ID::CURSOR_HANDLER,
+        SDL_SCANCODE_2,
+        std::nullopt,
+        "save_origin"
+    },
+    {
+        Command{COMMAND_ID::DRAW_CIRCLE, Command::DRAW::CIRCLE::NORMAL, false},
+        COMMAND_PROCESSOR_ID::DRAW_HANDLER,
+        SDL_SCANCODE_G,
+        std::nullopt,
+        "circle"
+    },
+    {
+        Command{COMMAND_ID::DRAW_CIRCLE_RAINBOW, Command::DRAW::CIRCLE::RAINBOW, false},
+        COMMAND_PROCESSOR_ID::DRAW_HANDLER,
+        SDL_SCANCODE_L,
+        std::nullopt,
+        "rainbow_circle"
+    },
+    {
+        Command{COMMAND_ID::DRAW_FILL_PAYLOAD, Command::DRAW::FILL::USE_PAYLOAD, false},
+        COMMAND_PROCESSOR_ID::DRAW_HANDLER,
+        std::nullopt,
+        std::nullopt,
+        "fill"
+    },
+    {
+        Command{COMMAND_ID::DRAW_FILL_DRAWCOLOUR, Command::DRAW::FILL::USE_DRAW_COLOUR, false},
+        COMMAND_PROCESSOR_ID::DRAW_HANDLER,
+        SDL_SCANCODE_F,
+        std::nullopt,
+        std::nullopt
+    },
+    {
+        Command{COMMAND_ID::COLOUR_RESET, Command::META::CHANGE_COLOUR::DEFAULT, false},
+        COMMAND_PROCESSOR_ID::CANVAS_HANDLER,
+        std::nullopt,
+        std::nullopt,
+        "default_colour"
+    },
+    {
+        Command{COMMAND_ID::COLOUR_RANDOM, Command::META::CHANGE_COLOUR::RANDOM, false},
+        COMMAND_PROCESSOR_ID::DRAW_HANDLER,
+        SDL_SCANCODE_J,
+        std::nullopt,
+        "random_colour"
+    },
+    {
+        Command{COMMAND_ID::COLOUR_SET, Command::META::CHANGE_COLOUR::USE_PAYLOAD, false, DEFAULT_DRAW_COLOUR},
+        COMMAND_PROCESSOR_ID::DRAW_HANDLER,
+        std::nullopt,
+        std::nullopt,
+        "colour"
+    },
+    {
+        Command{COMMAND_ID::RAINBOW_DEFAULT, Command::META::ENABLE_RAINBOW::DEFAULT, false},
+        COMMAND_PROCESSOR_ID::DRAW_HANDLER,
+        SDL_SCANCODE_E,
+        std::nullopt,
+        std::nullopt
+    },
+    {
+        Command{COMMAND_ID::RAINBOW_SET, Command::META::ENABLE_RAINBOW::USE_PAYLOAD, false, 1000},
+        COMMAND_PROCESSOR_ID::DRAW_HANDLER,
+        std::nullopt,
+        std::nullopt,
+        "rainbow"
+    },
+    {
+        Command{COMMAND_ID::DRAWSTEP_DECREASE, Command::META::CHANGE_DRAWSTEP::ADD_PAYLOAD, false, -1},
+        COMMAND_PROCESSOR_ID::CURSOR_HANDLER,
+        SDL_SCANCODE_Z,
+        std::nullopt,
+        "step_down"
+    },
+    {
+        Command{COMMAND_ID::DRAWSTEP_INCREASE, Command::META::CHANGE_DRAWSTEP::ADD_PAYLOAD, false, 1},
+        COMMAND_PROCESSOR_ID::CURSOR_HANDLER,
+        SDL_SCANCODE_X,
+        std::nullopt,
+        "step_up"
+    },
+    {
+        Command{COMMAND_ID::DRAWSTEP_SET, Command::META::CHANGE_DRAWSTEP::SET_TO_PAYLOAD, false, 1},
+        COMMAND_PROCESSOR_ID::CURSOR_HANDLER,
+        std::nullopt,
+        std::nullopt,
+        "step_set"
+    },
+    {
+        Command{COMMAND_ID::PEN_DOWN, Command::META::PEN_DOWN::DISCRETE, false},
+        COMMAND_PROCESSOR_ID::CURSOR_HANDLER,
+        SDL_SCANCODE_1,
+        std::nullopt,
+        "pen"
+    },
+    {
+        Command{COMMAND_ID::PEN_HELD_DOWN, Command::META::PEN_DOWN::CONTINUOUS, true},
+        COMMAND_PROCESSOR_ID::CURSOR_HANDLER,
+        std::nullopt,
+        SDL_BUTTON_LMASK,
+        std::nullopt
+    },
+    {
+        Command{COMMAND_ID::PEN_WIDTH_DECREASE, Command::META::CHANGE_PEN_WIDTH::ADD_PAYLOAD, false, -1},
+        COMMAND_PROCESSOR_ID::DRAW_HANDLER,
+        SDL_SCANCODE_V,
+        std::nullopt,
+        "pen_thinner"
+    },
+    {
+        Command{COMMAND_ID::PEN_WIDTH_INCREASE, Command::META::CHANGE_PEN_WIDTH::ADD_PAYLOAD, false, 1},
+        COMMAND_PROCESSOR_ID::DRAW_HANDLER,
+        SDL_SCANCODE_B,
+        std::nullopt,
+        "pen_thicker"
+    },
+    {
+        Command{COMMAND_ID::PEN_SET, Command::META::CHANGE_PEN_WIDTH::SET_TO_PAYLOAD, false, 1},
+        COMMAND_PROCESSOR_ID::DRAW_HANDLER,
+        std::nullopt,
+        std::nullopt,
+        "pen_set"
+    },
+    {
+        Command{COMMAND_ID::INPUT_CLI_ENABLE, Command::APP::INPUT_MODE::CLI, false},
+        COMMAND_PROCESSOR_ID::CLI_HANDLER,
+        SDL_SCANCODE_0,
+        std::nullopt,
+        std::nullopt
+    },
+    {
+        Command{COMMAND_ID::INPUT_MOUSE_ENABLE, Command::APP::INPUT_MODE::MOUSE, false},
+        COMMAND_PROCESSOR_ID::MOUSE_HANDLER,
+        SDL_SCANCODE_3,
+        std::nullopt,
+        std::nullopt
+    },
+    {
+        Command{COMMAND_ID::RESET_CANVAS, Command::META::RESET::RESET_CANVAS, false},
+        COMMAND_PROCESSOR_ID::CANVAS_HANDLER,
+        SDL_SCANCODE_C,
+        std::nullopt,
+        "reset_canvas"
+    },
+    {
+        Command{COMMAND_ID::RESET_CURSOR, Command::META::RESET::RESET_CURSOR, false},
+        COMMAND_PROCESSOR_ID::CURSOR_HANDLER,
+        SDL_SCANCODE_9,
+        std::nullopt,
+        "reset_cursor"
+    }
+
+    });
+
+
+/* TO ADD COMMANDS
+* 
+*   1. Create COMMAND_ID. This should describe what the action does.
+*   2. As necessary, create Command logic (e.g Command::Draw::Circle)
+*   3. Add to COMMAND_REPO. Ensure COMMAND_PROCESSOR_ID matches correct processor.
+* 
+*   BELOW ARE SOME TEMPLATES FOR MAKING NEW processCommands.  
+* 
+* 
+* void process__C__Command(const Command& command) {
     
-    DRAW_FILL_PAYLOAD,
-    DRAW_FILL_DRAWCOLOUR,
+    using T = Command::TYPE;
+    
+    switch (command.type) {
+    case T::A:
+        process__A__Command(command);
+        break;
+    }
+    
+}
+void process__T__Command(const Command& command) {
 
-    COLOUR_RESET,
-    COLOUR_RANDOM,
-    COLOUR_SET,
+    using A = Command::T::ACTION;
 
-    RAINBOW_DEFAULT,
-    RAINBOW_SET,
+    switch (static_cast<A>(command.action)) {
+    case (A::INPUT_MODE):
+            process__A__Command(command);
+            break;
+        }
+    }
+void process__A__Command(const Command& command) {
 
-    DRAWSTEP_DECREASE,
-    DRAWSTEP_INCREASE,
-    DRAWSTEP_SET,
+    using S = Command::T::A
 
-    PEN_DOWN,
-    PEN_HELD_DOWN,
-    PEN_WIDTH_DECREASE,
-    PEN_WIDTH_INCREASE,
-    PEN_SET,
-
-    INPUT_CLI_ENABLE,
-    INPUT_MOUSE_ENABLE,
-
-    RESET_CANVAS,
-    RESET_CURSOR,
-
-    INVALID
-};
-
-inline static const std::unordered_map<COMMAND, Command> commandMapping = {
-    // ANY CONSTANTS DEFINED HERE SHOULD USE constructCommand() TO PASS INFORMATION
-    // CONSTANTS DEFINED HERE ARE SET FOR COMMANDS THAT MUST HAVE PAYLOAD INFORMATION TO RUN.
-    { COMMAND::MOVE_UP,             Command{Command::MOVE::DIRECTION::UP, true} },
-    { COMMAND::MOVE_DOWN,           Command{Command::MOVE::DIRECTION::DOWN, true} },
-    { COMMAND::MOVE_LEFT,           Command{Command::MOVE::DIRECTION::LEFT, true} },
-    { COMMAND::MOVE_RIGHT,          Command{Command::MOVE::DIRECTION::RIGHT, true} },
-    { COMMAND::MOVE_RESET,          Command{Command::MOVE::SET::RESET_TO_ORIGIN, false} },
-    { COMMAND::MOVE_SET_POINT,      Command{Command::MOVE::SET::USE_PAYLOAD, false, DEFAULT_CURSOR_POINT} },
-
-    { COMMAND::DRAW_CIRCLE,         Command{Command::DRAW::CIRCLE::NORMAL, false} },
-    { COMMAND::DRAW_CIRCLE_RAINBOW, Command{Command::DRAW::CIRCLE::RAINBOW, false} },
-    { COMMAND::DRAW_FILL_PAYLOAD,   Command{Command::DRAW::FILL::USE_PAYLOAD, false} },
-    { COMMAND::DRAW_FILL_DRAWCOLOUR,Command{Command::DRAW::FILL::USE_DRAW_COLOUR, false} },
-
-    { COMMAND::COLOUR_RESET,        Command{Command::META::CHANGE_COLOUR::DEFAULT, false} },
-    { COMMAND::COLOUR_RANDOM,       Command{Command::META::CHANGE_COLOUR::RANDOM, false} },
-    { COMMAND::COLOUR_SET,          Command{Command::META::CHANGE_COLOUR::USE_PAYLOAD, false, DEFAULT_DRAW_COLOUR} },
-
-    { COMMAND::RAINBOW_DEFAULT,     Command{Command::META::ENABLE_RAINBOW::DEFAULT, false} },
-    { COMMAND::RAINBOW_SET,         Command{Command::META::ENABLE_RAINBOW::USE_PAYLOAD, false, 1000} },
-
-    { COMMAND::DRAWSTEP_DECREASE,   Command{Command::META::CHANGE_DRAWSTEP::ADD_PAYLOAD, false, -1} },
-    { COMMAND::DRAWSTEP_INCREASE,   Command{Command::META::CHANGE_DRAWSTEP::ADD_PAYLOAD, false,  1} },
-    { COMMAND::DRAWSTEP_SET,        Command{Command::META::CHANGE_DRAWSTEP::SET_TO_PAYLOAD, false,  1} },
-
-
-    { COMMAND::PEN_DOWN,            Command{Command::META::PEN_DOWN::DISCRETE, false} },
-    { COMMAND::PEN_HELD_DOWN,       Command{Command::META::PEN_DOWN::CONTINUOUS, true} },
-    { COMMAND::PEN_WIDTH_DECREASE,  Command{Command::META::CHANGE_PEN_WIDTH::ADD_PAYLOAD, false, -1} },
-    { COMMAND::PEN_WIDTH_INCREASE,  Command{Command::META::CHANGE_PEN_WIDTH::ADD_PAYLOAD, false, 1} },
-    { COMMAND::PEN_SET,             Command{Command::META::CHANGE_PEN_WIDTH::SET_TO_PAYLOAD, false, 1} },
-
-    { COMMAND::RESET_CANVAS,        Command{Command::META::RESET::RESET_CANVAS, false} },
-    { COMMAND::RESET_CURSOR,        Command{Command::META::RESET::RESET_CURSOR, false} },
-    { COMMAND::MOVE_SAVE_ORIGIN,    Command{Command::META::SAVE_ORIGIN::NORMAL, false} },
-
-    { COMMAND::INPUT_CLI_ENABLE,    Command{Command::APP::INPUT_MODE::CLI, false} },
-    { COMMAND::INPUT_MOUSE_ENABLE,  Command{Command::APP::INPUT_MODE::MOUSE, false} },
-
-};
-
+    switch (static_cast<S>(command.setting)) {
+    case (S::SETTING_MODE):
+        process__S__Command(command);
+        break;
+    }
+}
+* 
+*   
+* 
+* 
+* 
+*/
