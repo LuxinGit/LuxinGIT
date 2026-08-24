@@ -2,8 +2,8 @@
 #include "Canvas Handler.h"
 
 void Draw_Handler::checkDrawData() {
-    if (rainbowMode) if (CanvasHandler.CursorHandler.pixelsDrawn > pixelsToRainbow) {
-        colour = getRandomColour();
+    if (rainbowMode) if (CanvasHandler.CursorHandler.pixelsDrawn > pixelsToRainbow and penMode == PEN_MODE::DRAW) {
+        drawColour = getRandomColour();
         CanvasHandler.CursorHandler.pixelsDrawn = 0;
     }
 }
@@ -11,7 +11,7 @@ void Draw_Handler::checkDrawData() {
 void Draw_Handler::drawPoint(const std::pair<float, float>& c) {
     luxel* ptr = CanvasHandler.getLuxelFromCoord(c);
     if (!ptr) return;
-    ptr->colour = colour;
+    ptr->colour = *activeColour;
     CanvasHandler.CursorHandler.pixelsDrawn += 1;
 }
 void Draw_Handler::drawPoint(const std::pair<float, float>& c, const bool useP) {
@@ -19,6 +19,7 @@ void Draw_Handler::drawPoint(const std::pair<float, float>& c, const bool useP) 
     else drawPoint(c);
     checkDrawData();
 }
+
 
 void Draw_Handler::drawLine(std::pair<int, int> origin, std::pair<int, int> destination, const bool useP) {
 
@@ -144,8 +145,8 @@ void Draw_Handler::processCommand(const Command& command) {
         case Action::CHANGE_COLOUR:
             processChangeColourCommand(command);
             break;
-        case Action::ENABLE_RAINBOW:
-            processRainbowModeCommand(command);
+        case Action::CHANGE_PENMODE:
+            processChangePenModeCommand(command);
             break;
         case Action::CHANGE_PEN_WIDTH:
             processChangePenWidthCommand(command);
@@ -155,31 +156,54 @@ void Draw_Handler::processCommand(const Command& command) {
         void Draw_Handler::processChangeColourCommand(const Command& command) {
             switch (static_cast<Command::META::CHANGE_COLOUR>(command.setting)) {
             case Command::META::CHANGE_COLOUR::DEFAULT:
-                colour = { 200, 200, 200, 255 };
+                drawColour = { 200, 200, 200, 255 };
                 break;
             case Command::META::CHANGE_COLOUR::USE_PAYLOAD:
-                colour = std::get<std::array<uint8_t, 4>>(command.payload);
+                drawColour = std::get<std::array<uint8_t, 4>>(command.payload);
                 break;
             case Command::META::CHANGE_COLOUR::RANDOM:
-                colour = getRandomColour();
+                drawColour = getRandomColour();
                 break;
             }
         }
-        void Draw_Handler::processRainbowModeCommand(const Command& command) {
-            using setting = Command::META::ENABLE_RAINBOW;
-            switch (static_cast<setting>(command.setting)) {
-            case setting::USE_PAYLOAD:
-            {
-                int candidate = std::get<int>(command.payload);
-                if (candidate != pixelsToRainbow) pixelsToRainbow = candidate;
+        void Draw_Handler::processChangePenModeCommand(const Command& command) {
+            using S = Command::META::CHANGE_PENMODE;
+
+                switch (static_cast<S>(command.setting)) {
+                case (S::DRAW):
+                    activeColour = &drawColour;
+                    break;
+                case (S::RUBBER):
+                    activeColour = &backgroundColour;
+                    break;
+                case (S::PEN_DOWN):
+                    processPenDownCommand(command);
+                    break;
+                case (S::RAINBOW):
+                    processRainbowModeCommand(command);
+                    break;
+                }
+        }
+            void Draw_Handler::processRainbowModeCommand(const Command& command) {
+                if (auto p = std::get_if<int>(&command.payload)) {
+                    int candidate = *p;
+                    if (candidate != pixelsToRainbow) pixelsToRainbow = candidate;
+                    else rainbowMode = !rainbowMode;
+                }
                 else rainbowMode = !rainbowMode;
-                break; // scoping candidate to allow us to declare in this case branch without affecting other
             }
-            case setting::DEFAULT:
-                rainbowMode = !rainbowMode;
-                break;
+            void Draw_Handler::processPenDownCommand(const Command& command) {
+                using Setting = Command::META::PENMODE_PDOWN_PINTERP;
+                switch (static_cast<Setting>(std::get<int>(command.payload))) {
+                    case (Setting::DISCRETE):
+                        CanvasHandler.CursorHandler.penDown = !CanvasHandler.CursorHandler.penDown;
+                        break;
+                    case (Setting::CONTINUOUS):
+                        CanvasHandler.CursorHandler.penContinuous = true;
+                        CanvasHandler.CursorHandler.penDown = true;
+                        break;
+                }
             }
-        }
         void Draw_Handler::processChangePenWidthCommand(const Command& command) {
 
             using Setting = Command::META::CHANGE_PEN_WIDTH;
@@ -236,10 +260,10 @@ void Draw_Handler::processCommand(const Command& command) {
 
             if (setting == Command::DRAW::CIRCLE::RAINBOW) {
                 for (int i = 1; i <= radius; i++) {
-                    colour = getRandomColour();
+                    drawColour = getRandomColour();
                     drawCircle(CanvasHandler.CursorHandler.cursor, i, false, true);
                 }
-                colour = { 200, 200, 200, 255 };
+                drawColour = { 200, 200, 200, 255 };
                 return;
             }
             else drawCircle(CanvasHandler.CursorHandler.cursor, radius, false, true);
@@ -251,7 +275,7 @@ void Draw_Handler::processCommand(const Command& command) {
                 fill(CanvasHandler.CursorHandler.cursor, std::get<std::array<uint8_t, 4>>(command.payload));
                 break;
             case Setting::USE_DRAW_COLOUR:
-                fill(CanvasHandler.CursorHandler.cursor, colour);
+                fill(CanvasHandler.CursorHandler.cursor, *activeColour);
                 break;
             }
         }

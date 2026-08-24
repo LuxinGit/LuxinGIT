@@ -14,12 +14,12 @@ private:
 
     void addCommand(Command command);
     void processCommand(const Command& command);
-    void processAppCommand(const Command& command);
 
 public:
 
     void processCommands();
-    void constructCommand(COMMAND_ID command, Command::Payload payload = {});
+    void constructCommand(COMMAND_ID command);
+    void constructCommand(COMMAND_ID command, Command::Payload payload);
 
     size_t commandQueueSize();
     void clearCommands();

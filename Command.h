@@ -30,8 +30,9 @@ enum class COMMAND_ID {
     COLOUR_RANDOM,
     COLOUR_SET,
 
-    RAINBOW_DEFAULT,
-    RAINBOW_SET,
+    PENMODE_DRAW,
+    PENMODE_RUBBER,
+    PENMODE_RAINBOW,
 
     DRAWSTEP_DECREASE,
     DRAWSTEP_INCREASE,
@@ -136,13 +137,12 @@ public:
         struct META {
 
             enum class ACTION {
-                RESET = 0,
-                CHANGE_COLOUR = 1,
-                CHANGE_DRAWSTEP = 2,
-                ENABLE_RAINBOW = 3,
-                CHANGE_PEN_WIDTH = 4,
-                PEN_DOWN = 5,
-                SAVE_ORIGIN = 6
+                RESET,
+                CHANGE_COLOUR,
+                CHANGE_DRAWSTEP,
+                CHANGE_PENMODE,
+                CHANGE_PEN_WIDTH,
+                SAVE_ORIGIN,
             };
 
             enum class RESET {
@@ -158,20 +158,23 @@ public:
                 ADD_PAYLOAD = 0,
                 SET_TO_PAYLOAD = 1
             };
-            enum class ENABLE_RAINBOW {
-                DEFAULT = 0,
-                USE_PAYLOAD = 1
+            enum class CHANGE_PENMODE {
+                DRAW = 0,
+                PEN_DOWN = 1,
+                RUBBER = 2,
+                RAINBOW = 3
             };
             enum class CHANGE_PEN_WIDTH {
                 ADD_PAYLOAD = 0,
                 SET_TO_PAYLOAD = 1
             };
-            enum class PEN_DOWN {
-                DISCRETE = 0,
-                CONTINUOUS = 1
-            };
             enum class SAVE_ORIGIN {
                 NORMAL = 0
+            };
+
+            enum class PENMODE_PDOWN_PINTERP {
+                DISCRETE = 0,
+                CONTINUOUS = 1
             };
 
         private:
@@ -186,9 +189,8 @@ public:
             META(RESET varSetting);
             META(CHANGE_COLOUR varSetting);
             META(CHANGE_DRAWSTEP varSetting);
-            META(ENABLE_RAINBOW varSetting);
+            META(CHANGE_PENMODE varSetting);
             META(CHANGE_PEN_WIDTH varSetting);
-            META(PEN_DOWN varSetting);
             META(SAVE_ORIGIN varSetting);
 
         };
@@ -364,18 +366,39 @@ inline static const auto COMMAND_REPO = std::to_array<Command_Definition>({
         "colour"
     },
     {
-        Command{COMMAND_ID::RAINBOW_DEFAULT, Command::META::ENABLE_RAINBOW::DEFAULT, false},
+        Command{COMMAND_ID::PENMODE_DRAW, Command::META::CHANGE_PENMODE::DRAW, false},
+        COMMAND_PROCESSOR_ID::DRAW_HANDLER,
+        SDL_SCANCODE_Y,
+        std::nullopt,
+        "penmode_draw"
+    },
+    {
+        Command{COMMAND_ID::PENMODE_RUBBER, Command::META::CHANGE_PENMODE::RUBBER, false},
+        COMMAND_PROCESSOR_ID::DRAW_HANDLER,
+        SDL_SCANCODE_U,
+        std::nullopt,
+        "penmode_rubber"
+    },
+    {
+        Command{COMMAND_ID::PENMODE_RAINBOW, Command::META::CHANGE_PENMODE::RAINBOW, false},
         COMMAND_PROCESSOR_ID::DRAW_HANDLER,
         SDL_SCANCODE_E,
         std::nullopt,
-        std::nullopt
+        "penmode_rainbow"
     },
     {
-        Command{COMMAND_ID::RAINBOW_SET, Command::META::ENABLE_RAINBOW::USE_PAYLOAD, false, 1000},
+        Command{COMMAND_ID::PEN_DOWN, Command::META::CHANGE_PENMODE::PEN_DOWN, false, 0},
+        COMMAND_PROCESSOR_ID::DRAW_HANDLER,
+        SDL_SCANCODE_1,
+        std::nullopt,
+        "pen"
+    },
+    {
+        Command{COMMAND_ID::PEN_HELD_DOWN, Command::META::CHANGE_PENMODE::PEN_DOWN, true, 1},
         COMMAND_PROCESSOR_ID::DRAW_HANDLER,
         std::nullopt,
-        std::nullopt,
-        "rainbow"
+        SDL_BUTTON_LMASK,
+        std::nullopt
     },
     {
         Command{COMMAND_ID::DRAWSTEP_DECREASE, Command::META::CHANGE_DRAWSTEP::ADD_PAYLOAD, false, -1},
@@ -397,20 +420,6 @@ inline static const auto COMMAND_REPO = std::to_array<Command_Definition>({
         std::nullopt,
         std::nullopt,
         "step_set"
-    },
-    {
-        Command{COMMAND_ID::PEN_DOWN, Command::META::PEN_DOWN::DISCRETE, false},
-        COMMAND_PROCESSOR_ID::CURSOR_HANDLER,
-        SDL_SCANCODE_1,
-        std::nullopt,
-        "pen"
-    },
-    {
-        Command{COMMAND_ID::PEN_HELD_DOWN, Command::META::PEN_DOWN::CONTINUOUS, true},
-        COMMAND_PROCESSOR_ID::CURSOR_HANDLER,
-        std::nullopt,
-        SDL_BUTTON_LMASK,
-        std::nullopt
     },
     {
         Command{COMMAND_ID::PEN_WIDTH_DECREASE, Command::META::CHANGE_PEN_WIDTH::ADD_PAYLOAD, false, -1},

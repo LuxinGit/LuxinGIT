@@ -75,12 +75,10 @@ Command::META::META(ACTION varAction, int varSetting)
         : META(ACTION::CHANGE_COLOUR, static_cast<int>(varSetting)) {}
     Command::META::META(CHANGE_DRAWSTEP varSetting)
         : META(ACTION::CHANGE_DRAWSTEP, static_cast<int>(varSetting)) {}
-    Command::META::META(ENABLE_RAINBOW varSetting)
-        : META(ACTION::ENABLE_RAINBOW, static_cast<int>(varSetting)) {}
+    Command::META::META(CHANGE_PENMODE varSetting)
+        : META(ACTION::CHANGE_PENMODE, static_cast<int>(varSetting)) {}
     Command::META::META(CHANGE_PEN_WIDTH varSetting)
         : META(ACTION::CHANGE_PEN_WIDTH, static_cast<int>(varSetting)) {}
-    Command::META::META(PEN_DOWN varSetting)
-        : META(ACTION::PEN_DOWN, static_cast<int>(varSetting)) {}
     Command::META::META(SAVE_ORIGIN varSetting)
         : META(ACTION::SAVE_ORIGIN, static_cast<int>(varSetting)) {}
 

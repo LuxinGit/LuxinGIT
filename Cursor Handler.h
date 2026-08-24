@@ -29,7 +29,6 @@ struct Cursor_Handler {
         
     private:
         void processMetaCommand(const Command& command);
-            void processChangePenDownCommand(const Command& command);
             void processChangeDrawstepCommand(const Command& command);
 
         void processMoveCommand(const Command& command);

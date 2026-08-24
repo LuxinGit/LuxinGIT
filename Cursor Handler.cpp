@@ -18,7 +18,7 @@ void Cursor_Handler::resetCursors() {
 }
 
 void Cursor_Handler::refreshCursor() {
-    if (penDown) CanvasHandler.DrawHandler.drawLine(cursor, deltaCursor, true);
+    if (penDown && cursor != deltaCursor) CanvasHandler.DrawHandler.drawLine(cursor, deltaCursor, true);
     if (penContinuous) {
         penContinuous = false; penDown = false;
     }
@@ -42,9 +42,6 @@ void Cursor_Handler::processCommand(const Command& command) {
         case Action::CHANGE_DRAWSTEP:
             processChangeDrawstepCommand(command);
             break;
-        case Action::PEN_DOWN:
-            processChangePenDownCommand(command);
-            break;
         case Action::SAVE_ORIGIN:
             origin = cursor;
             break;
@@ -61,18 +58,6 @@ void Cursor_Handler::processCommand(const Command& command) {
                 break;
             }
 
-        }
-        void Cursor_Handler::processChangePenDownCommand(const Command& command) {
-            using Setting = Command::META::PEN_DOWN;
-            switch (static_cast<Setting>(command.setting)) {
-            case (Setting::CONTINUOUS):
-                penContinuous = true;
-                penDown = true;
-                break;
-            case (Setting::DISCRETE):
-                penDown = !penDown;
-                break;
-            }
         }
 
     void Cursor_Handler::processMoveCommand(const Command& command) {

@@ -4,6 +4,10 @@
 void Command_Handler::addCommand(Command command) {
     commandQueue.emplace_back(std::move(command));
 }
+void Command_Handler::constructCommand(COMMAND_ID command) {
+    Command_Definition result = *COMMAND_ID_DEF_MAP[command];
+    addCommand(result.command);
+}
 void Command_Handler::constructCommand(COMMAND_ID command, Command::Payload payload) {
     Command_Definition result = *COMMAND_ID_DEF_MAP[command];
     result.command.payload = payload;

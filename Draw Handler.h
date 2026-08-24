@@ -10,8 +10,19 @@ struct Canvas_Handler;
 struct Draw_Handler {
 
     Canvas_Handler& CanvasHandler;
-    std::array<uint8_t, 4> colour =     DEFAULT_DRAW_COLOUR;
-    int pen =                           DEFAULT_PENWIDTH;
+    std::array<uint8_t, 4> drawColour =         DEFAULT_DRAW_COLOUR;
+    std::array<uint8_t, 4> backgroundColour =   DEFAULT_BACKGROUND_COLOUR;
+    std::array<uint8_t, 4>* activeColour =      &drawColour;
+    int pen =                                   DEFAULT_PENWIDTH;
+
+    enum class PEN_MODE {
+        DRAW = 0,
+        NO_DRAW = 1,
+        RUBBER = 2,
+        RAINBOW = 3
+    };
+
+    PEN_MODE penMode =     static_cast<PEN_MODE>(DEFAULT_PEN_MODE);
     
     bool rainbowMode = false; int pixelsToRainbow = 1000;
 
@@ -31,7 +42,9 @@ struct Draw_Handler {
 
     private:
         void processMetaCommand(const Command& command);
-            void processRainbowModeCommand(const Command& command);
+            void processChangePenModeCommand(const Command& command);
+                void processRainbowModeCommand(const Command& command);
+                void processPenDownCommand(const Command& command);
             void processChangePenWidthCommand(const Command& command);
 
         void processDrawCommand(const Command& command);
