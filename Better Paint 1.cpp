@@ -23,9 +23,6 @@ TO DO:
 2. Probably just rework coords entirely.
 3. Undo / redo functionality.
 4. Some better way to select colours.
-5. Rubber (shouldn't be too hard?).
-6. Brush modes
-
 
 */
 

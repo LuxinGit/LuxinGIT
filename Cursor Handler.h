@@ -18,7 +18,6 @@ struct Cursor_Handler {
     bool penDown = true;
     bool penContinuous = false;
     bool enableCrosshair = true;
-    int crosshairRadius =                       DEFAULT_CROSSHAIR_RADIUS;
     size_t pixelsDrawn = 0;
 
     static void resetPoint(float& f, const int& width);

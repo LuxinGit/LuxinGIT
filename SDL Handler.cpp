@@ -36,7 +36,7 @@ void SDL_Handler::renderCrosshair() const {
     if (CanvasHandler.CursorHandler.enableCrosshair)
     {
         auto [x, y] = CanvasHandler.CursorHandler.cursor;
-        int r = CanvasHandler.CursorHandler.crosshairRadius;
+        int r = CanvasHandler.DrawHandler.pen;
         SDL_RenderLine(Renderer, x - r, y, x + r, y);
         SDL_RenderLine(Renderer, x, y - r, x, y + r);
     }
