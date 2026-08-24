@@ -23,7 +23,8 @@ TO DO:
 2. Probably just rework coords entirely.
 3. Undo / redo functionality.
 4. Some better way to select colours.
-
+5. drawBaseball();
+6. fix mouse cursor click with pendown not drawing point 
 */
 
 int main()

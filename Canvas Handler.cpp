@@ -28,7 +28,7 @@ size_t Canvas_Handler::indexFromCoord(const std::pair<float, float>& c)  {
 }
 
 bool Canvas_Handler::coordCheck(const std::pair<float, float>& c) const {
-    if (c.first < 0 or c.first > width) return false;
+    if (c.first < 0 or c.first >= width) return false;
     if (c.second < 0 or c.second >= height) return false;
     return true;
 } 
