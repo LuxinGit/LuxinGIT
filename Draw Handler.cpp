@@ -8,22 +8,22 @@ void Draw_Handler::checkDrawData() {
     }
 }
 
-void Draw_Handler::drawPoint(luxel& p) {
+void Draw_Handler::drawPoint(luxel& p, const std::array<uint8_t, 4>& colour) {
     std::array<uint8_t, 4>& pixelColour = p.colour;
     CanvasHandler.MasterHandler.ActionHandler.pixelChange(&p, pixelColour);
-    pixelColour = *activeColour;
+    pixelColour = colour;
     CanvasHandler.CursorHandler.pixelsDrawn += 1;
 }
-void Draw_Handler::drawPoint(luxel* p) {
+void Draw_Handler::drawPoint(luxel* p, const std::array<uint8_t, 4>& colour) {
     if (!p) return;
-    drawPoint(*p);
+    drawPoint(*p, colour);
 }
-void Draw_Handler::drawPoint(const coordinate& c) {
-    drawPoint(CanvasHandler.getLuxelFromCoord(c));
+void Draw_Handler::drawPoint(const coordinate& c, const std::array<uint8_t, 4>& colour) {
+    drawPoint(CanvasHandler.getLuxelFromCoord(c), colour);
 }
-void Draw_Handler::drawPoint(const coordinate& c, const bool useP) {
+void Draw_Handler::drawPoint(const coordinate& c, const bool useP, const std::array<uint8_t, 4>& colour) {
     if (useP) drawCircle(c, pen, true);
-    else drawPoint(c);
+    else drawPoint(c, colour);
     checkDrawData();
 }
 
@@ -130,6 +130,11 @@ void Draw_Handler::fill(const coordinate& oc, const std::array<uint8_t, 4>& nCol
     }
 
 }
+void Draw_Handler::clearCanvas() {
+    for (luxel& l : CanvasHandler.canvas) {
+        drawPoint(l, backgroundColour);
+    }
+}
 
 std::array<uint8_t, 4> Draw_Handler::getRandomColour() {
     return { static_cast<uint8_t>(rand() % 256),static_cast<uint8_t>(rand() % 256),static_cast<uint8_t>(rand() % 256), 255 };
@@ -159,8 +164,18 @@ void Draw_Handler::processCommand(const Command& command) {
         case Action::CHANGE_PEN_WIDTH:
             processChangePenWidthCommand(command);
             break;
+        case Action::RESET:
+            processResetCommand(command);
+            break;
         }
     };
+        void Draw_Handler::processResetCommand(const Command& command) {
+            switch (static_cast<Command::META::RESET>(command.setting)) {
+            case Command::META::RESET::RESET_CANVAS:
+                clearCanvas();
+                break;
+            }
+        }
         void Draw_Handler::processChangeColourCommand(const Command& command) {
             switch (static_cast<Command::META::CHANGE_COLOUR>(command.setting)) {
             case Command::META::CHANGE_COLOUR::DEFAULT:
@@ -292,4 +307,8 @@ void Draw_Handler::processCommand(const Command& command) {
 
 
 
-Draw_Handler::Draw_Handler(Canvas_Handler& CanvH) : CanvasHandler(CanvH) {}
+Draw_Handler::Draw_Handler(Canvas_Handler& CanvH) : CanvasHandler(CanvH) {
+    drawColour       =  DEFAULT_DRAW_COLOUR;
+    backgroundColour =  DEFAULT_BACKGROUND_COLOUR;
+    activeColour     =  &drawColour;
+}

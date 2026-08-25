@@ -20,8 +20,6 @@ struct Canvas_Handler {
     int& width; int& height;
     std::vector<luxel> canvas;
 
-    void clearCanvas();
-
     size_t indexFromCoord(const coordinate& c, const int& w);
     size_t indexFromCoord(const coordinate& c);
 

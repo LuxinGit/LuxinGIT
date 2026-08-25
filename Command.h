@@ -468,7 +468,7 @@ inline static const auto COMMAND_REPO = std::to_array<Command_Definition>({
     },
     {
         Command{COMMAND_ID::RESET_CANVAS, Command::META::RESET::RESET_CANVAS, false},
-        COMMAND_PROCESSOR_ID::CANVAS_HANDLER,
+        COMMAND_PROCESSOR_ID::DRAW_HANDLER,
         SDL_SCANCODE_C,
         std::nullopt,
         "reset_canvas"

@@ -11,9 +11,9 @@ struct luxel;
 struct Draw_Handler {
 
     Canvas_Handler& CanvasHandler;
-    std::array<uint8_t, 4> drawColour =         DEFAULT_DRAW_COLOUR;
-    std::array<uint8_t, 4> backgroundColour =   DEFAULT_BACKGROUND_COLOUR;
-    std::array<uint8_t, 4>* activeColour =      &drawColour;
+    inline static std::array<uint8_t, 4> drawColour;
+    inline static std::array<uint8_t, 4> backgroundColour;
+    inline static std::array<uint8_t, 4>* activeColour;
     int pen =                                   DEFAULT_PENWIDTH;
 
     enum class PEN_MODE {
@@ -31,13 +31,14 @@ struct Draw_Handler {
 
     void checkDrawData();
 
-    void drawPoint(luxel& p);
-    void drawPoint(luxel* l);
-    void drawPoint(const coordinate& c);
-    void drawPoint(const coordinate& c, const bool useP);
+    void drawPoint(luxel& p, const std::array<uint8_t, 4>& colour = *activeColour);
+    void drawPoint(luxel* l, const std::array<uint8_t, 4>& colour = *activeColour);
+    void drawPoint(const coordinate& c, const std::array<uint8_t, 4>& colour = *activeColour);
+    void drawPoint(const coordinate& c, const bool useP, const std::array<uint8_t, 4>& colour = *activeColour);
     void drawLine(const coordinate& origin, const coordinate& destination, const bool useP);
     void drawCircle(const coordinate& c, int radius, const bool fill = false, const bool useP = false);
     void fill(const coordinate& origin, const std::array<uint8_t, 4>& nColour);
+    void clearCanvas();
 
     static std::array<uint8_t, 4> getRandomColour();
 
@@ -45,6 +46,7 @@ struct Draw_Handler {
 
     private:
         void processMetaCommand(const Command& command);
+        void processResetCommand(const Command& command);
             void processChangePenModeCommand(const Command& command);
                 void processRainbowModeCommand(const Command& command);
                 void processPenDownCommand(const Command& command);

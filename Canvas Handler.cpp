@@ -14,11 +14,6 @@ Canvas_Handler::Canvas_Handler(int& varwidth, int& varheight, Master_Handler& va
     canvas(std::vector<luxel>(width* height)) {
     // Only concern here is that if underlying height / width changes then this will need to be recalculated.
 }
-void Canvas_Handler::clearCanvas() {
-    for (luxel& l : canvas) {
-        l.resetLuxel();
-    }
-}
 
 size_t Canvas_Handler::indexFromCoord(const coordinate& c, const int& w) {
     // ASSUMES POSITIVE X/Y. INDEXING WITH THIS INDEX WITHOUT SIZE CHECKING MAY CAUSE OUT OF BOUNDARY MEMORY CRASH [IF COORD > LAST LUXEL INDEX].
@@ -57,9 +52,6 @@ void Canvas_Handler::processCommand(const Command& command) {
     }
         void Canvas_Handler::processResetCommand(const Command& command) {
             switch (static_cast<Command::META::RESET>(command.setting)) {
-            case Command::META::RESET::RESET_CANVAS:
-                clearCanvas();
-                break;
             case Command::META::RESET::RESET_CURSOR:
                 CursorHandler.cursor = DEFAULT_CURSOR_POINT;
                 CursorHandler.origin = DEFAULT_CURSOR_POINT;
