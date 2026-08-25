@@ -1,19 +1,32 @@
 #pragma once
 
 #include "Command.h"
-
+#include <unordered_set>
 struct Canvas_Handler;
-struct luxel;
+
+struct Change_Set {
+	struct Change {
+		luxel* p;
+		std::array<uint8_t, 4> originalColour;
+	};
+
+	std::vector<Change> changeSet;
+	std::unordered_set<luxel*> changedPixels;
+
+	void addLuxel(luxel* p, const std::array<uint8_t, 4>& oC) {
+		if (changedPixels.insert(p).second)
+			changeSet.emplace_back(p, oC);
+	}
+};
 
 struct Action_Handler {
 
 private:
 
-	std::unordered_map<size_t, std::array<uint8_t, 4>> Action = {};
+	Change_Set currentAction;
+	std::vector<Change_Set> actionQueue;
 	int actionQueueIndex = 0;
 	Canvas_Handler& CanvasHandler;
-
-	std::vector<std::unordered_map<size_t, std::array<uint8_t, 4>>> actionQueue;
 
 	void addNewAction();
 	void undoAction();
@@ -24,7 +37,7 @@ public:
 
 	Action_Handler(Canvas_Handler& varcanvH) : CanvasHandler(varcanvH) {}
 
-	void pixelChange(const coordinate& c, const std::array<uint8_t, 4>& originalColour); // Draw_Handler's method for adding to action
+	void pixelChange(luxel* p, const std::array<uint8_t, 4>& originalColour); // Draw_Handler's method for adding to action
 	void checkForActions();// Command_Handler's method for adding a new action.
 
 	void processCommand(const Command& command);

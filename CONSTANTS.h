@@ -26,6 +26,16 @@ struct coordinate {
 
 };
 
+struct luxel {
+
+    luxel();
+    void resetLuxel();
+
+    std::array<uint8_t, 4> colour;
+
+};
+
+
 
 // CURSOR HANDLER
 

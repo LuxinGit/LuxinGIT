@@ -10,15 +10,6 @@
 #include "Cursor Handler.h"
 #include "Draw Handler.h"
 
-struct luxel {
-
-    luxel();
-    void resetLuxel();
-
-    std::array<uint8_t, 4> colour;
-
-};
-
 struct Master_Handler;
 
 struct Canvas_Handler {

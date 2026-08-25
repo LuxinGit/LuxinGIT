@@ -8,15 +8,15 @@ void Draw_Handler::checkDrawData() {
     }
 }
 
-void Draw_Handler::drawPoint(const luxel* p) {
+void Draw_Handler::drawPoint(luxel* p) {
     if (!p) return;
-}
-void Draw_Handler::drawPoint(const coordinate& c) {
-    luxel* ptr = CanvasHandler.getLuxelFromCoord(c);
-    std::array<uint8_t, 4>& pixelColour = ptr->colour;
-    CanvasHandler.MasterHandler.ActionHandler.pixelChange(c, pixelColour);
+    std::array<uint8_t, 4>& pixelColour = p->colour;
+    CanvasHandler.MasterHandler.ActionHandler.pixelChange(p, pixelColour);
     pixelColour = *activeColour;
     CanvasHandler.CursorHandler.pixelsDrawn += 1;
+}
+void Draw_Handler::drawPoint(const coordinate& c) {
+    drawPoint(CanvasHandler.getLuxelFromCoord(c));
 }
 void Draw_Handler::drawPoint(const coordinate& c, const bool useP) {
     if (useP) drawCircle(c, pen, true);
@@ -111,12 +111,19 @@ void Draw_Handler::fill(const coordinate& oc, const std::array<uint8_t, 4>& nCol
         coordinate c = pixelStack.back();
         luxel* l = CanvasHandler.getLuxelFromCoord(c);
 
+
+        // figure out how to get this into drawpoint
+
         if (!l or l->colour != oColour) {
             pixelStack.pop_back(); 
             continue;
         }
 
         l->colour = nColour;
+        CanvasHandler.MasterHandler.ActionHandler.pixelChange(l, oColour);
+        CanvasHandler.CursorHandler.pixelsDrawn += 1;
+
+
         pixelStack.pop_back();
         pixelStack.emplace_back(c.x + 1, c.y);
         pixelStack.emplace_back(c.x - 1, c.y);
