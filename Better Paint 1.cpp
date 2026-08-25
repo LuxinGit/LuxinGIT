@@ -19,7 +19,7 @@
 /*
 TO DO:
 
-1. Undo / redo functionality.
+1. clearCanvas needs to be moved within /undo functionality
 2. Some better way to select colours. //include eyedropper ?
 3. drawBaseball();
 */

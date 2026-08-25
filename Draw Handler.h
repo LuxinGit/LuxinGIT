@@ -31,6 +31,7 @@ struct Draw_Handler {
 
     void checkDrawData();
 
+    void drawPoint(luxel& p);
     void drawPoint(luxel* l);
     void drawPoint(const coordinate& c);
     void drawPoint(const coordinate& c, const bool useP);
