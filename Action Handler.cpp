@@ -33,6 +33,9 @@ void Action_Handler::redoAction() {
     }
 	processAction();
 }
+void Action_Handler::resetActionQueue() {
+    actionQueue = {};
+}
 
 void Action_Handler::processCommand(const Command& command) {
 
@@ -45,7 +48,28 @@ void Action_Handler::processCommand(const Command& command) {
     }
 
 }
-    
+
+    void Action_Handler::processMetaCommand(const Command& command) {
+
+        using A = Command::META::ACTION;
+
+        switch (static_cast<A>(command.action)) {
+        case (A::RESET):
+            processResetCommand(command);
+            break;
+        }
+    }
+        void Action_Handler::processResetCommand(const Command& command) {
+
+            using S = Command::META::RESET;
+
+            switch (static_cast<S>(command.setting)) {
+            case (S::RESET_ACTION_QUEUE):
+                resetActionQueue();
+                break;
+            }
+        }
+
     void Action_Handler::processAppCommand(const Command& command) {
 
     using A = Command::APP::ACTION;
@@ -58,14 +82,14 @@ void Action_Handler::processCommand(const Command& command) {
 }
         void Action_Handler::processActionCommand(const Command& command) {
 
-    using S = Command::APP::UNDO_REDO;
+            using S = Command::APP::UNDO_REDO;
 
-    switch (static_cast<S>(command.setting)) {
-    case (S::UNDO):
-        undoAction();
-        break;
-    case (S::REDO):
-        redoAction();
-        break;
-    }
+            switch (static_cast<S>(command.setting)) {
+            case (S::UNDO):
+                undoAction();
+                break;
+            case (S::REDO):
+                redoAction();
+                break;
+            }
 }

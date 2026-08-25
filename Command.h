@@ -51,7 +51,9 @@ enum class COMMAND_ID {
     INPUT_MOUSE_ENABLE,
 
     RESET_CANVAS,
+    RESET_ACTION_QUEUE,
     RESET_CURSOR,
+    RESET_ALL,
 
     INVALID
 };
@@ -150,7 +152,9 @@ public:
 
             enum class RESET {
                 RESET_CANVAS = 0,
-                RESET_CURSOR = 1
+                RESET_CURSOR = 1,
+                RESET_ACTION_QUEUE = 2,
+                RESET_ALL = 3,
             };
             enum class CHANGE_COLOUR {
                 DEFAULT = 0,
@@ -472,6 +476,20 @@ inline static const auto COMMAND_REPO = std::to_array<Command_Definition>({
         SDL_SCANCODE_C,
         std::nullopt,
         "reset_canvas"
+    },
+    {
+        Command{COMMAND_ID::RESET_ACTION_QUEUE, Command::META::RESET::RESET_ACTION_QUEUE, false},
+        COMMAND_PROCESSOR_ID::ACTION_HANDLER,
+        std::nullopt,
+        std::nullopt,
+        "reset_action_queue"
+    },
+    {
+        Command{COMMAND_ID::RESET_ALL, Command::META::RESET::RESET_ALL, false},
+        COMMAND_PROCESSOR_ID::CANVAS_HANDLER,
+        SDL_SCANCODE_R,
+        std::nullopt,
+        "reset_all"
     },
     {
         Command{COMMAND_ID::RESET_CURSOR, Command::META::RESET::RESET_CURSOR, false},

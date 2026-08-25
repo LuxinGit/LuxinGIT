@@ -33,17 +33,24 @@ private:
 	void redoAction();
 	void processAction();
 
+
+
 public: 
 
 	Action_Handler(Canvas_Handler& varcanvH) : CanvasHandler(varcanvH) {}
 
 	void pixelChange(luxel* p, const std::array<uint8_t, 4>& originalColour); // Draw_Handler's method for adding to action
 	void checkForActions();// Command_Handler's method for adding a new action.
+	void resetActionQueue();
 
 	void processCommand(const Command& command);
 private:
-		void processAppCommand(const Command& command);
-			void processActionCommand(const Command& command);
+
+	void processMetaCommand(const Command& command);
+		void processResetCommand(const Command& command);
+	void processAppCommand(const Command& command);
+		void processActionCommand(const Command& command);
+				
 
 
 };
