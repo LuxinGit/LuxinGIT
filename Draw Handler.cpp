@@ -197,10 +197,12 @@ void Draw_Handler::processCommand(const Command& command) {
                 switch (static_cast<Setting>(std::get<int>(command.payload))) {
                     case (Setting::DISCRETE):
                         CanvasHandler.CursorHandler.penDown = !CanvasHandler.CursorHandler.penDown;
+                        if (CanvasHandler.CursorHandler.penDown) drawPoint(CanvasHandler.CursorHandler.cursor, true);
                         break;
                     case (Setting::CONTINUOUS):
                         CanvasHandler.CursorHandler.penContinuous = true;
                         CanvasHandler.CursorHandler.penDown = true;
+                        drawPoint(CanvasHandler.CursorHandler.cursor, true);
                         break;
                 }
             }
