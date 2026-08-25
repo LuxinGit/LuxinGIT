@@ -2,10 +2,11 @@
 
 Master_Handler::Master_Handler(int varwidth, int varheight) :
     width(varwidth), height(varheight),
-    CanvasHandler(width, height),
+    CanvasHandler(width, height, *this),
     CommandHandler(*this),
     KeyboardHandler(CommandHandler),
     MouseHandler(CanvasHandler.CursorHandler.deltaCursor, CommandHandler),
+    ActionHandler(CanvasHandler),
     SDLHandler(CanvasHandler),
     CLIHandler(*this) 
 {

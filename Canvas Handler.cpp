@@ -1,12 +1,14 @@
 #include "Canvas Handler.h"
+#include "Master Handler.h"
 
 luxel::luxel() { colour = DEFAULT_BACKGROUND_COLOUR; }
 void luxel::resetLuxel() {
     colour = DEFAULT_BACKGROUND_COLOUR;
 }
 
-Canvas_Handler::Canvas_Handler(int& varwidth, int& varheight) :
+Canvas_Handler::Canvas_Handler(int& varwidth, int& varheight, Master_Handler& varMH) :
     width(varwidth), height(varheight),
+    MasterHandler(varMH),
     CursorHandler(*this),
     DrawHandler(*this),
     canvas(std::vector<luxel>(width* height)) {

@@ -129,6 +129,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Action Handler.cpp" />
     <ClCompile Include="Better Paint 1.cpp">
       <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdcpp20</LanguageStandard>
       <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Release|x64'">stdcpp20</LanguageStandard>
@@ -136,7 +137,7 @@
     <ClCompile Include="Canvas Handler.cpp" />
     <ClCompile Include="CLI Handler.cpp" />
     <ClCompile Include="Command Handler.cpp" />
-    <ClCompile Include="Command.cpp" />
+    <ClCompile Include="COMMAND.cpp" />
     <ClCompile Include="CONSTANTS.h" />
     <ClCompile Include="Cursor Handler.cpp" />
     <ClCompile Include="Draw Handler.cpp" />
@@ -146,10 +147,11 @@
     <ClCompile Include="SDL Handler.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Action Handler.h" />
     <ClInclude Include="Canvas Handler.h" />
     <ClInclude Include="CLI Handler.h" />
     <ClInclude Include="Command Handler.h" />
-    <ClInclude Include="Command.h" />
+    <ClInclude Include="COMMAND.h" />
     <ClInclude Include="Cursor Handler.h" />
     <ClInclude Include="Draw Handler.h" />
     <ClInclude Include="Keyboard Handler.h" />

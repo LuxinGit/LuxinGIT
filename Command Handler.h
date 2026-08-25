@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Command.h"
+#include "COMMAND.h"
 #include <vector>
 
 struct Master_Handler;

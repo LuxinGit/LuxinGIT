@@ -13,17 +13,15 @@
 #include <algorithm>
 #include <variant>
 
-#include "Command.h"
+#include "COMMAND.h"
 #include "Master Handler.h"
 
 /*
 TO DO:
 
-1. Probably just rework coords entirely.
-2. Undo / redo functionality.
-3. Some better way to select colours. //include eyedropper ?
-4. drawBaseball();
-5. fix mouse cursor click with pendown not drawing point 
+1. Undo / redo functionality.
+2. Some better way to select colours. //include eyedropper ?
+3. drawBaseball();
 */
 
 int main()

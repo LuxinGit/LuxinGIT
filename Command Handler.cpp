@@ -31,6 +31,10 @@ void Command_Handler::processCommand(const Command& command) {
             MasterHandler.CanvasHandler.DrawHandler.processCommand(command);
             break;
 
+        case COMMAND_PROCESSOR_ID::ACTION_HANDLER:
+            MasterHandler.ActionHandler.processCommand(command);
+            break;
+
         case COMMAND_PROCESSOR_ID::CLI_HANDLER:
             MasterHandler.CLIHandler.processCommand(command);
             break;
@@ -45,8 +49,11 @@ void Command_Handler::processCommand(const Command& command) {
     }
 }
 void Command_Handler::processCommands() {
+
+    if (commandQueue.empty()) MasterHandler.ActionHandler.checkForActions();
     for (const auto& command : commandQueue) processCommand(command);
     clearCommands();
+
 }
 
 size_t Command_Handler::commandQueueSize() { return commandQueue.size(); }

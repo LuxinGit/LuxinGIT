@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <algorithm>
 
-#include "Command.h"
+#include "COMMAND.h"
 #include "Cursor Handler.h"
 #include "Draw Handler.h"
 
@@ -19,34 +19,11 @@ struct luxel {
 
 };
 
-
-struct coordinate {
-    int x;
-    int y;
-
-    bool operator==(const coordinate& other) const {
-        return x == other.x and y == other.y;
-    }
-
-    coordinate operator+(const coordinate& other) const {
-        return { x + other.x, y + other.y };
-    }
-
-    coordinate operator-(const coordinate& other) const {
-        return { x - other.x, y - other.y };
-    }
-
-    coordinate(const int& varx, const int& vary) : x(varx), y(vary) {}
-    coordinate(const std::pair<int, int>& varC) : x(varC.first), y(varC.second) {}
-    coordinate(const float& varfx, const float& varfy) : x(static_cast<int>(varfx)), y(static_cast<int>(varfy)) {}
-    coordinate(const std::pair<float, float>& varfC) : coordinate(varfC.first, varfC.second) {}
-
-};
-
-
+struct Master_Handler;
 
 struct Canvas_Handler {
 
+    Master_Handler& MasterHandler;
     Cursor_Handler CursorHandler;
     Draw_Handler DrawHandler;
     int& width; int& height;
@@ -63,7 +40,7 @@ struct Canvas_Handler {
     luxel* getLuxelFromCoord(const coordinate& c, bool coordCheck);
     luxel* getLuxelFromCoord(const coordinate& c);
 
-    Canvas_Handler(int& varwidth, int& varheight);
+    Canvas_Handler(int& varwidth, int& varheight, Master_Handler& varMH);
 
     void processCommand(const Command& command);
 

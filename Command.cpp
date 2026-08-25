@@ -1,4 +1,4 @@
-#include "Command.h"
+#include "COMMAND.h"
 
 #include <variant>
 #include <unordered_map>
@@ -85,3 +85,4 @@ Command::META::META(ACTION varAction, int varSetting)
 
 Command::APP::APP(ACTION varAction, int varSetting) : action(varAction), setting(varSetting) {}
     Command::APP::APP(INPUT_MODE varSetting) : APP(ACTION::INPUT_MODE, static_cast<int>(varSetting)) {}
+    Command::APP::APP(UNDO_REDO varSetting) : APP(ACTION::UNDO_REDO, static_cast<int>(varSetting)) {}

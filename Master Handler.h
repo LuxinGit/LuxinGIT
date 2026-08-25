@@ -6,6 +6,7 @@
 #include "Keyboard Handler.h"
 #include "CLI Handler.h"
 #include "Mouse Handler.h"
+#include "Action Handler.h"
 
 struct Master_Handler {
 
@@ -23,6 +24,7 @@ public:
     Keyboard_Handler KeyboardHandler;
     CLI_Handler CLIHandler;
     Mouse_Handler MouseHandler;
+    Action_Handler ActionHandler;
 
     Master_Handler(int varwidth, int varheight);
 

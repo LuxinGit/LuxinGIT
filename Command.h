@@ -38,6 +38,9 @@ enum class COMMAND_ID {
     DRAWSTEP_INCREASE,
     DRAWSTEP_SET,
 
+    UNDO,
+    REDO,
+
     PEN_DOWN,
     PEN_HELD_DOWN,
     PEN_WIDTH_DECREASE,
@@ -198,11 +201,17 @@ public:
 
             enum class ACTION {
                 INPUT_MODE = 0,
+                UNDO_REDO
             };
 
             enum class INPUT_MODE {
                 CLI = 0,
                 MOUSE = 1
+            };
+
+            enum class UNDO_REDO {
+                UNDO = 0,
+                REDO = 1
             };
 
         private:
@@ -212,6 +221,7 @@ public:
         public:
 
             APP(INPUT_MODE varSetting);
+            APP(UNDO_REDO varSetting);
 
             ACTION action;
             int setting;
@@ -245,7 +255,7 @@ enum class COMMAND_PROCESSOR_ID {
     CANVAS_HANDLER,
     CURSOR_HANDLER,
     DRAW_HANDLER,
-
+    ACTION_HANDLER,
     CLI_HANDLER,
     KEYBOARD_HANDLER,
     MOUSE_HANDLER
@@ -469,6 +479,20 @@ inline static const auto COMMAND_REPO = std::to_array<Command_Definition>({
         SDL_SCANCODE_9,
         std::nullopt,
         "reset_cursor"
+    },
+    {
+        Command{COMMAND_ID::UNDO, Command::APP::UNDO_REDO::UNDO, false},
+        COMMAND_PROCESSOR_ID::ACTION_HANDLER,
+        SDL_SCANCODE_N,
+        std::nullopt,
+        "undo"
+    },
+    {
+        Command{COMMAND_ID::REDO, Command::APP::UNDO_REDO::REDO, false},
+        COMMAND_PROCESSOR_ID::ACTION_HANDLER,
+        SDL_SCANCODE_M,
+        std::nullopt,
+        "redo"
     }
 
     });

@@ -1,5 +1,5 @@
 #include "Draw Handler.h"
-#include "Canvas Handler.h"
+#include "Master Handler.h"
 
 void Draw_Handler::checkDrawData() {
     if (rainbowMode) if (CanvasHandler.CursorHandler.pixelsDrawn > pixelsToRainbow and penMode == PEN_MODE::DRAW) {
@@ -8,10 +8,14 @@ void Draw_Handler::checkDrawData() {
     }
 }
 
+void Draw_Handler::drawPoint(const luxel* p) {
+    if (!p) return;
+}
 void Draw_Handler::drawPoint(const coordinate& c) {
     luxel* ptr = CanvasHandler.getLuxelFromCoord(c);
-    if (!ptr) return;
-    ptr->colour = *activeColour;
+    std::array<uint8_t, 4>& pixelColour = ptr->colour;
+    CanvasHandler.MasterHandler.ActionHandler.pixelChange(c, pixelColour);
+    pixelColour = *activeColour;
     CanvasHandler.CursorHandler.pixelsDrawn += 1;
 }
 void Draw_Handler::drawPoint(const coordinate& c, const bool useP) {

@@ -2,11 +2,11 @@
 
 #include <array>
 
-#include "Command.h"
+#include "COMMAND.h"
 #include "CONSTANTS.h"
 
 struct Canvas_Handler;
-struct coordinate;
+struct luxel;
 
 struct Draw_Handler {
 
@@ -31,6 +31,7 @@ struct Draw_Handler {
 
     void checkDrawData();
 
+    void drawPoint(const luxel* l);
     void drawPoint(const coordinate& c);
     void drawPoint(const coordinate& c, const bool useP);
     void drawLine(const coordinate& origin, const coordinate& destination, const bool useP);

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Command.h"
+#include "COMMAND.h"
 #include "SDL3/SDL.h"
 
 struct Command_Handler;

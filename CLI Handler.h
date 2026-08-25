@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include <string>
 
-#include "Command.h"
+#include "COMMAND.h"
 struct Master_Handler;
 
 struct CLI_Handler {

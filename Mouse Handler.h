@@ -5,7 +5,7 @@
 #include <SDL3/SDL.h>
 
 #include "CONSTANTS.h"
-#include "Command.h"
+#include "COMMAND.h"
 
 struct Command_Handler;
 
