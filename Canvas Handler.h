@@ -20,6 +20,31 @@ struct luxel {
 };
 
 
+struct coordinate {
+    int x;
+    int y;
+
+    bool operator==(const coordinate& other) const {
+        return x == other.x and y == other.y;
+    }
+
+    coordinate operator+(const coordinate& other) const {
+        return { x + other.x, y + other.y };
+    }
+
+    coordinate operator-(const coordinate& other) const {
+        return { x - other.x, y - other.y };
+    }
+
+    coordinate(const int& varx, const int& vary) : x(varx), y(vary) {}
+    coordinate(const std::pair<int, int>& varC) : x(varC.first), y(varC.second) {}
+    coordinate(const float& varfx, const float& varfy) : x(static_cast<int>(varfx)), y(static_cast<int>(varfy)) {}
+    coordinate(const std::pair<float, float>& varfC) : coordinate(varfC.first, varfC.second) {}
+
+};
+
+
+
 struct Canvas_Handler {
 
     Cursor_Handler CursorHandler;
@@ -29,15 +54,14 @@ struct Canvas_Handler {
 
     void clearCanvas();
 
-    size_t indexFromCoord(const std::pair<float, float>& c, const int& w);
-    size_t indexFromCoord(const std::pair<float, float>& c);
+    size_t indexFromCoord(const coordinate& c, const int& w);
+    size_t indexFromCoord(const coordinate& c);
 
-    bool coordCheck(const std::pair<float, float>& c) const;
-    std::pair<float, float> addCoords(const std::pair<float, float>& c1, const std::pair<float, float>& c2);
+    bool coordCheck(const coordinate& c) const;
 
     luxel* getLuxelFromIndex(const size_t& index);
-    luxel* getLuxelFromCoord(const std::pair<float, float>& c, bool coordCheck);
-    luxel* getLuxelFromCoord(const std::pair<float, float>& c);
+    luxel* getLuxelFromCoord(const coordinate& c, bool coordCheck);
+    luxel* getLuxelFromCoord(const coordinate& c);
 
     Canvas_Handler(int& varwidth, int& varheight);
 

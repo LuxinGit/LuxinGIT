@@ -8,25 +8,25 @@ void Draw_Handler::checkDrawData() {
     }
 }
 
-void Draw_Handler::drawPoint(const std::pair<float, float>& c) {
+void Draw_Handler::drawPoint(const coordinate& c) {
     luxel* ptr = CanvasHandler.getLuxelFromCoord(c);
     if (!ptr) return;
     ptr->colour = *activeColour;
     CanvasHandler.CursorHandler.pixelsDrawn += 1;
 }
-void Draw_Handler::drawPoint(const std::pair<float, float>& c, const bool useP) {
+void Draw_Handler::drawPoint(const coordinate& c, const bool useP) {
     if (useP) drawCircle(c, pen, true);
     else drawPoint(c);
     checkDrawData();
 }
 
 
-void Draw_Handler::drawLine(std::pair<int, int> origin, std::pair<int, int> destination, const bool useP) {
+void Draw_Handler::drawLine(const coordinate& origin, const coordinate& destination, const bool useP) {
 
-    int x0 = origin.first;
-    int y0 = origin.second;
-    int x1 = destination.first;
-    int y1 = destination.second;
+    int x0 = origin.x;
+    int y0 = origin.y;
+    int x1 = destination.x;
+    int y1 = destination.y;
 
     int dx = std::abs(x1 - x0);
     int dy = -std::abs(y1 - y0);
@@ -56,7 +56,7 @@ void Draw_Handler::drawLine(std::pair<int, int> origin, std::pair<int, int> dest
         }
     }
 }
-void Draw_Handler::drawCircle(const std::pair<float, float>& c, int radius, const bool fill, const bool useP) {
+void Draw_Handler::drawCircle(const coordinate& c, int radius, const bool fill, const bool useP) {
     int x = 0;
     int y = radius;
     int d = 1 - radius;
@@ -64,22 +64,22 @@ void Draw_Handler::drawCircle(const std::pair<float, float>& c, int radius, cons
     while (x <= y) {
 
         if (fill) {
-            drawLine({ c.first - x, c.second + y }, { c.first + x, c.second + y }, false);
-            drawLine({ c.first - x, c.second - y }, { c.first + x, c.second - y }, false);
+            drawLine({ c.x - x, c.y + y }, { c.x + x, c.y + y }, false);
+            drawLine({ c.x - x, c.y - y }, { c.x + x, c.y - y }, false);
 
-            drawLine({ c.first - y, c.second + x }, { c.first + y, c.second + x }, false);
-            drawLine({ c.first - y, c.second - x }, { c.first + y, c.second - x }, false);
+            drawLine({ c.x - y, c.y + x }, { c.x + y, c.y + x }, false);
+            drawLine({ c.x - y, c.y - x }, { c.x + y, c.y - x }, false);
         }
         else {
-            drawPoint({ c.first + x, c.second + y }, useP);
-            drawPoint({ c.first - x, c.second + y }, useP);
-            drawPoint({ c.first + x, c.second - y }, useP);
-            drawPoint({ c.first - x, c.second - y }, useP);
+            drawPoint({ c.x + x, c.y + y }, useP);
+            drawPoint({ c.x - x, c.y + y }, useP);
+            drawPoint({ c.x + x, c.y - y }, useP);
+            drawPoint({ c.x - x, c.y - y }, useP);
 
-            drawPoint({ c.first + y, c.second + x }, useP);
-            drawPoint({ c.first - y, c.second + x }, useP);
-            drawPoint({ c.first + y, c.second - x }, useP);
-            drawPoint({ c.first - y, c.second - x }, useP);
+            drawPoint({ c.x + y, c.y + x }, useP);
+            drawPoint({ c.x - y, c.y + x }, useP);
+            drawPoint({ c.x + y, c.y - x }, useP);
+            drawPoint({ c.x - y, c.y - x }, useP);
         }
 
         x++;
@@ -94,17 +94,17 @@ void Draw_Handler::drawCircle(const std::pair<float, float>& c, int radius, cons
     }
 }
 
-void Draw_Handler::fill(const std::pair<int, int>& oc, const std::array<uint8_t, 4>& nColour) {
+void Draw_Handler::fill(const coordinate& oc, const std::array<uint8_t, 4>& nColour) {
     
     const std::array<uint8_t, 4> oColour = CanvasHandler.getLuxelFromCoord(oc)->colour;
 
     if (oColour == nColour) return;
 
-    std::vector<std::pair<int, int>> pixelStack = { oc };
+    std::vector<coordinate> pixelStack = { oc };
 
     while (!pixelStack.empty()) {
 
-        std::pair<int, int> c = pixelStack.back();
+        coordinate c = pixelStack.back();
         luxel* l = CanvasHandler.getLuxelFromCoord(c);
 
         if (!l or l->colour != oColour) {
@@ -114,10 +114,10 @@ void Draw_Handler::fill(const std::pair<int, int>& oc, const std::array<uint8_t,
 
         l->colour = nColour;
         pixelStack.pop_back();
-        pixelStack.emplace_back(c.first + 1, c.second);
-        pixelStack.emplace_back(c.first - 1, c.second);
-        pixelStack.emplace_back(c.first, c.second + 1);
-        pixelStack.emplace_back(c.first, c.second - 1);
+        pixelStack.emplace_back(c.x + 1, c.y);
+        pixelStack.emplace_back(c.x - 1, c.y);
+        pixelStack.emplace_back(c.x, c.y + 1);
+        pixelStack.emplace_back(c.x, c.y - 1);
 
     }
 
@@ -156,7 +156,7 @@ void Draw_Handler::processCommand(const Command& command) {
         void Draw_Handler::processChangeColourCommand(const Command& command) {
             switch (static_cast<Command::META::CHANGE_COLOUR>(command.setting)) {
             case Command::META::CHANGE_COLOUR::DEFAULT:
-                drawColour = { 200, 200, 200, 255 };
+                drawColour = DEFAULT_DRAW_COLOUR;
                 break;
             case Command::META::CHANGE_COLOUR::USE_PAYLOAD:
                 drawColour = std::get<std::array<uint8_t, 4>>(command.payload);

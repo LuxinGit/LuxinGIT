@@ -5,7 +5,7 @@
 
 // CURSOR HANDLER
 
-static constexpr std::pair<float, float>        DEFAULT_CURSOR_POINT = { 100, 100 }; // IF YOU MAKE A CANVAS SMALLER THAN 100, 100 THAT'S ON YOU // ALSO THAT SHOULD STILL BE FINE
+static constexpr std::pair<float, float>        DEFAULT_CURSOR_POINT = { 100.0f, 100.0f }; // IF YOU MAKE A CANVAS SMALLER THAN 100, 100 THAT'S ON YOU // ALSO THAT SHOULD STILL BE FINE
 static constexpr int                            DEFAULT_DRAWSTEP = 1;
 static constexpr int                            DEFAULT_CROSSHAIR_RADIUS = 5; // DEPRECIATED - CURSOR RADIUS IS TAKING PENWIDTH AS COMMAND
 

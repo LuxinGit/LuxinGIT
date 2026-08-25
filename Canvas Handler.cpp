@@ -5,7 +5,6 @@ void luxel::resetLuxel() {
     colour = DEFAULT_BACKGROUND_COLOUR;
 }
 
-
 Canvas_Handler::Canvas_Handler(int& varwidth, int& varheight) :
     width(varwidth), height(varheight),
     CursorHandler(*this),
@@ -19,26 +18,23 @@ void Canvas_Handler::clearCanvas() {
     }
 }
 
-size_t Canvas_Handler::indexFromCoord(const std::pair<float, float>& c, const int& w) {
+size_t Canvas_Handler::indexFromCoord(const coordinate& c, const int& w) {
     // ASSUMES POSITIVE X/Y. INDEXING WITH THIS INDEX WITHOUT SIZE CHECKING MAY CAUSE OUT OF BOUNDARY MEMORY CRASH [IF COORD > LAST LUXEL INDEX].
-    return size_t(c.second) * w + size_t(c.first);
+    return size_t(c.y) * w + size_t(c.x);
 }
-size_t Canvas_Handler::indexFromCoord(const std::pair<float, float>& c)  {
+size_t Canvas_Handler::indexFromCoord(const coordinate& c)  {
     return indexFromCoord(c, width);
 }
 
-bool Canvas_Handler::coordCheck(const std::pair<float, float>& c) const {
-    if (c.first < 0 or c.first >= width) return false;
-    if (c.second < 0 or c.second >= height) return false;
+bool Canvas_Handler::coordCheck(const coordinate& c) const {
+    if (c.x < 0 or c.x >= width) return false;
+    if (c.y < 0 or c.y >= height) return false;
     return true;
 } 
-std::pair<float, float> Canvas_Handler::addCoords(const std::pair<float, float>& c1, const std::pair<float, float>& c2) {
-    return { c1.first + c2.first, c1.second + c2.second };
-}
 
 luxel* Canvas_Handler::getLuxelFromIndex(const size_t& index) { return &canvas[index]; }
-luxel* Canvas_Handler::getLuxelFromCoord(const std::pair<float, float>& c, bool coordCheck) { return &canvas[indexFromCoord(c)]; }
-luxel* Canvas_Handler::getLuxelFromCoord(const std::pair<float, float>& c) { return (coordCheck(c) ? getLuxelFromCoord(c, true) : nullptr); }
+luxel* Canvas_Handler::getLuxelFromCoord(const coordinate& c, bool coordCheck) { return &canvas[indexFromCoord(c)]; }
+luxel* Canvas_Handler::getLuxelFromCoord(const coordinate& c) { return (coordCheck(c) ? getLuxelFromCoord(c, true) : nullptr); }
 
 
 void Canvas_Handler::processCommand(const Command& command) {

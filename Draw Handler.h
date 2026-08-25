@@ -6,6 +6,7 @@
 #include "CONSTANTS.h"
 
 struct Canvas_Handler;
+struct coordinate;
 
 struct Draw_Handler {
 
@@ -30,11 +31,11 @@ struct Draw_Handler {
 
     void checkDrawData();
 
-    void drawPoint(const std::pair<float, float>& c);
-    void drawPoint(const std::pair<float, float>& c, const bool useP);
-    void drawLine(std::pair<int, int> origin, std::pair<int, int> destination, const bool useP);
-    void drawCircle(const std::pair<float, float>& c, int radius, const bool fill = false, const bool useP = false);
-    void fill(const std::pair<int, int>& origin, const std::array<uint8_t, 4>& nColour);
+    void drawPoint(const coordinate& c);
+    void drawPoint(const coordinate& c, const bool useP);
+    void drawLine(const coordinate& origin, const coordinate& destination, const bool useP);
+    void drawCircle(const coordinate& c, int radius, const bool fill = false, const bool useP = false);
+    void fill(const coordinate& origin, const std::array<uint8_t, 4>& nColour);
 
     static std::array<uint8_t, 4> getRandomColour();
 
