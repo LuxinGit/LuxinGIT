@@ -23,6 +23,7 @@ TO DO:
 3. drawBaseball();
 4. accept combo commands on keybindings.
 5. canvas resizing
+6. can usePen
 
 */
 

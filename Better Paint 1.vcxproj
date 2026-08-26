@@ -130,6 +130,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Action Handler.cpp" />
+    <ClCompile Include="GUI Handler.cpp" />
     <ClCompile Include="Luxin Paint.cpp">
       <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdcpp20</LanguageStandard>
       <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Release|x64'">stdcpp20</LanguageStandard>
@@ -154,6 +155,7 @@
     <ClInclude Include="COMMAND.h" />
     <ClInclude Include="Cursor Handler.h" />
     <ClInclude Include="Draw Handler.h" />
+    <ClInclude Include="GUI Handler.h" />
     <ClInclude Include="Keyboard Handler.h" />
     <ClInclude Include="Master Handler.h" />
     <ClInclude Include="Mouse Handler.h" />

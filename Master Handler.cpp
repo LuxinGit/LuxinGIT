@@ -7,10 +7,12 @@ Master_Handler::Master_Handler(int varwidth, int varheight) :
     KeyboardHandler(CommandHandler),
     MouseHandler(CanvasHandler.CursorHandler.deltaCursor, CommandHandler),
     ActionHandler(CanvasHandler),
-    SDLHandler(CanvasHandler),
-    CLIHandler(*this) 
+    SDLHandler(*this),
+    CLIHandler(*this),
+    GUIHandler(*this)
 {
     initialiseBindings();
+    SDLHandler.initialiseSDL(GUIHandler);
     if (ENABLE_CLI) CLIHandler.beginCLILoop();
 };
 

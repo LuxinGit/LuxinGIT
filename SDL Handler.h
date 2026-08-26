@@ -4,8 +4,10 @@
 #include <vector>
 
 struct luxel;
+struct Master_Handler;
 struct Canvas_Handler;
 struct Cursor_Handler;
+struct GUI_Handler;
 
 struct SDL_Handler {
 
@@ -16,12 +18,13 @@ struct SDL_Handler {
     std::vector<luxel>& canvas;
     int& canvasWidth, canvasHeight;
     Cursor_Handler& CursorHandler;
+    GUI_Handler* GUIHandler;
 
-    SDL_Handler(Canvas_Handler& varCanvH);
+    SDL_Handler(Master_Handler& varMH);
 
     ~SDL_Handler();
 
-    void initialiseSDL();
+    void initialiseSDL(GUI_Handler& varGH);
 
     void refreshPresent();
     
