@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <array>
+#include <string>
 
 struct coordinate {
     int x = 0;
@@ -49,6 +50,10 @@ static constexpr std::array<uint8_t, 4>			DEFAULT_DRAW_COLOUR = { 200, 200, 200,
 static constexpr std::array<uint8_t, 4>			DEFAULT_BACKGROUND_COLOUR = { 255, 255, 255, 255 };
 static constexpr int							DEFAULT_PENWIDTH = 2;
 static constexpr int							DEFAULT_PEN_MODE = 0; // DRAW
+
+// SDL HANDLER
+
+static constexpr const char*                    DEFAULT_APPLICATION_NAME = "Luxin Paint";
 
 // ENABLES
 

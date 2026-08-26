@@ -5,14 +5,17 @@
 
 struct luxel;
 struct Canvas_Handler;
+struct Cursor_Handler;
 
 struct SDL_Handler {
 
-    SDL_Window* Window =        nullptr;
-    SDL_Renderer* Renderer =    nullptr;
+    inline static SDL_Window*      Window;
+    inline static SDL_Renderer*    Renderer;
     SDL_Texture* Texture =      nullptr;
 
-    Canvas_Handler& CanvasHandler;
+    std::vector<luxel>& canvas;
+    int& canvasWidth, canvasHeight;
+    Cursor_Handler& CursorHandler;
 
     SDL_Handler(Canvas_Handler& varCanvH);
 
@@ -26,12 +29,9 @@ struct SDL_Handler {
 
 private:
 
-    void updateCanvasTexture() const;
-    void renderTexture() const;
+    static void updateCanvasTexture(SDL_Texture* texture, std::vector<luxel>& canvas, int pitch);
+    static void renderTexture(SDL_Texture* texture);
     void renderCrosshair() const;
     void renderPresent() const;
 
-    int initialiseWindow();
-    int initialiseRenderer();
-    int initialiseTexture();
 };

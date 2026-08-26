@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Better Paint 1.cpp">
+    <ClCompile Include="Luxin Paint.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="COMMAND.cpp">

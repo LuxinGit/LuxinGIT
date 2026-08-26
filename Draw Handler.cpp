@@ -132,7 +132,8 @@ void Draw_Handler::fill(const coordinate& oc, const std::array<uint8_t, 4>& nCol
 }
 void Draw_Handler::clearCanvas() {
     for (luxel& l : CanvasHandler.canvas) {
-        drawPoint(l, backgroundColour);
+        if (l.colour == backgroundColour) continue;
+        else drawPoint(l, backgroundColour);
     }
 }
 

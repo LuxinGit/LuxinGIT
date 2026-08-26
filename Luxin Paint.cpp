@@ -19,9 +19,11 @@
 /*
 TO DO:
 
-1. clearCanvas needs to be moved within /undo functionality
 2. Some better way to select colours. //include eyedropper ?
 3. drawBaseball();
+4. accept combo commands on keybindings.
+5. canvas resizing
+
 */
 
 int main()

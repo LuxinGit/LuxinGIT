@@ -3,17 +3,16 @@
 
 
 SDL_Handler::SDL_Handler(Canvas_Handler& varCanvH)
-    : CanvasHandler(varCanvH) { initialiseSDL(); }
+    : canvas(varCanvH.canvas), canvasHeight(varCanvH.height), canvasWidth(varCanvH.width), CursorHandler(varCanvH.CursorHandler) { initialiseSDL(); }
 SDL_Handler::~SDL_Handler() {
     cleanup();
 }
 
 void SDL_Handler::initialiseSDL() {
-    if (initialiseWindow()) return;
-    if (initialiseRenderer()) return;
-    if (initialiseTexture()) return;
-    SDL_UpdateTexture(Texture, nullptr, CanvasHandler.canvas.data(), CanvasHandler.width * sizeof(luxel));
-
+    Window = SDL_CreateWindow(DEFAULT_APPLICATION_NAME, canvasWidth, canvasHeight, 0);
+    Renderer = SDL_CreateRenderer(Window, nullptr);
+    Texture = SDL_CreateTexture(Renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, canvasWidth, canvasHeight);
+    updateCanvasTexture(Texture, canvas, canvasWidth * sizeof(luxel));
 }
 
 void SDL_Handler::cleanup() const {
@@ -23,44 +22,28 @@ void SDL_Handler::cleanup() const {
     SDL_Quit();
 }
 
-void SDL_Handler::updateCanvasTexture() const {
-    SDL_UpdateTexture(Texture, nullptr, CanvasHandler.canvas.data(), CanvasHandler.width * sizeof(luxel));
+void SDL_Handler::updateCanvasTexture(SDL_Texture* texture, std::vector<luxel>& canvas, int pitch) {
+    SDL_UpdateTexture(texture, nullptr, canvas.data(), pitch);
 }
-void SDL_Handler::renderTexture() const {
-    SDL_RenderTexture(Renderer, Texture, nullptr, nullptr);
+void SDL_Handler::renderTexture(SDL_Texture* texture) {
+    SDL_RenderTexture(Renderer, texture, nullptr, nullptr);
 }
 void SDL_Handler::renderPresent() const {
     SDL_RenderPresent(Renderer);
 }
 void SDL_Handler::renderCrosshair() const {
-    if (CanvasHandler.CursorHandler.enableCrosshair)
+    if (CursorHandler.enableCrosshair)
     {
-        auto [x, y] = CanvasHandler.CursorHandler.cursor;
-        int r = CanvasHandler.DrawHandler.pen;
+        auto [x, y] = CursorHandler.cursor;
+        int r = CursorHandler.CanvasHandler.DrawHandler.pen;
         SDL_RenderLine(Renderer, x - r, y, x + r, y);
         SDL_RenderLine(Renderer, x, y - r, x, y + r);
     }
 };
 void SDL_Handler::refreshPresent() {
-    CanvasHandler.CursorHandler.refreshCursor();
-    updateCanvasTexture();
-    renderTexture();
+    CursorHandler.refreshCursor();
+    updateCanvasTexture(Texture, canvas, canvasWidth * sizeof(luxel));
+    renderTexture(Texture);
     renderCrosshair();
     renderPresent();
-}
-
-int SDL_Handler::initialiseWindow() {
-    if (!SDL_Init(SDL_INIT_VIDEO))
-        return 1;
-
-    Window = SDL_CreateWindow("Better Paint", CanvasHandler.width, CanvasHandler.height, 0);
-    if (!Window) return 1; else return 0;
-}
-int SDL_Handler::initialiseRenderer() {
-    Renderer = SDL_CreateRenderer(Window, nullptr);
-    if (!Renderer) return 1; else return 0;
-}
-int SDL_Handler::initialiseTexture() {
-    Texture = SDL_CreateTexture(Renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, CanvasHandler.width, CanvasHandler.height);
-    if (!Texture) return 1; else return 0;
 }
