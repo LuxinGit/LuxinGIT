@@ -19,11 +19,12 @@
 /*
 TO DO:
 
+1. Save commands from command queue for later use
 2. Some better way to select colours. //include eyedropper ?
-3. drawBaseball();
+3. drawBaseball(); drawCock();
 4. accept combo commands on keybindings.
-5. canvas resizing
-6. can usePen
+5. canvas resizing <-
+6. 3d
 
 */
 
