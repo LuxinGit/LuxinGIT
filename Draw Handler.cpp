@@ -10,6 +10,7 @@ void Draw_Handler::checkDrawData() {
 
 void Draw_Handler::drawPoint(luxel& p, const std::array<uint8_t, 4>& colour) {
     std::array<uint8_t, 4>& pixelColour = p.colour;
+    if (pixelColour == colour) return;
     CanvasHandler.MasterHandler.ActionHandler.pixelChange(&p, pixelColour);
     pixelColour = colour;
     CanvasHandler.CursorHandler.pixelsDrawn += 1;
@@ -132,8 +133,7 @@ void Draw_Handler::fill(const coordinate& oc, const std::array<uint8_t, 4>& nCol
 }
 void Draw_Handler::clearCanvas() {
     for (luxel& l : CanvasHandler.canvas) {
-        if (l.colour == backgroundColour) continue;
-        else drawPoint(l, backgroundColour);
+        drawPoint(l, backgroundColour);
     }
 }
 
