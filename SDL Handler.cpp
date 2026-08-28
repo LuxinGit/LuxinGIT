@@ -20,6 +20,7 @@ SDL_Handler::~SDL_Handler() {
 
 void SDL_Handler::initialiseSDL(GUI_Handler& varGH) {
 	GUIHandler = &varGH;
+	SDL_SetWindowRelativeMouseMode(Window, false);
 }
 
 void SDL_Handler::cleanup() const {
@@ -47,12 +48,12 @@ void SDL_Handler::renderCrosshair() const {
 		SDL_RenderLine(Renderer, x, y - r, x, y + r);
 	}
 };
-void SDL_Handler::refreshPresent() {
-	//GUIHandler->beginFrame();
+void SDL_Handler::renderFrame() {
+	GUIHandler->beginFrame();
 	CursorHandler.refreshCursor();
 	updateCanvasTexture(Texture, canvas, canvasWidth * sizeof(luxel));
 	renderTexture(Texture);
-	//GUIHandler->render();
+	GUIHandler->render();
 	renderCrosshair();
 	renderPresent();
 }

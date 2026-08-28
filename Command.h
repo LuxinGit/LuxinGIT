@@ -265,6 +265,24 @@ enum class COMMAND_PROCESSOR_ID {
     MOUSE_HANDLER
 };
 
+struct GUI_METADATA {
+    enum class HEADER {
+        FILE = 0,
+        EDIT = 1, 
+        TOOLS = 2,
+        COUNT 
+    };
+
+    enum class FUNCTION_TYPE {
+        BINARY,
+        SLIDER
+    }; // to do push this out into separate structs that allow for more complicated ocnstruction of underlying functions
+
+    HEADER header;
+    FUNCTION_TYPE functionType;
+    std::string_view label;
+};
+
 struct Command_Definition {
 
     Command command;
@@ -273,6 +291,7 @@ struct Command_Definition {
     std::optional<SDL_Scancode> keyBinding;
     std::optional<SDL_MouseButtonFlags> mouseBinding;
     std::optional<std::string_view> cliBinding;
+    std::optional<GUI_METADATA> guiBinding;
 
 };
 
@@ -286,180 +305,232 @@ inline static const auto COMMAND_REPO = std::to_array<Command_Definition>({
         COMMAND_PROCESSOR_ID::CURSOR_HANDLER,
         SDL_SCANCODE_W,
         std::nullopt,
-        "up"
+        "up",
+        std::nullopt
     },
     {
         Command{COMMAND_ID::MOVE_DOWN, Command::MOVE::DIRECTION::DOWN, true},
         COMMAND_PROCESSOR_ID::CURSOR_HANDLER,
         SDL_SCANCODE_S,
         std::nullopt,
-        "down"
+        "down",
+        std::nullopt
     },
     {
         Command{COMMAND_ID::MOVE_LEFT, Command::MOVE::DIRECTION::LEFT, true},
         COMMAND_PROCESSOR_ID::CURSOR_HANDLER,
         SDL_SCANCODE_A,
         std::nullopt,
-        "left"
+        "left",
+        std::nullopt
     },
     {
         Command{COMMAND_ID::MOVE_RIGHT, Command::MOVE::DIRECTION::RIGHT, true},
         COMMAND_PROCESSOR_ID::CURSOR_HANDLER,
         SDL_SCANCODE_D,
         std::nullopt,
-        "right"
+        "right",
+        std::nullopt
     },
     {
         Command{COMMAND_ID::MOVE_RESET, Command::MOVE::SET::RESET_TO_ORIGIN, false},
         COMMAND_PROCESSOR_ID::CURSOR_HANDLER,
         SDL_SCANCODE_Q,
         std::nullopt,
-        "reset"
+        "reset",
+        std::nullopt
     },
     {
         Command{COMMAND_ID::MOVE_SET_POINT, Command::MOVE::SET::USE_PAYLOAD, false, DEFAULT_CURSOR_POINT},
         COMMAND_PROCESSOR_ID::CURSOR_HANDLER,
         std::nullopt,
         std::nullopt,
-        "move"
+        "move",
+        std::nullopt
     },
     {
         Command{COMMAND_ID::MOVE_SAVE_ORIGIN, Command::META::SAVE_ORIGIN::NORMAL, false},
         COMMAND_PROCESSOR_ID::CURSOR_HANDLER,
         SDL_SCANCODE_2,
         std::nullopt,
-        "save_origin"
+        "save_origin",
+        std::nullopt
     },
+
+    // DRAW
     {
         Command{COMMAND_ID::DRAW_CIRCLE, Command::DRAW::CIRCLE::NORMAL, false},
         COMMAND_PROCESSOR_ID::DRAW_HANDLER,
         SDL_SCANCODE_G,
         std::nullopt,
-        "circle"
+        "circle",
+        std::nullopt
     },
     {
         Command{COMMAND_ID::DRAW_CIRCLE_RAINBOW, Command::DRAW::CIRCLE::RAINBOW, false},
         COMMAND_PROCESSOR_ID::DRAW_HANDLER,
         SDL_SCANCODE_L,
         std::nullopt,
-        "rainbow_circle"
+        "rainbow_circle",
+        std::nullopt
     },
     {
         Command{COMMAND_ID::DRAW_FILL_PAYLOAD, Command::DRAW::FILL::USE_PAYLOAD, false},
         COMMAND_PROCESSOR_ID::DRAW_HANDLER,
         std::nullopt,
         std::nullopt,
-        "fill"
+        "fill",
+        std::nullopt
     },
     {
         Command{COMMAND_ID::DRAW_FILL_DRAWCOLOUR, Command::DRAW::FILL::USE_DRAW_COLOUR, false},
         COMMAND_PROCESSOR_ID::DRAW_HANDLER,
         SDL_SCANCODE_F,
         std::nullopt,
+        std::nullopt,
         std::nullopt
     },
+
+    // COLOUR
     {
         Command{COMMAND_ID::COLOUR_RESET, Command::META::CHANGE_COLOUR::DEFAULT, false},
         COMMAND_PROCESSOR_ID::CANVAS_HANDLER,
         std::nullopt,
         std::nullopt,
-        "default_colour"
+        "default_colour",
+        std::nullopt
     },
     {
         Command{COMMAND_ID::COLOUR_RANDOM, Command::META::CHANGE_COLOUR::RANDOM, false},
         COMMAND_PROCESSOR_ID::DRAW_HANDLER,
         SDL_SCANCODE_J,
         std::nullopt,
-        "random_colour"
+        "random_colour",
+        std::nullopt
     },
     {
         Command{COMMAND_ID::COLOUR_SET, Command::META::CHANGE_COLOUR::USE_PAYLOAD, false, DEFAULT_DRAW_COLOUR},
         COMMAND_PROCESSOR_ID::DRAW_HANDLER,
         std::nullopt,
         std::nullopt,
-        "colour"
+        "colour",
+        std::nullopt
     },
+
+    // PEN MODE
     {
         Command{COMMAND_ID::PENMODE_DRAW, Command::META::CHANGE_PENMODE::DRAW, false},
         COMMAND_PROCESSOR_ID::DRAW_HANDLER,
         SDL_SCANCODE_Y,
         std::nullopt,
-        "penmode_draw"
+        "penmode_draw",
+        GUI_METADATA{
+            GUI_METADATA::HEADER::TOOLS,
+            GUI_METADATA::FUNCTION_TYPE::BINARY,
+            "Draw"
+        }
     },
     {
         Command{COMMAND_ID::PENMODE_RUBBER, Command::META::CHANGE_PENMODE::RUBBER, false},
         COMMAND_PROCESSOR_ID::DRAW_HANDLER,
         SDL_SCANCODE_U,
         std::nullopt,
-        "penmode_rubber"
+        "penmode_rubber",
+        GUI_METADATA{
+            GUI_METADATA::HEADER::TOOLS,
+            GUI_METADATA::FUNCTION_TYPE::BINARY,
+            "Rubber"
+        }
     },
     {
         Command{COMMAND_ID::PENMODE_RAINBOW, Command::META::CHANGE_PENMODE::RAINBOW, false},
         COMMAND_PROCESSOR_ID::DRAW_HANDLER,
         SDL_SCANCODE_E,
         std::nullopt,
-        "penmode_rainbow"
+        "penmode_rainbow",
+        GUI_METADATA{
+            GUI_METADATA::HEADER::TOOLS,
+            GUI_METADATA::FUNCTION_TYPE::BINARY,
+            "Rainbow"
+        }
     },
+
+    // PEN
     {
         Command{COMMAND_ID::PEN_DOWN, Command::META::CHANGE_PENMODE::PEN_DOWN, false, 0},
         COMMAND_PROCESSOR_ID::DRAW_HANDLER,
         SDL_SCANCODE_1,
         std::nullopt,
-        "pen"
+        "pen",
+        std::nullopt
     },
     {
         Command{COMMAND_ID::PEN_HELD_DOWN, Command::META::CHANGE_PENMODE::PEN_DOWN, true, 1},
         COMMAND_PROCESSOR_ID::DRAW_HANDLER,
         std::nullopt,
         SDL_BUTTON_LMASK,
+        std::nullopt,
         std::nullopt
     },
+
+    // DRAW STEP
     {
         Command{COMMAND_ID::DRAWSTEP_DECREASE, Command::META::CHANGE_DRAWSTEP::ADD_PAYLOAD, false, -1},
         COMMAND_PROCESSOR_ID::CURSOR_HANDLER,
         SDL_SCANCODE_Z,
         std::nullopt,
-        "step_down"
+        "step_down",
+        std::nullopt
     },
     {
         Command{COMMAND_ID::DRAWSTEP_INCREASE, Command::META::CHANGE_DRAWSTEP::ADD_PAYLOAD, false, 1},
         COMMAND_PROCESSOR_ID::CURSOR_HANDLER,
         SDL_SCANCODE_X,
         std::nullopt,
-        "step_up"
+        "step_up",
+        std::nullopt
     },
     {
         Command{COMMAND_ID::DRAWSTEP_SET, Command::META::CHANGE_DRAWSTEP::SET_TO_PAYLOAD, false, 1},
         COMMAND_PROCESSOR_ID::CURSOR_HANDLER,
         std::nullopt,
         std::nullopt,
-        "step_set"
+        "step_set",
+        std::nullopt
     },
+
+    // PEN WIDTH
     {
         Command{COMMAND_ID::PEN_WIDTH_DECREASE, Command::META::CHANGE_PEN_WIDTH::ADD_PAYLOAD, false, -1},
         COMMAND_PROCESSOR_ID::DRAW_HANDLER,
         SDL_SCANCODE_V,
         std::nullopt,
-        "pen_thinner"
+        "pen_thinner",
+        std::nullopt
     },
     {
         Command{COMMAND_ID::PEN_WIDTH_INCREASE, Command::META::CHANGE_PEN_WIDTH::ADD_PAYLOAD, false, 1},
         COMMAND_PROCESSOR_ID::DRAW_HANDLER,
         SDL_SCANCODE_B,
         std::nullopt,
-        "pen_thicker"
+        "pen_thicker",
+        std::nullopt
     },
     {
         Command{COMMAND_ID::PEN_SET, Command::META::CHANGE_PEN_WIDTH::SET_TO_PAYLOAD, false, 1},
         COMMAND_PROCESSOR_ID::DRAW_HANDLER,
         std::nullopt,
         std::nullopt,
-        "pen_set"
+        "pen_set",
+        std::nullopt
     },
+
+    // INPUT
     {
         Command{COMMAND_ID::INPUT_CLI_ENABLE, Command::APP::INPUT_MODE::CLI, false},
         COMMAND_PROCESSOR_ID::CLI_HANDLER,
         SDL_SCANCODE_0,
+        std::nullopt,
         std::nullopt,
         std::nullopt
     },
@@ -468,54 +539,75 @@ inline static const auto COMMAND_REPO = std::to_array<Command_Definition>({
         COMMAND_PROCESSOR_ID::MOUSE_HANDLER,
         SDL_SCANCODE_3,
         std::nullopt,
+        std::nullopt,
         std::nullopt
     },
+
+    // RESET
     {
         Command{COMMAND_ID::RESET_CANVAS, Command::META::RESET::RESET_CANVAS, false},
         COMMAND_PROCESSOR_ID::DRAW_HANDLER,
         SDL_SCANCODE_C,
         std::nullopt,
-        "reset_canvas"
+        "reset_canvas",
+        GUI_METADATA{
+            GUI_METADATA::HEADER::FILE,
+            GUI_METADATA::FUNCTION_TYPE::BINARY,
+            "Reset Canvas"
+        }
     },
     {
         Command{COMMAND_ID::RESET_ACTION_QUEUE, Command::META::RESET::RESET_ACTION_QUEUE, false},
         COMMAND_PROCESSOR_ID::ACTION_HANDLER,
         std::nullopt,
         std::nullopt,
-        "reset_action_queue"
+        "reset_action_queue",
+        std::nullopt
     },
     {
         Command{COMMAND_ID::RESET_ALL, Command::META::RESET::RESET_ALL, false},
         COMMAND_PROCESSOR_ID::CANVAS_HANDLER,
         SDL_SCANCODE_R,
         std::nullopt,
-        "reset_all"
+        "reset_all",
+        std::nullopt
     },
     {
         Command{COMMAND_ID::RESET_CURSOR, Command::META::RESET::RESET_CURSOR, false},
         COMMAND_PROCESSOR_ID::CURSOR_HANDLER,
         SDL_SCANCODE_9,
         std::nullopt,
-        "reset_cursor"
+        "reset_cursor",
+        std::nullopt
     },
+
+    // UNDO / REDO
     {
         Command{COMMAND_ID::UNDO, Command::APP::UNDO_REDO::UNDO, false},
         COMMAND_PROCESSOR_ID::ACTION_HANDLER,
         SDL_SCANCODE_N,
         std::nullopt,
-        "undo"
+        "undo",
+        GUI_METADATA{
+            GUI_METADATA::HEADER::EDIT,
+            GUI_METADATA::FUNCTION_TYPE::BINARY,
+            "Undo"
+        }
     },
     {
         Command{COMMAND_ID::REDO, Command::APP::UNDO_REDO::REDO, false},
         COMMAND_PROCESSOR_ID::ACTION_HANDLER,
         SDL_SCANCODE_M,
         std::nullopt,
-        "redo"
+        "redo",
+        GUI_METADATA{
+            GUI_METADATA::HEADER::EDIT,
+            GUI_METADATA::FUNCTION_TYPE::BINARY,
+            "Redo"
+        }
     }
 
     });
-
-
 /* TO ADD COMMANDS
 * 
 *   1. Create COMMAND_ID. This should describe what the action does.

@@ -1,18 +1,8 @@
 // Better Paint 1.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
-#include <iostream>
-#include <string>
 #include <SDL3/SDL.h>
-#include <vector>
-#include <array>
-#include <cmath>
-#include <cstdlib>
-#include <map>
-#include <unordered_map>
-#include <algorithm>
-#include <variant>
-
+#include <imgui.h>
 #include "COMMAND.h"
 #include "Master Handler.h"
 
@@ -40,11 +30,13 @@ int main()
 
         while (SDL_PollEvent(&event))
         {
+            ImGui_ImplSDL3_ProcessEvent(&event);
+
             if (event.type == SDL_EVENT_QUIT)
                 running = false;  
         }
 
-        MasterHandler.processCommands();
+        MasterHandler.renderFrame();
 
     }
 

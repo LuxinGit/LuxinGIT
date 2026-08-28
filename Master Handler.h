@@ -30,7 +30,7 @@ public:
 
     Master_Handler(int varwidth, int varheight);
 
-    void processCommands();
+    void renderFrame();
 
     void cleanup() const;
 

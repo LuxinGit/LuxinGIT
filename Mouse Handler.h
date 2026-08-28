@@ -7,7 +7,7 @@
 #include "CONSTANTS.h"
 #include "COMMAND.h"
 
-struct Command_Handler;
+struct Master_Handler;
 
 struct Mouse_Handler {
 	
@@ -16,7 +16,7 @@ private:
 	bool enable_mouse = ENABLE_MOUSE;
 	float& x;
 	float& y;
-	Command_Handler& CommandHandler;
+	Master_Handler& MasterHandler;
 
 public:
 
@@ -24,7 +24,7 @@ public:
 
 	void harvestMouseState();
 
-	Mouse_Handler(std::pair<float, float>& cursor, Command_Handler& varCommH);
+	Mouse_Handler(std::pair<float, float>& cursor, Master_Handler& varMasH);
 
 
 	void processCommand(const Command& command);

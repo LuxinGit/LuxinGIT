@@ -5,7 +5,7 @@ Master_Handler::Master_Handler(int varwidth, int varheight) :
     CanvasHandler(width, height, *this),
     CommandHandler(*this),
     KeyboardHandler(CommandHandler),
-    MouseHandler(CanvasHandler.CursorHandler.deltaCursor, CommandHandler),
+    MouseHandler(CanvasHandler.CursorHandler.deltaCursor, *this),
     ActionHandler(CanvasHandler),
     SDLHandler(*this),
     CLIHandler(*this),
@@ -17,11 +17,11 @@ Master_Handler::Master_Handler(int varwidth, int varheight) :
 };
 
 
-void Master_Handler::processCommands() {
+void Master_Handler::renderFrame() {
     KeyboardHandler.harvestKeyboardState();
     MouseHandler.harvestMouseState();
     CommandHandler.processCommands();
-    SDLHandler.refreshPresent();
+    SDLHandler.renderFrame();
 }
 
 void Master_Handler::cleanup() const {
@@ -40,7 +40,10 @@ void Master_Handler::initialiseBindings() {
         if (def.mouseBinding)
             MouseHandler.mouseBindings.emplace(*def.mouseBinding, ID);
 
-        if (def.cliBinding)
+        if (def.cliBinding) {
             CLIHandler.stringMapping.emplace(*def.cliBinding, ID);
+        }
+
+        GUIHandler.initialiseBinding(def);
     }
 }

@@ -1,5 +1,5 @@
 #include "Mouse Handler.h"
-#include "Command Handler.h"
+#include "Master Handler.h"
 
 #include <vector>
 
@@ -8,16 +8,17 @@
 void Mouse_Handler::harvestMouseState() {
 
     if (!enable_mouse) return;
+    if (MasterHandler.GUIHandler.wantsMouse()) return;
 
     SDL_MouseButtonFlags mouseState = SDL_GetMouseState(&x, &y);
 
     for (const auto& [button, command] : mouseBindings) 
-        if (mouseState & button) CommandHandler.constructCommand(command);
+        if (mouseState & button) MasterHandler.CommandHandler.constructCommand(command);
 
 }
 
-Mouse_Handler::Mouse_Handler(std::pair<float, float>& cursor, Command_Handler& varCommH)
-    : x(cursor.first), y(cursor.second), CommandHandler(varCommH) {
+Mouse_Handler::Mouse_Handler(std::pair<float, float>& cursor, Master_Handler& varMasH)
+    : x(cursor.first), y(cursor.second), MasterHandler(varMasH) {
     if (enable_mouse) SDL_HideCursor();
     
 }

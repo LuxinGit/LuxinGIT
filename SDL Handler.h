@@ -26,7 +26,7 @@ struct SDL_Handler {
 
     void initialiseSDL(GUI_Handler& varGH);
 
-    void refreshPresent();
+    void renderFrame();
     
     void cleanup() const;
 
