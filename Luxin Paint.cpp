@@ -8,13 +8,13 @@
 
 /*
 TO DO:
-
-1. Save commands from command queue for later use
-2. Some better way to select colours. //include eyedropper ?
-3. drawBaseball(); drawCock();
-4. accept combo commands on keybindings.
-5. canvas resizing <-
-6. 3d
+    
+    keybind reduce / increase brightness
+    keybind remappings
+    Save commands from command queue for later use
+    drawBaseball(); drawCock();
+    accept combo commands on keybindings.
+    3d
 
 */
 
