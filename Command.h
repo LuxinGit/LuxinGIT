@@ -28,6 +28,9 @@ enum class COMMAND_ID {
     DRAW_FILL_PAYLOAD,
     DRAW_FILL_DRAWCOLOUR,
 
+    CANVAS_RESIZE_SET_PAYLOAD,
+    CANVAS_RESIZE_ADD_PAYLOAD,
+
     COLOUR_RESET,
     COLOUR_RANDOM,
     COLOUR_SET_DRAW,
@@ -151,6 +154,7 @@ public:
                 CHANGE_PENMODE,
                 CHANGE_PEN_WIDTH,
                 SAVE_ORIGIN,
+                CANVAS_CHANGE_SIZE
             };
 
             enum class RESET {
@@ -188,6 +192,11 @@ public:
                 CONTINUOUS = 1
             };
 
+            enum class CANVAS_CHANGE_SIZE {
+                ADD_PAYLOAD = 0,
+                SET_TO_PAYLOAD = 1
+            };
+
         private:
 
             META(ACTION varAction, int varSetting);
@@ -203,6 +212,7 @@ public:
             META(CHANGE_PENMODE varSetting);
             META(CHANGE_PEN_WIDTH varSetting);
             META(SAVE_ORIGIN varSetting);
+            META(CANVAS_CHANGE_SIZE varSetting);
 
         };
         struct APP {
@@ -668,8 +678,17 @@ inline static const auto COMMAND_REPO = std::to_array<Command_Definition>({
         GUI_METADATA{
             GUI_METADATA::HEADER::EDIT,
             "Redo"
-        }
-    }
+        },
+
+    },
+    {
+        Command{COMMAND_ID::CANVAS_RESIZE_SET_PAYLOAD, Command::META::CANVAS_CHANGE_SIZE::SET_TO_PAYLOAD, false, std::pair<float,float>{400.0f, 400.0f}},
+        COMMAND_PROCESSOR_ID::CANVAS_HANDLER,
+        SDL_SCANCODE_7,
+        std::nullopt,
+        "resize",
+        std::nullopt
+    },
 
     });
 /* TO ADD COMMANDS

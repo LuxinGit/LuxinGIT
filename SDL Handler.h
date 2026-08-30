@@ -16,7 +16,8 @@ struct SDL_Handler {
     SDL_Texture* Texture =      nullptr;
 
     std::vector<luxel>& canvas;
-    int& canvasWidth, canvasHeight;
+    int& canvasWidth;
+    int& canvasHeight;
     Cursor_Handler& CursorHandler;
     GUI_Handler* GUIHandler;
     bool* enableMouse;
@@ -24,6 +25,10 @@ struct SDL_Handler {
     SDL_Handler(Master_Handler& varMH);
 
     ~SDL_Handler();
+
+    void initialiseTexture();
+
+    void registerCanvasSizeChange();
 
     void initialiseSDL(GUI_Handler& varGH, bool* varenableMouse);
 

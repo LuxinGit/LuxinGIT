@@ -6,6 +6,28 @@ void luxel::resetLuxel() {
     colour = DEFAULT_BACKGROUND_COLOUR;
 }
 
+coordinate Canvas_Handler::coordinateFromIndex(const size_t index, const int varW) {
+    coordinate c(0, 0);
+    c.x = index % varW; c.y = static_cast<int>(index / varW);
+    return c;
+}
+void Canvas_Handler::updateCanvasSize(const int vW, const int vH)
+{
+    std::vector<luxel> ret(vW * vH);
+    for (int i = 0; i < canvas.size(); i++) {
+        coordinate curC = coordinateFromIndex(i, width);
+        if (curC.x >= vW or curC.y >= vH) continue;
+        ret[indexFromCoord(curC, vW)] = canvas[i];
+    }
+
+    canvas  =    std::move(ret);
+    width   =    vW;
+    height  =    vH;
+
+    MasterHandler.ActionHandler.resetActionQueue();
+    MasterHandler.SDLHandler.registerCanvasSizeChange();
+}
+
 Canvas_Handler::Canvas_Handler(int& varwidth, int& varheight, Master_Handler& varMH) :
     width(varwidth), height(varheight),
     MasterHandler(varMH),
@@ -48,6 +70,9 @@ void Canvas_Handler::processCommand(const Command& command) {
         case Action::RESET:
             processResetCommand(command);
             break;
+        case Action::CANVAS_CHANGE_SIZE:
+            processCanvasSizeCommand(command);
+            break;
         };
     }
         void Canvas_Handler::processResetCommand(const Command& command) {
@@ -62,5 +87,22 @@ void Canvas_Handler::processCommand(const Command& command) {
                 CursorHandler.drawStep = DEFAULT_DRAWSTEP_CUR;
                 DrawHandler.pen = DEFAULT_PENWIDTH_CUR;
                 break;
+            }
+        }
+
+        void Canvas_Handler::processCanvasSizeCommand(const Command& command) {
+            switch (static_cast<Command::META::CANVAS_CHANGE_SIZE>(command.setting)) {
+            case Command::META::CANVAS_CHANGE_SIZE::ADD_PAYLOAD:
+            {
+                std::pair<float, float> payload = std::get<std::pair<float, float>>(command.payload);
+                updateCanvasSize(width + static_cast<int>(payload.first), height + static_cast<int>(payload.second));
+                break;
+            }
+            case Command::META::CANVAS_CHANGE_SIZE::SET_TO_PAYLOAD:
+            {
+                std::pair<float, float> payload = std::get<std::pair<float, float>>(command.payload);
+                updateCanvasSize(static_cast<int>(payload.first), static_cast<int>(payload.second));
+                break;
+            }
             }
         }

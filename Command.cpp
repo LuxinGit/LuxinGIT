@@ -82,6 +82,8 @@ Command::META::META(ACTION varAction, int varSetting)
         : META(ACTION::CHANGE_PEN_WIDTH, static_cast<int>(varSetting)) {}
     Command::META::META(SAVE_ORIGIN varSetting)
         : META(ACTION::SAVE_ORIGIN, static_cast<int>(varSetting)) {}
+    Command::META::META(CANVAS_CHANGE_SIZE varSetting)
+        : META(ACTION::CANVAS_CHANGE_SIZE, static_cast<int>(varSetting)) {}
 
 
 Command::APP::APP(ACTION varAction, int varSetting) : action(varAction), setting(varSetting) {}

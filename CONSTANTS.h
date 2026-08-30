@@ -24,6 +24,7 @@ struct coordinate {
     coordinate(const std::pair<int, int>& varC) : x(varC.first), y(varC.second) {}
     coordinate(const float& varfx, const float& varfy) : x(static_cast<int>(varfx)), y(static_cast<int>(varfy)) {}
     coordinate(const std::pair<float, float>& varfC) : coordinate(varfC.first, varfC.second) {}
+    coordinate(const long long& varx, const long long& vary) : coordinate(static_cast<int>(varx), static_cast<int>(vary)) {}
 
 };
 

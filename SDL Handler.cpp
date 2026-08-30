@@ -11,11 +11,21 @@ SDL_Handler::SDL_Handler(Master_Handler& varMH) :
 {
 	Window		= SDL_CreateWindow(DEFAULT_APPLICATION_NAME, canvasWidth, canvasHeight, 0);
 	Renderer	= SDL_CreateRenderer(Window, nullptr);
-	Texture		= SDL_CreateTexture(Renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, canvasWidth, canvasHeight);
+	initialiseTexture();
 	updateCanvasTexture(Texture, canvas, canvasWidth * sizeof(luxel));
 }
 SDL_Handler::~SDL_Handler() {
 	cleanup();
+}
+
+void SDL_Handler::initialiseTexture() {
+	Texture = SDL_CreateTexture(Renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, canvasWidth, canvasHeight);
+}
+
+void SDL_Handler::registerCanvasSizeChange() {
+	SDL_DestroyTexture(Texture);
+	SDL_SetWindowSize(Window, canvasWidth, canvasHeight);
+	initialiseTexture();
 }
 
 void SDL_Handler::initialiseSDL(GUI_Handler& varGH, bool* varenableMouse) {

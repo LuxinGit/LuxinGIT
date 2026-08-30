@@ -29,6 +29,9 @@ struct Canvas_Handler {
     luxel* getLuxelFromCoord(const coordinate& c, bool coordCheck);
     luxel* getLuxelFromCoord(const coordinate& c);
 
+    static coordinate coordinateFromIndex(const size_t index, const int varW);
+
+    void updateCanvasSize(const int width, const int height);
     Canvas_Handler(int& varwidth, int& varheight, Master_Handler& varMH);
 
     void processCommand(const Command& command);
@@ -36,5 +39,6 @@ struct Canvas_Handler {
 private:
         void processMetaCommand(const Command& command);
             void processResetCommand(const Command& command);
+            void processCanvasSizeCommand(const Command& command);
 
 };
