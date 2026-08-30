@@ -4,6 +4,9 @@
 #include "SDL3/SDL.h"
 
 void Keyboard_Handler::harvestKeyboardState() {
+
+    if (ImGui::GetIO().WantCaptureKeyboard) return;
+
     const bool* keyboardState = SDL_GetKeyboardState(nullptr);
     for (const auto& [scancode, id] : keyBindings) {
         if (keyboardState[scancode] &&

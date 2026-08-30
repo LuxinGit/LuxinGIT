@@ -30,12 +30,12 @@ struct GUI_Handler {
 	void menu(const std::string& name, const std::vector<COMMAND_ID>& commands);
 		void menuItem(const COMMAND_ID&);
 			void binaryMenuItem(const COMMAND_ID&, GUI_METADATA&);
-			void sliderMenuItem(const COMMAND_ID&, GUI_METADATA&);
+			void nonbinaryMenuItem(const COMMAND_ID&, GUI_METADATA&);
 
 	void checkForPopouts();
 		bool renderPopout(const COMMAND_ID&);
-			bool sliderPopout(const COMMAND_ID& ID, GUI_METADATA& md);
-
+			void sliderPopout(const COMMAND_ID& ID, GUI_METADATA& md);
+			void colourPopout(const COMMAND_ID& ID, GUI_METADATA& md);
 
 	void renderMMBar();
 

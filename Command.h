@@ -30,7 +30,8 @@ enum class COMMAND_ID {
 
     COLOUR_RESET,
     COLOUR_RANDOM,
-    COLOUR_SET,
+    COLOUR_SET_DRAW,
+    COLOUR_SET_BACKGROUND,
 
     PENMODE_DRAW,
     PENMODE_RUBBER,
@@ -160,8 +161,9 @@ public:
             };
             enum class CHANGE_COLOUR {
                 DEFAULT = 0,
-                USE_PAYLOAD = 1,
-                RANDOM = 2
+                USE_PAYLOAD_DRAW = 1,
+                USE_PAYLOAD_BACKGROUND = 2,
+                RANDOM = 3
             };
             enum class CHANGE_DRAWSTEP {
                 ADD_PAYLOAD = 0,
@@ -277,7 +279,8 @@ struct GUI_METADATA {
 
     enum class FUNCTION_TYPE {
         BINARY,
-        SLIDER
+        SLIDER,
+        COLOUR
     };
 
     struct SLIDER_METADATA {
@@ -290,15 +293,25 @@ struct GUI_METADATA {
         static int* resolveDrawstep(Master_Handler&);
     };
 
+    struct COLOUR_METADATA {
+        using Resolver = std::array<uint8_t, 4>* (*)(Master_Handler&);
+        Resolver getUnderlying;
+        std::array<uint8_t, 4>* underlying = nullptr;
+        static std::array<uint8_t, 4>* resolveDrawColourChange(Master_Handler& varMH);
+        static std::array<uint8_t, 4>* resolveBackgroundColourChange(Master_Handler& varMH);
+    };
+
     HEADER header;
     FUNCTION_TYPE functionType;
     std::string_view label;
-    std::variant<std::monostate, SLIDER_METADATA> metadata;
+    std::variant<std::monostate, SLIDER_METADATA, COLOUR_METADATA> metadata;
 
     GUI_METADATA(HEADER varH, std::string_view varL) :
         header(varH), functionType(FUNCTION_TYPE::BINARY), label(varL) {}
     GUI_METADATA(HEADER varH, std::string_view varL, SLIDER_METADATA varMD)
         : header(varH), functionType(FUNCTION_TYPE::SLIDER), label(varL), metadata(varMD) {}
+    GUI_METADATA(HEADER varH, std::string_view varL, COLOUR_METADATA varMD)
+        : header(varH), functionType(FUNCTION_TYPE::COLOUR), label(varL), metadata(varMD) {}
 };
 
 struct Command_Definition {
@@ -427,12 +440,32 @@ inline static const auto COMMAND_REPO = std::to_array<Command_Definition>({
         std::nullopt
     },
     {
-        Command{COMMAND_ID::COLOUR_SET, Command::META::CHANGE_COLOUR::USE_PAYLOAD, false, DEFAULT_DRAW_COLOUR},
+        Command{COMMAND_ID::COLOUR_SET_DRAW, Command::META::CHANGE_COLOUR::USE_PAYLOAD_DRAW, false, DEFAULT_DRAW_COLOUR},
         COMMAND_PROCESSOR_ID::DRAW_HANDLER,
         std::nullopt,
         std::nullopt,
-        "colour",
-        std::nullopt
+        "colour_draw",
+        GUI_METADATA{
+            GUI_METADATA::HEADER::TOOLS,
+            "Set draw colour",
+            GUI_METADATA::COLOUR_METADATA{
+                GUI_METADATA::COLOUR_METADATA::resolveDrawColourChange
+            }
+        }
+    },
+    {
+		Command{COMMAND_ID::COLOUR_SET_BACKGROUND, Command::META::CHANGE_COLOUR::USE_PAYLOAD_BACKGROUND, false, DEFAULT_DRAW_COLOUR},
+		COMMAND_PROCESSOR_ID::DRAW_HANDLER,
+		std::nullopt,
+		std::nullopt,
+		"colour_background",
+        GUI_METADATA{
+            GUI_METADATA::HEADER::TOOLS,
+            "Set background colour",
+            GUI_METADATA::COLOUR_METADATA{
+                GUI_METADATA::COLOUR_METADATA::resolveBackgroundColourChange
+            }
+        }
     },
 
     // PEN MODE

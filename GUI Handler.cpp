@@ -31,11 +31,19 @@ void GUI_Handler::initialiseBinding(const Command_Definition& definition) {
 
     GUI_METADATA binding = *definition.guiBinding;
     switch (binding.functionType) {
-    case GUI_METADATA::FUNCTION_TYPE::SLIDER:
-        GUI_METADATA::SLIDER_METADATA& sMD = std::get<GUI_METADATA::SLIDER_METADATA>(binding.metadata);
-        sMD.underlying = sMD.getUnderlying(MasterHandler);
-        break;
-    }
+        case GUI_METADATA::FUNCTION_TYPE::SLIDER:
+        {
+            GUI_METADATA::SLIDER_METADATA& sMD = std::get<GUI_METADATA::SLIDER_METADATA>(binding.metadata);
+            sMD.underlying = sMD.getUnderlying(MasterHandler);
+            break;
+        }
+        case GUI_METADATA::FUNCTION_TYPE::COLOUR:
+        {
+            GUI_METADATA::COLOUR_METADATA& cMD = std::get<GUI_METADATA::COLOUR_METADATA>(binding.metadata);
+            cMD.underlying = cMD.getUnderlying(MasterHandler);
+            break;
+        }
+        }
     labelMapping.emplace(definition.command.ID, std::move(binding));
 }
 
@@ -61,8 +69,8 @@ void GUI_Handler::menu(const std::string& name, const std::vector<COMMAND_ID>& c
         case type::BINARY:
             binaryMenuItem(ID, md);
             break;
-        case type::SLIDER:
-            sliderMenuItem(ID, md);
+        default:
+            nonbinaryMenuItem(ID, md);
             break;
         }
     }
@@ -71,7 +79,7 @@ void GUI_Handler::menu(const std::string& name, const std::vector<COMMAND_ID>& c
                 MasterHandler.CommandHandler.constructCommand(ID);
             }
         }
-        void GUI_Handler::sliderMenuItem(const COMMAND_ID& ID, GUI_METADATA& md) {
+        void GUI_Handler::nonbinaryMenuItem(const COMMAND_ID& ID, GUI_METADATA& md) {
         
             if (ImGui::MenuItem(md.label.data())) {
                 if (openPopouts.contains(ID))
@@ -93,40 +101,61 @@ void GUI_Handler::checkForPopouts() {
         openPopouts.erase(cID);
     }
 }
-    bool GUI_Handler::sliderPopout(const COMMAND_ID& ID, GUI_METADATA& md) {
-        bool open = true;
-        ImGui::Begin(md.label.data(), &open);
-        GUI_METADATA::SLIDER_METADATA& sMD = std::get<GUI_METADATA::SLIDER_METADATA>(md.metadata);
-        int payload = *sMD.underlying;
-
-        if (ImGui::SliderInt(
-            md.label.data(),
-            &payload,
-            sMD.minimum,
-            sMD.maximum))
-        {
-            MasterHandler.CommandHandler.constructCommand(ID, payload);
-        }
-
-        ImGui::End();
-
-        return open;
-    }
     bool GUI_Handler::renderPopout(const COMMAND_ID& ID) {
         using type = GUI_METADATA::FUNCTION_TYPE;
         GUI_METADATA& md = labelMapping.at(ID);
+        bool open = true;
+        ImGui::Begin(md.label.data(), &open);
+        
         switch (md.functionType) {
         case type::BINARY:
             return true;
             break;
         case type::SLIDER:
-            return sliderPopout(ID, md);
+            sliderPopout(ID, md);
+            break;
+        case type::COLOUR:
+            colourPopout(ID, md);
             break;
         default:
             return true;
         }
+        ImGui::End();
+        return open;
     }
+        void GUI_Handler::sliderPopout(const COMMAND_ID& ID, GUI_METADATA& md) {
+            GUI_METADATA::SLIDER_METADATA& sMD = std::get<GUI_METADATA::SLIDER_METADATA>(md.metadata);
+            int payload = *sMD.underlying;
 
+            if (ImGui::SliderInt(
+                md.label.data(),
+                &payload,
+                sMD.minimum,
+                sMD.maximum))
+            {
+                MasterHandler.CommandHandler.constructCommand(ID, payload);
+            }
+        }
+        void GUI_Handler::colourPopout(const COMMAND_ID& ID, GUI_METADATA& md) {
+            GUI_METADATA::COLOUR_METADATA& cMD = std::get<GUI_METADATA::COLOUR_METADATA>(md.metadata);
+            std::array<float, 4> displayload = luxel::coloursToFloat(*cMD.underlying);
+            if (ImGui::ColorEdit4(md.label.data(), displayload.data()))
+                MasterHandler.CommandHandler.constructCommand(ID, luxel::floatsToColour(displayload));
+            int rgba[4] = {
+                static_cast<int>((*cMD.underlying)[0]),
+                static_cast<int>((*cMD.underlying)[1]),
+                static_cast<int>((*cMD.underlying)[2]),
+                static_cast<int>((*cMD.underlying)[3])
+            };
+            if (ImGui::InputInt4("RGBA", rgba)) {
+                std::array<uint8_t, 4> ret = {};
+                for (int i = 0; i < 4; i++)
+                    ret[i] = std::clamp(rgba[i], 0, 255);
+                MasterHandler.CommandHandler.constructCommand(ID, ret);
+            }
+
+
+        }
 void GUI_Handler::renderMMBar() {
     if (ImGui::BeginMainMenuBar()) {
         

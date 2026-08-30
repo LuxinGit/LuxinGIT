@@ -182,8 +182,11 @@ void Draw_Handler::processCommand(const Command& command) {
             case Command::META::CHANGE_COLOUR::DEFAULT:
                 drawColour = DEFAULT_DRAW_COLOUR;
                 break;
-            case Command::META::CHANGE_COLOUR::USE_PAYLOAD:
+            case Command::META::CHANGE_COLOUR::USE_PAYLOAD_DRAW:
                 drawColour = std::get<std::array<uint8_t, 4>>(command.payload);
+                break;
+            case Command::META::CHANGE_COLOUR::USE_PAYLOAD_BACKGROUND:
+                backgroundColour = std::get<std::array<uint8_t, 4>>(command.payload);
                 break;
             case Command::META::CHANGE_COLOUR::RANDOM:
                 drawColour = getRandomColour();

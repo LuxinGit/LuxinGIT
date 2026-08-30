@@ -34,6 +34,28 @@ struct luxel {
 
     std::array<uint8_t, 4> colour;
 
+private:
+    static uint8_t floatToColour(float f) {
+        return static_cast<uint8_t>(f * 255.0f + 0.5f);
+    }
+    static float colourToFloat(const uint8_t& c) {
+        return static_cast<float>(c) / 255;
+    }
+public:
+    static std::array<uint8_t, 4> floatsToColour(const std::array<float,4>& floats) {
+        std::array<uint8_t, 4> ret = {};
+        for (int i = 0; i < 4; i++) {
+            ret[i] = floatToColour(floats[i]);
+        }
+        return ret;
+    }
+    static std::array<float, 4> coloursToFloat(const std::array<uint8_t, 4>& colours) {
+        std::array<float, 4> ret = {};
+        for (int i = 0; i < 4; i++) {
+            ret[i] = colourToFloat(colours[i]);
+        }
+        return ret;
+    }
 };
 
 
