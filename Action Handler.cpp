@@ -21,7 +21,7 @@ void Action_Handler::processAction() {
 
 }
 void Action_Handler::undoAction() {
-    if (actionQueueIndex < 0) return;
+    if (actionQueueIndex < 1) return;
     processAction();
 	actionQueueIndex--;
 }

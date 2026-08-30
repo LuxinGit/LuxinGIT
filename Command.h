@@ -278,7 +278,7 @@ struct GUI_METADATA {
     enum class FUNCTION_TYPE {
         BINARY,
         SLIDER
-    }; // to do push this out into separate structs that allow for more complicated ocnstruction of underlying functions
+    };
 
     struct SLIDER_METADATA {
         int minimum;
@@ -600,7 +600,10 @@ inline static const auto COMMAND_REPO = std::to_array<Command_Definition>({
         SDL_SCANCODE_R,
         std::nullopt,
         "reset_all",
-        std::nullopt
+        GUI_METADATA{
+            GUI_METADATA::HEADER::FILE,
+            "Reset All (Includes undo/redo history)"
+        }
     },
     {
         Command{COMMAND_ID::RESET_CURSOR, Command::META::RESET::RESET_CURSOR, false},
