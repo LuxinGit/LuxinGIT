@@ -19,16 +19,19 @@ struct SDL_Handler {
     int& canvasWidth, canvasHeight;
     Cursor_Handler& CursorHandler;
     GUI_Handler* GUIHandler;
+    bool* enableMouse;
 
     SDL_Handler(Master_Handler& varMH);
 
     ~SDL_Handler();
 
-    void initialiseSDL(GUI_Handler& varGH);
+    void initialiseSDL(GUI_Handler& varGH, bool* varenableMouse);
 
     void renderFrame();
     
     void cleanup() const;
+
+    void checkShowMouse() const;
 
 private:
 

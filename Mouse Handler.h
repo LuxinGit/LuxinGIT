@@ -13,19 +13,19 @@ struct Mouse_Handler {
 	
 private:
 
-	bool enable_mouse = ENABLE_MOUSE;
 	float& x;
 	float& y;
 	Master_Handler& MasterHandler;
 
 public:
 
+	bool enableMouse = ENABLE_MOUSE;
+
 	std::unordered_map<SDL_MouseButtonFlags, COMMAND_ID> mouseBindings{};
 
 	void harvestMouseState();
 
 	Mouse_Handler(std::pair<float, float>& cursor, Master_Handler& varMasH);
-
 
 	void processCommand(const Command& command);
 	

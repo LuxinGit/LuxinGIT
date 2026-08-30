@@ -22,7 +22,7 @@ struct GUI_Handler {
 
 	void initialise();
 
-	void initialiseBinding(Command_Definition definition);
+	void initialiseBinding(const Command_Definition& definition);
 
 	void beginFrame();
 

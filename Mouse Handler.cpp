@@ -7,9 +7,11 @@
 
 void Mouse_Handler::harvestMouseState() {
 
-    if (!enable_mouse) return;
-    if (MasterHandler.GUIHandler.wantsMouse()) return;
-
+    if (!enableMouse) return;
+    if (MasterHandler.GUIHandler.wantsMouse()) {
+        SDL_ShowCursor();
+        return;
+    }
     SDL_MouseButtonFlags mouseState = SDL_GetMouseState(&x, &y);
 
     for (const auto& [button, command] : mouseBindings) 
@@ -18,12 +20,7 @@ void Mouse_Handler::harvestMouseState() {
 }
 
 Mouse_Handler::Mouse_Handler(std::pair<float, float>& cursor, Master_Handler& varMasH)
-    : x(cursor.first), y(cursor.second), MasterHandler(varMasH) {
-    if (enable_mouse) SDL_HideCursor();
-    
-}
-
-
+    : x(cursor.first), y(cursor.second), MasterHandler(varMasH) {}
 
 void Mouse_Handler::processCommand(const Command& command) {
     switch (command.type) {
@@ -46,8 +43,5 @@ void Mouse_Handler::processCommand(const Command& command) {
         }
     }
         void Mouse_Handler::processMouseCommand(const Command& command) {
-            enable_mouse = !enable_mouse;
-
-            if (enable_mouse) SDL_HideCursor();
-            else SDL_ShowCursor();
+            enableMouse = !enableMouse;
         }

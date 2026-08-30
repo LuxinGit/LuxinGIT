@@ -18,8 +18,9 @@ SDL_Handler::~SDL_Handler() {
 	cleanup();
 }
 
-void SDL_Handler::initialiseSDL(GUI_Handler& varGH) {
+void SDL_Handler::initialiseSDL(GUI_Handler& varGH, bool* varenableMouse) {
 	GUIHandler = &varGH;
+	enableMouse = varenableMouse;
 	SDL_SetWindowRelativeMouseMode(Window, false);
 }
 
@@ -28,6 +29,11 @@ void SDL_Handler::cleanup() const {
 	if (Renderer) SDL_DestroyRenderer(Renderer);
 	if (Window) SDL_DestroyWindow(Window);
 	SDL_Quit();
+}
+
+void SDL_Handler::checkShowMouse() const {
+	if (!*enableMouse or GUIHandler->wantsMouse()) SDL_ShowCursor();
+	else SDL_HideCursor();
 }
 
 void SDL_Handler::updateCanvasTexture(SDL_Texture* texture, std::vector<luxel>& canvas, int pitch) {
@@ -53,7 +59,8 @@ void SDL_Handler::renderFrame() {
 	CursorHandler.refreshCursor();
 	updateCanvasTexture(Texture, canvas, canvasWidth * sizeof(luxel));
 	renderTexture(Texture);
+	renderCrosshair(); // todo  fix the fact that we be rendering the crosshair regardless of whether or not we be using the gui
 	GUIHandler->render();
-	renderCrosshair();
+	checkShowMouse();
 	renderPresent();
 }

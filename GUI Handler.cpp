@@ -16,8 +16,11 @@ void GUI_Handler::initialise()
 
     ImGui_ImplSDL3_InitForSDLRenderer(Window, Renderer);
     ImGui_ImplSDLRenderer3_Init(Renderer);
+
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
 }
-void GUI_Handler::initialiseBinding(Command_Definition definition) {
+void GUI_Handler::initialiseBinding(const Command_Definition& definition) {
     if (!definition.guiBinding)
         return;
 

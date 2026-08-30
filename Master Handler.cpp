@@ -12,7 +12,7 @@ Master_Handler::Master_Handler(int varwidth, int varheight) :
     GUIHandler(*this)
 {
     initialiseBindings();
-    SDLHandler.initialiseSDL(GUIHandler);
+    SDLHandler.initialiseSDL(GUIHandler, &MouseHandler.enableMouse);
     if (ENABLE_CLI) CLIHandler.beginCLILoop();
 };
 
