@@ -28,7 +28,6 @@ void Draw_Handler::drawPoint(const coordinate& c, const bool useP, const std::ar
     checkDrawData();
 }
 
-
 void Draw_Handler::drawLine(const coordinate& origin, const coordinate& destination, const bool useP) {
 
     int x0 = origin.x;
@@ -190,6 +189,9 @@ void Draw_Handler::processCommand(const Command& command) {
                 break;
             case Command::META::CHANGE_COLOUR::RANDOM:
                 drawColour = getRandomColour();
+                break;
+            case Command::META::CHANGE_COLOUR::USE_HOVERED_LUXEL:
+                drawColour = CanvasHandler.getLuxelFromCoord(CanvasHandler.CursorHandler.cursor)->colour;
                 break;
             }
         }

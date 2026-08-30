@@ -38,6 +38,7 @@ enum class COMMAND_ID {
     COLOUR_RANDOM,
     COLOUR_SET_DRAW,
     COLOUR_SET_BACKGROUND,
+    COLOUR_SET_PICK,
 
     PENMODE_DRAW,
     PENMODE_RUBBER,
@@ -170,7 +171,8 @@ public:
                 DEFAULT = 0,
                 USE_PAYLOAD_DRAW = 1,
                 USE_PAYLOAD_BACKGROUND = 2,
-                RANDOM = 3
+                RANDOM = 3,
+                USE_HOVERED_LUXEL = 4
             };
             enum class CHANGE_DRAWSTEP {
                 ADD_PAYLOAD = 0,
@@ -469,6 +471,14 @@ inline static const auto COMMAND_REPO = std::to_array<Command_Definition>({
                 GUI_METADATA::COLOUR_METADATA::resolveDrawColourChange
             }
         }
+    },
+    {
+        Command{COMMAND_ID::COLOUR_SET_PICK, Command::META::CHANGE_COLOUR::USE_HOVERED_LUXEL, false, DEFAULT_DRAW_COLOUR},
+        COMMAND_PROCESSOR_ID::DRAW_HANDLER,
+        std::nullopt,
+        SDL_BUTTON_MIDDLE,
+        std::nullopt,
+        std::nullopt,
     },
     {
 		Command{COMMAND_ID::COLOUR_SET_BACKGROUND, Command::META::CHANGE_COLOUR::USE_PAYLOAD_BACKGROUND, false, DEFAULT_DRAW_COLOUR},
