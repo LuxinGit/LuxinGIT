@@ -51,10 +51,10 @@ void Cursor_Handler::processCommand(const Command& command) {
             using setting = Command::META::CHANGE_DRAWSTEP;
             switch (static_cast<setting>(command.setting)) {
             case setting::ADD_PAYLOAD:
-                drawStep = std::clamp(drawStep + std::get<int>(command.payload), 1, 50);
+                drawStep = std::clamp(drawStep + std::get<int>(command.payload), DEFAULT_DRAWSTEP_MIN, DEFAULT_DRAWSTEP_MAX);
                 break;
             case setting::SET_TO_PAYLOAD:
-                drawStep = std::clamp(std::get<int>(command.payload), 1, 50);
+                drawStep = std::clamp(std::get<int>(command.payload), DEFAULT_DRAWSTEP_MIN, DEFAULT_DRAWSTEP_MAX);
                 break;
             }
 

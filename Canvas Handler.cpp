@@ -59,7 +59,7 @@ void Canvas_Handler::processCommand(const Command& command) {
             case Command::META::RESET::RESET_CURSOR:
                 CursorHandler.cursor = DEFAULT_CURSOR_POINT;
                 CursorHandler.origin = DEFAULT_CURSOR_POINT;
-                CursorHandler.drawStep = DEFAULT_DRAWSTEP;
+                CursorHandler.drawStep = DEFAULT_DRAWSTEP_CUR;
                 DrawHandler.pen = DEFAULT_PENWIDTH_CUR;
                 break;
             }

@@ -14,7 +14,7 @@ struct Cursor_Handler {
     std::pair<float, float> origin =            DEFAULT_CURSOR_POINT;
     std::pair<float, float> cursor =            DEFAULT_CURSOR_POINT;
     std::pair<float, float> deltaCursor =       DEFAULT_CURSOR_POINT;
-    int                     drawStep =          DEFAULT_DRAWSTEP;
+    int                     drawStep =          DEFAULT_DRAWSTEP_CUR;
     bool penDown = true;
     bool penContinuous = false;
     bool enableCrosshair = true;

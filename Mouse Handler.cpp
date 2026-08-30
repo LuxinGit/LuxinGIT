@@ -8,7 +8,7 @@
 void Mouse_Handler::harvestMouseState() {
 
     if (!enableMouse) return;
-    if (MasterHandler.GUIHandler.wantsMouse()) {
+    if (ImGui::GetIO().WantCaptureMouse) {
         SDL_ShowCursor();
         return;
     }

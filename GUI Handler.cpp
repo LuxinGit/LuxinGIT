@@ -46,47 +46,86 @@ void GUI_Handler::beginFrame() {
     ImGui::NewFrame();
 }
 
-void GUI_Handler::menuItem(COMMAND_ID ID) {
-    using type = GUI_METADATA::FUNCTION_TYPE;
-    
-    const GUI_METADATA& md = labelMapping.at(ID);
-
-    switch (md.functionType) {
-    case type::BINARY:
-        binaryMenuItem(ID, md);
-        break;
-    case type::SLIDER:
-        sliderMenuItem(ID, md);
-        break;
-    }
-}
-    void GUI_Handler::binaryMenuItem(COMMAND_ID ID, const GUI_METADATA& md) {
-        if (ImGui::MenuItem(labelMapping.at(ID).label.data())) {
-            MasterHandler.CommandHandler.constructCommand(ID);
-        }
-    }
-    void GUI_Handler::sliderMenuItem(COMMAND_ID ID, const GUI_METADATA& md) {
-        
-        const auto& sMD =
-            std::get<GUI_METADATA::SLIDER_METADATA>(md.metadata);
-
-        ImGui::Begin(labelMapping.at(ID).label.data());
-        int payload = *sMD.underlying;
-
-        if (ImGui::SliderInt(labelMapping.at(ID).label.data(), &payload, sMD.minimum, sMD.maximum))
-            MasterHandler.CommandHandler.constructCommand(ID, payload);
-        ImGui::End();
-    }
-
 void GUI_Handler::menu(const std::string& name, const std::vector<COMMAND_ID>& commands) {
     if (ImGui::BeginMenu(name.c_str())) {
         for (const auto& command : commands) menuItem(command);
         ImGui::EndMenu();
     }
 }
+    void GUI_Handler::menuItem(const COMMAND_ID& ID) {
+        using type = GUI_METADATA::FUNCTION_TYPE;
+    
+        GUI_METADATA& md = labelMapping.at(ID);
 
+        switch (md.functionType) {
+        case type::BINARY:
+            binaryMenuItem(ID, md);
+            break;
+        case type::SLIDER:
+            sliderMenuItem(ID, md);
+            break;
+        }
+    }
+        void GUI_Handler::binaryMenuItem(const COMMAND_ID& ID, GUI_METADATA& md) {
+            if (ImGui::MenuItem(labelMapping.at(ID).label.data())) {
+                MasterHandler.CommandHandler.constructCommand(ID);
+            }
+        }
+        void GUI_Handler::sliderMenuItem(const COMMAND_ID& ID, GUI_METADATA& md) {
+        
+            if (ImGui::MenuItem(md.label.data())) {
+                if (openPopouts.contains(ID))
+                    openPopouts.erase(ID);
+                else
+                    openPopouts.insert(ID);
+            }
 
+        }
 
+void GUI_Handler::checkForPopouts() {
+    std::vector<COMMAND_ID> clearlist = {};
+    for (const COMMAND_ID& ID : openPopouts) {
+        if (!renderPopout(ID)) {
+            clearlist.emplace_back(ID);
+        }
+    }
+    for (const COMMAND_ID& cID : clearlist) {
+        openPopouts.erase(cID);
+    }
+}
+    bool GUI_Handler::sliderPopout(const COMMAND_ID& ID, GUI_METADATA& md) {
+        bool open = true;
+        ImGui::Begin(md.label.data(), &open);
+        GUI_METADATA::SLIDER_METADATA& sMD = std::get<GUI_METADATA::SLIDER_METADATA>(md.metadata);
+        int payload = *sMD.underlying;
+
+        if (ImGui::SliderInt(
+            md.label.data(),
+            &payload,
+            sMD.minimum,
+            sMD.maximum))
+        {
+            MasterHandler.CommandHandler.constructCommand(ID, payload);
+        }
+
+        ImGui::End();
+
+        return open;
+    }
+    bool GUI_Handler::renderPopout(const COMMAND_ID& ID) {
+        using type = GUI_METADATA::FUNCTION_TYPE;
+        GUI_METADATA& md = labelMapping.at(ID);
+        switch (md.functionType) {
+        case type::BINARY:
+            return true;
+            break;
+        case type::SLIDER:
+            return sliderPopout(ID, md);
+            break;
+        default:
+            return true;
+        }
+    }
 
 void GUI_Handler::renderMMBar() {
     if (ImGui::BeginMainMenuBar()) {
@@ -99,13 +138,10 @@ void GUI_Handler::renderMMBar() {
 
 }
 
-bool GUI_Handler::wantsMouse() {
-    return ImGui::GetIO().WantCaptureMouse;
-}
 void GUI_Handler::render() {
     
     renderMMBar();
-    
+    checkForPopouts();
     ImGui::Render();
     ImGui_ImplSDLRenderer3_RenderDrawData(
         ImGui::GetDrawData(),

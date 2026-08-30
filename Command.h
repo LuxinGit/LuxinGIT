@@ -286,7 +286,6 @@ struct GUI_METADATA {
         using Resolver = int* (*)(Master_Handler&);
         Resolver getUnderlying;
         int* underlying = nullptr; // used as reference for value, such that slider knows where we're at with whatever we're talking about.
-
         static int* resolvePenWidth(Master_Handler&);
         static int* resolveDrawstep(Master_Handler&);
     };
@@ -512,7 +511,15 @@ inline static const auto COMMAND_REPO = std::to_array<Command_Definition>({
         std::nullopt,
         std::nullopt,
         "step_set",
-        std::nullopt
+        GUI_METADATA{
+            GUI_METADATA::HEADER::TOOLS,
+            "Change Drawstep",
+            GUI_METADATA::SLIDER_METADATA{
+                DEFAULT_DRAWSTEP_MIN,
+                DEFAULT_DRAWSTEP_MAX,
+                GUI_METADATA::SLIDER_METADATA::resolveDrawstep
+            }
+        }
     },
 
     // PEN WIDTH

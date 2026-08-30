@@ -1,6 +1,6 @@
 #include "SDL Handler.h"
 #include "Master Handler.h"
-
+#include "imgui.h"
 
 SDL_Handler::SDL_Handler(Master_Handler& varMH) :
 	canvas(varMH.CanvasHandler.canvas),
@@ -32,7 +32,7 @@ void SDL_Handler::cleanup() const {
 }
 
 void SDL_Handler::checkShowMouse() const {
-	if (!*enableMouse or GUIHandler->wantsMouse()) SDL_ShowCursor();
+	if (!*enableMouse or ImGui::GetIO().WantCaptureMouse) SDL_ShowCursor();
 	else SDL_HideCursor();
 }
 
