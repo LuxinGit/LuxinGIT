@@ -28,7 +28,15 @@ void GUI_Handler::initialiseBinding(const Command_Definition& definition) {
         static_cast<size_t>(definition.guiBinding->header);
 
     headers[header].push_back(definition.command.ID);
-    labelMapping.emplace(definition.command.ID, &*definition.guiBinding);
+
+    GUI_METADATA binding = *definition.guiBinding;
+    switch (binding.functionType) {
+    case GUI_METADATA::FUNCTION_TYPE::SLIDER:
+        GUI_METADATA::SLIDER_METADATA& sMD = std::get<GUI_METADATA::SLIDER_METADATA>(binding.metadata);
+        sMD.underlying = sMD.getUnderlying(MasterHandler);
+        break;
+    }
+    labelMapping.emplace(definition.command.ID, std::move(binding));
 }
 
 void GUI_Handler::beginFrame() {
@@ -41,9 +49,9 @@ void GUI_Handler::beginFrame() {
 void GUI_Handler::menuItem(COMMAND_ID ID) {
     using type = GUI_METADATA::FUNCTION_TYPE;
     
-    const GUI_METADATA* md = labelMapping.at(ID);
+    const GUI_METADATA& md = labelMapping.at(ID);
 
-    switch (md->functionType) {
+    switch (md.functionType) {
     case type::BINARY:
         binaryMenuItem(ID, md);
         break;
@@ -52,17 +60,20 @@ void GUI_Handler::menuItem(COMMAND_ID ID) {
         break;
     }
 }
-    void GUI_Handler::binaryMenuItem(COMMAND_ID ID, const GUI_METADATA* md) {
-        if (ImGui::MenuItem(labelMapping.at(ID)->label.data())) {
+    void GUI_Handler::binaryMenuItem(COMMAND_ID ID, const GUI_METADATA& md) {
+        if (ImGui::MenuItem(labelMapping.at(ID).label.data())) {
             MasterHandler.CommandHandler.constructCommand(ID);
         }
     }
-    void GUI_Handler::sliderMenuItem(COMMAND_ID ID, const GUI_METADATA* md) {
-        int min = 1, max = 100; // SHOULDNT BE DEFINED HERE, NEEDS TO BE ADDED TO GUI_METADATA
-        ImGui::Begin(labelMapping.at(ID)->label.data());
-        int payload;
+    void GUI_Handler::sliderMenuItem(COMMAND_ID ID, const GUI_METADATA& md) {
+        
+        const auto& sMD =
+            std::get<GUI_METADATA::SLIDER_METADATA>(md.metadata);
 
-        if (ImGui::SliderInt(labelMapping.at(ID)->label.data(), &payload, min, max))
+        ImGui::Begin(labelMapping.at(ID).label.data());
+        int payload = *sMD.underlying;
+
+        if (ImGui::SliderInt(labelMapping.at(ID).label.data(), &payload, sMD.minimum, sMD.maximum))
             MasterHandler.CommandHandler.constructCommand(ID, payload);
         ImGui::End();
     }

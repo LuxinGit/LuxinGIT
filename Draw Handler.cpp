@@ -236,10 +236,10 @@ void Draw_Handler::processCommand(const Command& command) {
 
             switch (static_cast<Setting>(command.setting)) {
             case (Setting::ADD_PAYLOAD):
-                pen = std::clamp(pen + std::get<int>(command.payload), 1, 50);
+                pen = std::clamp(pen + std::get<int>(command.payload), DEFAULT_PENWIDTH_MIN, DEFAULT_PENWIDTH_MAX);
                 break;
             case (Setting::SET_TO_PAYLOAD):
-                pen = std::clamp(std::get<int>(command.payload), 1, 50);
+                pen = std::clamp(std::get<int>(command.payload), DEFAULT_PENWIDTH_MIN, DEFAULT_PENWIDTH_MAX);
                 break;
             }
 

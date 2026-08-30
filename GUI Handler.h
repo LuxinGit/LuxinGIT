@@ -14,7 +14,7 @@ struct GUI_Handler {
 	inline static SDL_Renderer*&	Renderer	= SDL_Handler::Renderer;
 
 	std::array<std::vector<COMMAND_ID>, static_cast<int>(GUI_METADATA::HEADER::COUNT)> headers;
-	std::unordered_map<COMMAND_ID, const GUI_METADATA*> labelMapping;
+	std::unordered_map<COMMAND_ID, GUI_METADATA> labelMapping;
 
 	Master_Handler& MasterHandler;
 
@@ -28,9 +28,9 @@ struct GUI_Handler {
 
 	void menuItem(COMMAND_ID ID);
 
-	void binaryMenuItem(COMMAND_ID ID, const GUI_METADATA* md);
+	void binaryMenuItem(COMMAND_ID ID, const GUI_METADATA& md);
 
-	void sliderMenuItem(COMMAND_ID, const GUI_METADATA* md);
+	void sliderMenuItem(COMMAND_ID, const GUI_METADATA& md);
 
 	void menu(const std::string& name, const std::vector<COMMAND_ID>& commands);
 

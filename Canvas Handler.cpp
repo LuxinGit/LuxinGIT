@@ -60,7 +60,7 @@ void Canvas_Handler::processCommand(const Command& command) {
                 CursorHandler.cursor = DEFAULT_CURSOR_POINT;
                 CursorHandler.origin = DEFAULT_CURSOR_POINT;
                 CursorHandler.drawStep = DEFAULT_DRAWSTEP;
-                DrawHandler.pen = DEFAULT_PENWIDTH;
+                DrawHandler.pen = DEFAULT_PENWIDTH_CUR;
                 break;
             }
         }

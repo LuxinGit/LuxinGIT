@@ -10,6 +10,8 @@
 
 #include "CONSTANTS.h"
 
+struct Master_Handler;
+
 enum class COMMAND_ID {
     MOVE_UP,
     MOVE_DOWN,
@@ -268,9 +270,9 @@ enum class COMMAND_PROCESSOR_ID {
 struct GUI_METADATA {
     enum class HEADER {
         FILE = 0,
-        EDIT = 1, 
+        EDIT = 1,
         TOOLS = 2,
-        COUNT 
+        COUNT
     };
 
     enum class FUNCTION_TYPE {
@@ -278,9 +280,26 @@ struct GUI_METADATA {
         SLIDER
     }; // to do push this out into separate structs that allow for more complicated ocnstruction of underlying functions
 
+    struct SLIDER_METADATA {
+        int minimum;
+        int maximum;
+        using Resolver = int* (*)(Master_Handler&);
+        Resolver getUnderlying;
+        int* underlying = nullptr; // used as reference for value, such that slider knows where we're at with whatever we're talking about.
+
+        static int* resolvePenWidth(Master_Handler&);
+        static int* resolveDrawstep(Master_Handler&);
+    };
+
     HEADER header;
     FUNCTION_TYPE functionType;
     std::string_view label;
+    std::variant<std::monostate, SLIDER_METADATA> metadata;
+
+    GUI_METADATA(HEADER varH, std::string_view varL) :
+        header(varH), functionType(FUNCTION_TYPE::BINARY), label(varL) {}
+    GUI_METADATA(HEADER varH, std::string_view varL, SLIDER_METADATA varMD)
+        : header(varH), functionType(FUNCTION_TYPE::SLIDER), label(varL), metadata(varMD) {}
 };
 
 struct Command_Definition {
@@ -426,7 +445,6 @@ inline static const auto COMMAND_REPO = std::to_array<Command_Definition>({
         "penmode_draw",
         GUI_METADATA{
             GUI_METADATA::HEADER::TOOLS,
-            GUI_METADATA::FUNCTION_TYPE::BINARY,
             "Draw"
         }
     },
@@ -438,7 +456,6 @@ inline static const auto COMMAND_REPO = std::to_array<Command_Definition>({
         "penmode_rubber",
         GUI_METADATA{
             GUI_METADATA::HEADER::TOOLS,
-            GUI_METADATA::FUNCTION_TYPE::BINARY,
             "Rubber"
         }
     },
@@ -450,7 +467,6 @@ inline static const auto COMMAND_REPO = std::to_array<Command_Definition>({
         "penmode_rainbow",
         GUI_METADATA{
             GUI_METADATA::HEADER::TOOLS,
-            GUI_METADATA::FUNCTION_TYPE::BINARY,
             "Rainbow"
         }
     },
@@ -522,7 +538,15 @@ inline static const auto COMMAND_REPO = std::to_array<Command_Definition>({
         std::nullopt,
         std::nullopt,
         "pen_set",
-        std::nullopt
+        GUI_METADATA{
+            GUI_METADATA::HEADER::TOOLS,
+            "Change Pen Width",
+            GUI_METADATA::SLIDER_METADATA{
+                DEFAULT_PENWIDTH_MIN,
+                DEFAULT_PENWIDTH_MAX,
+                GUI_METADATA::SLIDER_METADATA::resolvePenWidth
+            }
+        }
     },
 
     // INPUT
@@ -552,7 +576,6 @@ inline static const auto COMMAND_REPO = std::to_array<Command_Definition>({
         "reset_canvas",
         GUI_METADATA{
             GUI_METADATA::HEADER::FILE,
-            GUI_METADATA::FUNCTION_TYPE::BINARY,
             "Reset Canvas"
         }
     },
@@ -590,7 +613,6 @@ inline static const auto COMMAND_REPO = std::to_array<Command_Definition>({
         "undo",
         GUI_METADATA{
             GUI_METADATA::HEADER::EDIT,
-            GUI_METADATA::FUNCTION_TYPE::BINARY,
             "Undo"
         }
     },
@@ -602,7 +624,6 @@ inline static const auto COMMAND_REPO = std::to_array<Command_Definition>({
         "redo",
         GUI_METADATA{
             GUI_METADATA::HEADER::EDIT,
-            GUI_METADATA::FUNCTION_TYPE::BINARY,
             "Redo"
         }
     }

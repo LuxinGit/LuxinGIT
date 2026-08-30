@@ -11,10 +11,10 @@ struct luxel;
 struct Draw_Handler {
 
     Canvas_Handler& CanvasHandler;
-    inline static std::array<uint8_t, 4> drawColour;
-    inline static std::array<uint8_t, 4> backgroundColour;
-    inline static std::array<uint8_t, 4>* activeColour;
-    int pen =                                   DEFAULT_PENWIDTH;
+    inline static std::array<uint8_t, 4>        drawColour;
+    inline static std::array<uint8_t, 4>        backgroundColour;
+    inline static std::array<uint8_t, 4>*       activeColour;
+    int pen =                                   DEFAULT_PENWIDTH_CUR;
 
     enum class PEN_MODE {
         DRAW = 0,
