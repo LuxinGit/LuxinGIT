@@ -11,7 +11,7 @@ std::string CLI_Handler::harvestInput(const std::string& Question, bool linebrea
     return output;
 }
 
-std::pair<float, float> CLI_Handler::convertCoord(const std::string& input) {
+std::pair<float, float> CLI_Handler::convertFP(const std::string& input) {
     std::pair<float, float> ret;
     std::string s = "";
     for (char c : input) {
@@ -25,6 +25,27 @@ std::pair<float, float> CLI_Handler::convertCoord(const std::string& input) {
             break;
         case '}':
             ret.second = (std::stof(s));
+            break;
+        default:
+            s += c;
+        }
+    }
+    return ret;
+}
+coordinate CLI_Handler::convertCoord(const std::string& input) {
+    coordinate ret{ 100,100 };
+    std::string s = "";
+    for (char c : input) {
+        switch (c) {
+        case '{':
+            continue;
+            break;
+        case ',':
+            ret.x = (std::stoi(s));
+            s = "";
+            break;
+        case '}':
+            ret.y = (std::stoi(s));
             break;
         default:
             s += c;
@@ -66,9 +87,10 @@ Please input data for payload:
     switch (std::stoi(harvestInput(R"(
 Please enter the payload's type:
 
-    Integer:    [1]
-    Coordinate: [2]
-    Colour:     [3]
+    Integer:                [1]
+    Coordinate:             [2]
+    Colour:                 [3]
+    FloatPair {depreciated} [4]
 
 Or enter anything else to cancel)")))
     {
@@ -78,6 +100,8 @@ Or enter anything else to cancel)")))
         return convertCoord(input);
     case 3:
         return convertColour(input);
+    case 4:
+        return convertFP(input);
     default:
         return {};
 

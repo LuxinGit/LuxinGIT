@@ -17,7 +17,8 @@ struct Canvas_Handler {
     Master_Handler& MasterHandler;
     Cursor_Handler CursorHandler;
     Draw_Handler DrawHandler;
-    int& width; int& height;
+    int& width; 
+    int& height;
     std::vector<luxel> canvas;
 
     size_t indexFromCoord(const coordinate& c, const int& w);
@@ -29,9 +30,10 @@ struct Canvas_Handler {
     luxel* getLuxelFromCoord(const coordinate& c, bool coordCheck);
     luxel* getLuxelFromCoord(const coordinate& c);
 
+    coordinate coordinateFromLuxel(const luxel&);
     static coordinate coordinateFromIndex(const size_t index, const int varW);
 
-    void updateCanvasSize(const int width, const int height);
+    void updateCanvasSize(int width, int height);
     Canvas_Handler(int& varwidth, int& varheight, Master_Handler& varMH);
 
     void processCommand(const Command& command);

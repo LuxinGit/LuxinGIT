@@ -6,13 +6,20 @@ void luxel::resetLuxel() {
     colour = DEFAULT_BACKGROUND_COLOUR;
 }
 
+coordinate Canvas_Handler::coordinateFromLuxel(const luxel& l)
+{
+    return coordinateFromIndex(&l - canvas.data(), width);
+}
+
 coordinate Canvas_Handler::coordinateFromIndex(const size_t index, const int varW) {
     coordinate c(0, 0);
     c.x = index % varW; c.y = static_cast<int>(index / varW);
     return c;
 }
-void Canvas_Handler::updateCanvasSize(const int vW, const int vH)
+void Canvas_Handler::updateCanvasSize(int vW, int vH)
 {
+    vW = std::clamp(vW, DEFAULT_CANVAS_WIDTH_MIN, DEFAULT_CANVAS_WIDTH_MAX);
+    vH = std::clamp(vH, DEFAULT_CANVAS_HEIGHT_MIN, DEFAULT_CANVAS_HEIGHT_MAX);
     std::vector<luxel> ret(vW * vH);
     for (int i = 0; i < canvas.size(); i++) {
         coordinate curC = coordinateFromIndex(i, width);
@@ -24,7 +31,6 @@ void Canvas_Handler::updateCanvasSize(const int vW, const int vH)
     width   =    vW;
     height  =    vH;
 
-    MasterHandler.ActionHandler.resetActionQueue();
     MasterHandler.SDLHandler.registerCanvasSizeChange();
 }
 
@@ -94,15 +100,28 @@ void Canvas_Handler::processCommand(const Command& command) {
             switch (static_cast<Command::META::CANVAS_CHANGE_SIZE>(command.setting)) {
             case Command::META::CANVAS_CHANGE_SIZE::ADD_PAYLOAD:
             {
-                std::pair<float, float> payload = std::get<std::pair<float, float>>(command.payload);
-                updateCanvasSize(width + static_cast<int>(payload.first), height + static_cast<int>(payload.second));
+                coordinate payload = std::get<coordinate>(command.payload);
+                updateCanvasSize(width + payload.x, height + payload.y);
                 break;
             }
             case Command::META::CANVAS_CHANGE_SIZE::SET_TO_PAYLOAD:
             {
-                std::pair<float, float> payload = std::get<std::pair<float, float>>(command.payload);
-                updateCanvasSize(static_cast<int>(payload.first), static_cast<int>(payload.second));
+                coordinate payload = std::get<coordinate>(command.payload);
+                updateCanvasSize(payload.x, payload.y);
                 break;
             }
+            case Command::META::CANVAS_CHANGE_SIZE::SET_HEIGHT_TO_PAYLOAD:
+            {
+                int payload = std::get<int>(command.payload);
+                updateCanvasSize(width, payload);
+                break;
+            }
+            case Command::META::CANVAS_CHANGE_SIZE::SET_WIDTH_TO_PAYLOAD:
+            {
+                int payload = std::get<int>(command.payload);
+                updateCanvasSize(payload, height);
+                break;
+            }
+
             }
         }

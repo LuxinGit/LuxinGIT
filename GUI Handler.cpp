@@ -135,6 +135,7 @@ void GUI_Handler::checkForPopouts() {
             {
                 MasterHandler.CommandHandler.constructCommand(ID, payload);
             }
+
         }
         void GUI_Handler::colourPopout(const COMMAND_ID& ID, GUI_METADATA& md) {
             GUI_METADATA::COLOUR_METADATA& cMD = std::get<GUI_METADATA::COLOUR_METADATA>(md.metadata);

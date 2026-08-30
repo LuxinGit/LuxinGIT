@@ -14,8 +14,9 @@ private:
 
     std::string harvestInput(const std::string& Question, bool linebreak = true);
 
-    std::pair<float, float> convertCoord(const std::string& input);
-    std::array<uint8_t, 4> convertColour(const std::string& input);
+    std::pair<float, float> convertFP(const std::string& input);
+    coordinate              convertCoord(const std::string& input);
+    std::array<uint8_t, 4>  convertColour(const std::string& input);
 
     Command::Payload harvestPayload();
 

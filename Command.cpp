@@ -96,6 +96,15 @@ int* GUI_METADATA::SLIDER_METADATA::resolvePenWidth(Master_Handler& varMH) {
 int* GUI_METADATA::SLIDER_METADATA::resolveDrawstep(Master_Handler& varMH) {
     return &varMH.CanvasHandler.CursorHandler.drawStep;
 }
+int* GUI_METADATA::SLIDER_METADATA::resolveCanvasWidth(Master_Handler& varMH)
+{
+    return &varMH.CanvasHandler.width;
+}
+int* GUI_METADATA::SLIDER_METADATA::resolveCanvasHeight(Master_Handler& varMH)
+{
+    return &varMH.CanvasHandler.height;
+}
+
 std::array<uint8_t, 4>* GUI_METADATA::COLOUR_METADATA::resolveDrawColourChange(Master_Handler& varMH) {
     return &varMH.CanvasHandler.DrawHandler.drawColour;
 }

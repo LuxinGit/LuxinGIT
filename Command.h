@@ -9,6 +9,7 @@
 #include <SDL3/SDL.h>
 
 #include "CONSTANTS.h"
+#include "STRUCTS.h"
 
 struct Master_Handler;
 
@@ -29,6 +30,8 @@ enum class COMMAND_ID {
     DRAW_FILL_DRAWCOLOUR,
 
     CANVAS_RESIZE_SET_PAYLOAD,
+    CANVAS_RESIZE_SET_WIDTH,
+    CANVAS_RESIZE_SET_HEIGHT,
     CANVAS_RESIZE_ADD_PAYLOAD,
 
     COLOUR_RESET,
@@ -194,7 +197,9 @@ public:
 
             enum class CANVAS_CHANGE_SIZE {
                 ADD_PAYLOAD = 0,
-                SET_TO_PAYLOAD = 1
+                SET_TO_PAYLOAD = 1,
+                SET_WIDTH_TO_PAYLOAD = 2,
+                SET_HEIGHT_TO_PAYLOAD = 3
             };
 
         private:
@@ -246,7 +251,7 @@ public:
 
         };
 
-    using Payload = std::variant<std::monostate, int, std::pair<float, float>, std::array<uint8_t, 4>>;
+    using Payload = std::variant<std::monostate, int, std::pair<float, float>, std::array<uint8_t, 4>, coordinate>;
 
 private:
 
@@ -301,6 +306,8 @@ struct GUI_METADATA {
         int* underlying = nullptr; // used as reference for value, such that slider knows where we're at with whatever we're talking about.
         static int* resolvePenWidth(Master_Handler&);
         static int* resolveDrawstep(Master_Handler&);
+        static int* resolveCanvasHeight(Master_Handler&);
+        static int* resolveCanvasWidth(Master_Handler&);
     };
 
     struct COLOUR_METADATA {
@@ -682,12 +689,44 @@ inline static const auto COMMAND_REPO = std::to_array<Command_Definition>({
 
     },
     {
-        Command{COMMAND_ID::CANVAS_RESIZE_SET_PAYLOAD, Command::META::CANVAS_CHANGE_SIZE::SET_TO_PAYLOAD, false, std::pair<float,float>{400.0f, 400.0f}},
+        Command{COMMAND_ID::CANVAS_RESIZE_SET_PAYLOAD, Command::META::CANVAS_CHANGE_SIZE::SET_TO_PAYLOAD, false, coordinate{400, 400}},
         COMMAND_PROCESSOR_ID::CANVAS_HANDLER,
         SDL_SCANCODE_7,
         std::nullopt,
         "resize",
         std::nullopt
+    },
+    {
+        Command{COMMAND_ID::CANVAS_RESIZE_SET_HEIGHT, Command::META::CANVAS_CHANGE_SIZE::SET_HEIGHT_TO_PAYLOAD, false, 400},
+        COMMAND_PROCESSOR_ID::CANVAS_HANDLER,
+        std::nullopt,
+        std::nullopt,
+        "resize_height",
+        GUI_METADATA{
+            GUI_METADATA::HEADER::FILE,
+            "Adjust canvas height",
+            GUI_METADATA::SLIDER_METADATA{
+                DEFAULT_CANVAS_HEIGHT_MIN,
+                DEFAULT_CANVAS_HEIGHT_MAX,
+                GUI_METADATA::SLIDER_METADATA::resolveCanvasHeight
+            }
+        }
+    },
+    {
+        Command{COMMAND_ID::CANVAS_RESIZE_SET_WIDTH, Command::META::CANVAS_CHANGE_SIZE::SET_WIDTH_TO_PAYLOAD, false, 400},
+        COMMAND_PROCESSOR_ID::CANVAS_HANDLER,
+        std::nullopt,
+        std::nullopt,
+        "resize_width",
+        GUI_METADATA{
+            GUI_METADATA::HEADER::FILE,
+            "Adjust canvas width",
+            GUI_METADATA::SLIDER_METADATA{
+                DEFAULT_CANVAS_WIDTH_MIN,
+                DEFAULT_CANVAS_WIDTH_MAX,
+                GUI_METADATA::SLIDER_METADATA::resolveCanvasWidth
+            }
+        }
     },
 
     });
