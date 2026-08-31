@@ -11,7 +11,7 @@ void Cursor_Handler::resetPoint(float& f, const int& width) {
     f = std::clamp(f, 0.0f, static_cast<float>(width - 1));
 }
 void Cursor_Handler::resetCursors() {
-    if (!CanvasHandler.coordCheck(deltaCursor)) {
+    if (!CanvasHandler.coordCheckDisplay(deltaCursor)) {
         resetPoint(deltaCursor.first, CanvasHandler.width); resetPoint(deltaCursor.second, CanvasHandler.width);
     }
     cursor = deltaCursor;

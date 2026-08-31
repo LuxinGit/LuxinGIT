@@ -8,7 +8,6 @@
 
 #include <SDL3/SDL.h>
 
-#include "CONSTANTS.h"
 #include "STRUCTS.h"
 
 struct Master_Handler;

@@ -17,4 +17,4 @@ void Keyboard_Handler::harvestKeyboardState() {
     }
 }
 
-Keyboard_Handler::Keyboard_Handler(Command_Handler& CommH) : CommandHandler(CommH) {}
+Keyboard_Handler::Keyboard_Handler(Master_Handler& varMH) : CommandHandler(varMH.CommandHandler) {}

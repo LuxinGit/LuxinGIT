@@ -13,11 +13,11 @@ struct Master_Handler {
 
 private:
 
-    int width; int height;
-
     void initialiseBindings();
 
 public:
+
+    int width; int height;
 
     Canvas_Handler      CanvasHandler;
     SDL_Handler         SDLHandler;

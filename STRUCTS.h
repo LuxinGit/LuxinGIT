@@ -3,6 +3,10 @@
 #include <vector>
 #include <array>
 #include <string>
+#include "CONSTANTS.h"
+#include <optional>
+
+using Colour = std::array<uint8_t, 4>;
 
 struct luxel {
 
@@ -44,6 +48,13 @@ struct coordinate {
         return x == other.x and y == other.y;
     }
 
+    bool operator<(const coordinate& other) const {
+        return (x < other.x or y < other.y);
+    }
+    bool operator>(const coordinate& other) const {
+        return (x > other.x or y > other.y); 
+    }
+
     coordinate operator+(const coordinate& other) const {
         return { x + other.x, y + other.y };
     }
@@ -68,3 +79,15 @@ struct coordinate_hash {
     }
 };
 
+//struct location {
+//    
+//    Colour colour;
+//    std::optional<size_t> cIndex;
+//    luxel* l;
+//
+//    location() : colour(DEFAULT_BACKGROUND_COLOUR), cIndex(std::nullopt), l(nullptr) {}
+//    location(const Colour& c, size_t i, luxel* p) : colour(c), cIndex(i), l(p) {}
+//
+//    Colour changeColour(const Colour&);
+//    void processScopeChange(luxel* p = false, std::optional<size_t> vCIndex = std::nullopt);
+//}; 

@@ -6,16 +6,16 @@ struct Canvas_Handler;
 
 struct Change_Set {
 	struct Change {
-		coordinate c;
+		luxel* l;
 		std::array<uint8_t, 4> originalColour;
 	};
 
 	std::vector<Change> changeSet;
-	std::unordered_set<coordinate, coordinate_hash> changedCoordinates;
+	std::unordered_set<luxel*> changedLuxels;
 
-	void addLuxel(const coordinate& c, const std::array<uint8_t, 4>& oC) {
-		if (changedCoordinates.insert(c).second)
-			changeSet.emplace_back(c, oC);
+	void addLuxel(luxel* l, const std::array<uint8_t, 4>& oC) {
+		if (changedLuxels.insert(l).second)
+			changeSet.emplace_back(l, oC);
 	}
 };
 
@@ -39,7 +39,7 @@ public:
 
 	Action_Handler(Canvas_Handler& varcanvH) : CanvasHandler(varcanvH) {}
 
-	void pixelChange(const coordinate&, const std::array<uint8_t, 4>& originalColour); // Draw_Handler's method for adding to action
+	void pixelChange(luxel* , const std::array<uint8_t, 4>& originalColour); // Draw_Handler's method for adding to action
 	void checkForActions();// Command_Handler's method for adding a new action.
 	void resetActionQueue();
 

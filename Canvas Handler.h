@@ -21,14 +21,13 @@ struct Canvas_Handler {
     int& height;
     std::vector<luxel> canvas;
 
-    size_t indexFromCoord(const coordinate& c, const int& w);
     size_t indexFromCoord(const coordinate& c);
 
-    bool coordCheck(const coordinate& c) const;
+    static bool coordCheck(const coordinate& c, const size_t width, const size_t height);
+        bool coordCheckDisplay(const coordinate& c) const;
+        bool coordCheckEntire(const coordinate& c) const;
 
-    luxel* getLuxelFromIndex(const size_t& index);
-    luxel* getLuxelFromCoord(const coordinate& c, bool coordCheck);
-    luxel* getLuxelFromCoord(const coordinate& c);
+    luxel* getLuxelFromCoord(const coordinate& c, bool onDisplay = false);
 
     coordinate coordinateFromLuxel(const luxel&);
     static coordinate coordinateFromIndex(const size_t index, const int varW);

@@ -26,14 +26,15 @@ static constexpr const char*                    DEFAULT_APPLICATION_NAME = "Luxi
 
 // ENABLES
 
-static constexpr bool							ENABLE_MOUSE = true;
-static constexpr bool							ENABLE_CLI = false;
+static constexpr bool							ENABLE_MOUSE =					true;
+static constexpr bool							ENABLE_CLI =					false;
 
 // CANVAS
 
-static constexpr int							DEFAULT_CANVAS_WIDTH_MIN = 100;
-static constexpr int							DEFAULT_CANVAS_WIDTH_CUR = 800;
-static constexpr int							DEFAULT_CANVAS_WIDTH_MAX = 1500;
-static constexpr int							DEFAULT_CANVAS_HEIGHT_MIN = 100;
-static constexpr int							DEFAULT_CANVAS_HEIGHT_CUR = 600;
-static constexpr int							DEFAULT_CANVAS_HEIGHT_MAX = 1500;
+static constexpr int							DEFAULT_CANVAS_WIDTH_MIN =		100;
+static constexpr int							DEFAULT_CANVAS_WIDTH_CUR =		800;
+static constexpr int							DEFAULT_CANVAS_WIDTH_MAX =		4096;
+static constexpr int							DEFAULT_CANVAS_HEIGHT_MIN =		100;
+static constexpr int							DEFAULT_CANVAS_HEIGHT_CUR =		600;
+static constexpr int							DEFAULT_CANVAS_HEIGHT_MAX =		4096;
+static constexpr int							DEFAULT_CANVAS_SIZE_MAX = DEFAULT_CANVAS_WIDTH_MAX * DEFAULT_CANVAS_HEIGHT_MAX;

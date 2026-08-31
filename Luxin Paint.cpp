@@ -9,6 +9,7 @@
 /*
 TO DO:
     
+    cursor needs some better way to show on dark backgrounds.
     keybind reduce / increase brightness
     keybind remappings
     Save commands from command queue for later use

@@ -1,6 +1,6 @@
 #pragma once
 #include <SDL3/SDL.h>
-
+#include "STRUCTS.h"
 #include <vector>
 
 struct luxel;
@@ -28,21 +28,21 @@ struct SDL_Handler {
 
     void initialiseTexture();
 
-    void registerCanvasSizeChange();
+    void registerCanvasSizeChange() const;
 
-    void initialiseSDL(GUI_Handler& varGH, bool* varenableMouse);
+    void setReferences(GUI_Handler& varGH, bool* varenableMouse);
 
     void renderFrame();
     
     void cleanup() const;
 
-    void checkShowMouse() const;
+    void checkShowMouse()   const;
 
 private:
 
-    static void updateCanvasTexture(SDL_Texture* texture, std::vector<luxel>& canvas, int pitch);
-    static void renderTexture(SDL_Texture* texture);
-    void renderCrosshair() const;
-    void renderPresent() const;
+    void updateTexture();
+    void renderTexture()    const;
+    void renderCrosshair()  const;
+    void renderPresent()    const;
 
 };

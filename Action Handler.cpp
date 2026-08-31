@@ -1,8 +1,8 @@
 #include "Action Handler.h"
 #include "Canvas Handler.h"
 
-void Action_Handler::pixelChange(const coordinate& c, const std::array<uint8_t, 4>& originalColour) {
-        currentAction.addLuxel(c, originalColour);
+void Action_Handler::pixelChange(luxel* l, const std::array<uint8_t, 4>& originalColour) {
+        currentAction.addLuxel(l, originalColour);
 }
 void Action_Handler::checkForActions() {
     if (!currentAction.changeSet.empty()) addNewAction();
@@ -16,9 +16,7 @@ void Action_Handler::addNewAction() {
 void Action_Handler::processAction() {
 
 	for (auto& change : actionQueue[actionQueueIndex].changeSet) {
-        luxel* l = CanvasHandler.getLuxelFromCoord(change.c);
-        if (!l) continue;
-        std::swap(change.originalColour, l->colour);
+        std::swap(change.originalColour, change.l->colour);
 	}
 
 }

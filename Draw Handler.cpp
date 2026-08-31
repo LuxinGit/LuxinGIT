@@ -11,7 +11,7 @@ void Draw_Handler::checkDrawData() {
 void Draw_Handler::drawPoint(luxel& p, const std::array<uint8_t, 4>& colour) {
     std::array<uint8_t, 4>& pixelColour = p.colour;
     if (pixelColour == colour) return;
-    CanvasHandler.MasterHandler.ActionHandler.pixelChange(CanvasHandler.coordinateFromLuxel(p), pixelColour);
+    CanvasHandler.MasterHandler.ActionHandler.pixelChange(&p, pixelColour);
     pixelColour = colour;
     CanvasHandler.CursorHandler.pixelsDrawn += 1;
 }
@@ -20,7 +20,7 @@ void Draw_Handler::drawPoint(luxel* p, const std::array<uint8_t, 4>& colour) {
     drawPoint(*p, colour);
 }
 void Draw_Handler::drawPoint(const coordinate& c, const std::array<uint8_t, 4>& colour) {
-    drawPoint(CanvasHandler.getLuxelFromCoord(c), colour);
+    drawPoint(CanvasHandler.getLuxelFromCoord(c, false), colour);
 }
 void Draw_Handler::drawPoint(const coordinate& c, const bool useP, const std::array<uint8_t, 4>& colour) {
     if (useP) drawCircle(c, pen, true);
@@ -103,8 +103,10 @@ void Draw_Handler::drawCircle(const coordinate& c, int radius, const bool fill, 
 
 void Draw_Handler::fill(const coordinate& oc, const std::array<uint8_t, 4>& nColour) {
     
-    const std::array<uint8_t, 4> oColour = CanvasHandler.getLuxelFromCoord(oc)->colour;
-
+    luxel* o = CanvasHandler.getLuxelFromCoord(oc, true);
+    if (!o) return; // origin could not be on the display, and if so we don't want to fill around it.
+                    // this behaviour chosen instead of filling the pixel and then returning, fill should not be used as alias for drawPoint.
+    Colour oColour = o->colour;
     if (oColour == nColour) return;
 
     std::vector<coordinate> pixelStack = { oc };
@@ -112,7 +114,7 @@ void Draw_Handler::fill(const coordinate& oc, const std::array<uint8_t, 4>& nCol
     while (!pixelStack.empty()) {
 
         coordinate c = pixelStack.back();
-        luxel* l = CanvasHandler.getLuxelFromCoord(c);
+        luxel* l = CanvasHandler.getLuxelFromCoord(c, true);
 
         if (!l or l->colour != oColour) {
             pixelStack.pop_back(); 
@@ -131,9 +133,14 @@ void Draw_Handler::fill(const coordinate& oc, const std::array<uint8_t, 4>& nCol
 
 }
 void Draw_Handler::clearCanvas() {
-    for (luxel& l : CanvasHandler.canvas) {
-        drawPoint(l, backgroundColour);
+    for (int y = 0; y < CanvasHandler.height; ++y) {
+        const size_t rowStart = y * DEFAULT_CANVAS_WIDTH_MAX;
+
+        for (size_t i = rowStart; i < rowStart + CanvasHandler.width; ++i) {
+            drawPoint(CanvasHandler.canvas[i], DEFAULT_BACKGROUND_COLOUR);
+        }
     }
+
 }
 
 std::array<uint8_t, 4> Draw_Handler::getRandomColour() {

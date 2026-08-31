@@ -18,6 +18,6 @@ public:
 
     void harvestKeyboardState();
 
-    Keyboard_Handler(Command_Handler& CommH);
+    Keyboard_Handler(Master_Handler& varMH);
 
 };

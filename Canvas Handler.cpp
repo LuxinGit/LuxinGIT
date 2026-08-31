@@ -6,61 +6,54 @@ void luxel::resetLuxel() {
     colour = DEFAULT_BACKGROUND_COLOUR;
 }
 
-coordinate Canvas_Handler::coordinateFromLuxel(const luxel& l)
+void Canvas_Handler::updateCanvasSize(int vW, int vH)
 {
-    return coordinateFromIndex(&l - canvas.data(), width);
+    width   =    vW;
+    height  =    vH;
+    MasterHandler.SDLHandler.registerCanvasSizeChange();
 }
 
+Canvas_Handler::Canvas_Handler(int& varwidth, int& varheight, Master_Handler& varMH) :
+    canvas(DEFAULT_CANVAS_SIZE_MAX),
+    width(varwidth), height(varheight),
+    MasterHandler(varMH),
+    CursorHandler(*this),
+    DrawHandler(*this)
+{}
+
+coordinate Canvas_Handler::coordinateFromLuxel(const luxel& l)
+{
+    return coordinateFromIndex(&l - canvas.data(), DEFAULT_CANVAS_WIDTH_MAX);
+}
 coordinate Canvas_Handler::coordinateFromIndex(const size_t index, const int varW) {
     coordinate c(0, 0);
     c.x = index % varW; c.y = static_cast<int>(index / varW);
     return c;
 }
-void Canvas_Handler::updateCanvasSize(int vW, int vH)
-{
-    vW = std::clamp(vW, DEFAULT_CANVAS_WIDTH_MIN, DEFAULT_CANVAS_WIDTH_MAX);
-    vH = std::clamp(vH, DEFAULT_CANVAS_HEIGHT_MIN, DEFAULT_CANVAS_HEIGHT_MAX);
-    std::vector<luxel> ret(vW * vH);
-    for (int i = 0; i < canvas.size(); i++) {
-        coordinate curC = coordinateFromIndex(i, width);
-        if (curC.x >= vW or curC.y >= vH) continue;
-        ret[indexFromCoord(curC, vW)] = canvas[i];
+size_t Canvas_Handler::indexFromCoord(const coordinate& c) {
+    return size_t(c.y) * DEFAULT_CANVAS_WIDTH_MAX + size_t(c.x);
+}
+
+bool Canvas_Handler::coordCheck(const coordinate& c, const size_t width, const size_t height) {
+    if (c.x < 0 or static_cast<size_t>(c.x) >= width)   return false;
+    if (c.y < 0 or static_cast<size_t>(c.y) >= height)  return false;
+    return true;
+}
+    bool Canvas_Handler::coordCheckDisplay  (const coordinate& c) const {
+        return coordCheck(c, width, height);
+    } 
+    bool Canvas_Handler::coordCheckEntire   (const coordinate& c) const {
+        return coordCheck(c, DEFAULT_CANVAS_WIDTH_MAX, DEFAULT_CANVAS_HEIGHT_MAX);
     }
 
-    canvas  =    std::move(ret);
-    width   =    vW;
-    height  =    vH;
-
-    MasterHandler.SDLHandler.registerCanvasSizeChange();
+luxel* Canvas_Handler::getLuxelFromCoord(const coordinate& c, bool onDisplay) {
+    if (onDisplay) {
+        if (!coordCheckDisplay(c)) return nullptr;
+        return &canvas[indexFromCoord(c)];
+    }
+    else if (!coordCheckEntire(c)) return nullptr;
+    return &canvas[indexFromCoord(c)];
 }
-
-Canvas_Handler::Canvas_Handler(int& varwidth, int& varheight, Master_Handler& varMH) :
-    width(varwidth), height(varheight),
-    MasterHandler(varMH),
-    CursorHandler(*this),
-    DrawHandler(*this),
-    canvas(std::vector<luxel>(width* height)) {
-    // Only concern here is that if underlying height / width changes then this will need to be recalculated.
-}
-
-size_t Canvas_Handler::indexFromCoord(const coordinate& c, const int& w) {
-    // ASSUMES POSITIVE X/Y. INDEXING WITH THIS INDEX WITHOUT SIZE CHECKING MAY CAUSE OUT OF BOUNDARY MEMORY CRASH [IF COORD > LAST LUXEL INDEX].
-    return size_t(c.y) * w + size_t(c.x);
-}
-size_t Canvas_Handler::indexFromCoord(const coordinate& c)  {
-    return indexFromCoord(c, width);
-}
-
-bool Canvas_Handler::coordCheck(const coordinate& c) const {
-    if (c.x < 0 or c.x >= width) return false;
-    if (c.y < 0 or c.y >= height) return false;
-    return true;
-} 
-
-luxel* Canvas_Handler::getLuxelFromIndex(const size_t& index) { return &canvas[index]; }
-luxel* Canvas_Handler::getLuxelFromCoord(const coordinate& c, bool coordCheck) { return &canvas[indexFromCoord(c)]; }
-luxel* Canvas_Handler::getLuxelFromCoord(const coordinate& c) { return (coordCheck(c) ? getLuxelFromCoord(c, true) : nullptr); }
-
 
 void Canvas_Handler::processCommand(const Command& command) {
     switch (command.type) {
