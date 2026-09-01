@@ -78,7 +78,7 @@ void Canvas_Handler::processCommand(const Command& command) {
             switch (static_cast<Command::META::RESET>(command.setting)) {
             case Command::META::RESET::RESET_ALL:
                 for (auto& l : canvas) l.resetLuxel();
-                MasterHandler.ActionHandler.resetActionQueue();
+                MasterHandler.ActionState.actionQueue = {};
                 break;
             case Command::META::RESET::RESET_CURSOR:
                 CursorHandler.cursor = DEFAULT_CURSOR_POINT;

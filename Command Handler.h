@@ -13,7 +13,7 @@ private:
     Master_Handler& MasterHandler;
 
     void addCommand(Command command);
-    void processCommand(const Command& command);
+    void processCommand(Command& command);
 
 public:
 

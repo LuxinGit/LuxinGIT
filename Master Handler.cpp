@@ -1,4 +1,5 @@
 #include "Master Handler.h"
+#include "COMMAND REPO.h"
 
 Master_Handler::Master_Handler(int varwidth, int varheight) :
     width(varwidth), height(varheight),
@@ -6,7 +7,6 @@ Master_Handler::Master_Handler(int varwidth, int varheight) :
     CommandHandler(*this),
     KeyboardHandler(*this),
     MouseHandler(CanvasHandler.CursorHandler.deltaCursor, *this),
-    ActionHandler(CanvasHandler),
     SDLHandler(*this),
     CLIHandler(*this),
     GUIHandler(*this)

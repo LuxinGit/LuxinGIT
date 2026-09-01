@@ -14,9 +14,16 @@ void Command_Handler::constructCommand(COMMAND_ID command, Command::Payload payl
     addCommand(result.command);
 }
 
-void Command_Handler::processCommand(const Command& command) {
+void Command_Handler::processCommand(Command& command) {
 
-    COMMAND_PROCESSOR_ID pID = COMMAND_ID_DEF_MAP.at(command.ID)->processor;
+    auto& def = COMMAND_ID_DEF_MAP.at(command.ID);
+
+    if (def->newProcessor) {
+        def->newProcessor(MasterHandler, command);
+        return;
+    }
+
+    COMMAND_PROCESSOR_ID pID = def->processor;
 
     switch (pID) {
         case COMMAND_PROCESSOR_ID::CANVAS_HANDLER:
@@ -29,10 +36,6 @@ void Command_Handler::processCommand(const Command& command) {
 
         case COMMAND_PROCESSOR_ID::DRAW_HANDLER:
             MasterHandler.CanvasHandler.DrawHandler.processCommand(command);
-            break;
-
-        case COMMAND_PROCESSOR_ID::ACTION_HANDLER:
-            MasterHandler.ActionHandler.processCommand(command);
             break;
 
         case COMMAND_PROCESSOR_ID::CLI_HANDLER:
@@ -50,8 +53,8 @@ void Command_Handler::processCommand(const Command& command) {
 }
 void Command_Handler::processCommands() {
 
-    if (commandQueue.empty()) MasterHandler.ActionHandler.checkForActions();
-    for (const auto& command : commandQueue) processCommand(command);
+    if (commandQueue.empty()) Action::commitCurrentAction(MasterHandler.ActionState);
+    for (auto& command : commandQueue) processCommand(command);
     clearCommands();
 
 }
