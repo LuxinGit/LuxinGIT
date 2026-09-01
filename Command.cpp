@@ -91,23 +91,23 @@ Command::APP::APP(ACTION varAction, int varSetting) : action(varAction), setting
     Command::APP::APP(UNDO_REDO varSetting) : APP(ACTION::UNDO_REDO, static_cast<int>(varSetting)) {}
 
 int* GUI_METADATA::SLIDER_METADATA::resolvePenWidth(Master_Handler& varMH) {
-    return &varMH.CanvasHandler.DrawHandler.pen;
+    return &varMH.DrawState.pen;
 }
 int* GUI_METADATA::SLIDER_METADATA::resolveDrawstep(Master_Handler& varMH) {
-    return &varMH.CanvasHandler.CursorHandler.drawStep;
+    return &varMH.CursorState.drawStep;
 }
 int* GUI_METADATA::SLIDER_METADATA::resolveCanvasWidth(Master_Handler& varMH)
 {
-    return &varMH.CanvasHandler.width;
+    return &varMH.CanvasState.width;
 }
 int* GUI_METADATA::SLIDER_METADATA::resolveCanvasHeight(Master_Handler& varMH)
 {
-    return &varMH.CanvasHandler.height;
+    return &varMH.CanvasState.height;
 }
 
 std::array<uint8_t, 4>* GUI_METADATA::COLOUR_METADATA::resolveDrawColourChange(Master_Handler& varMH) {
-    return &varMH.CanvasHandler.DrawHandler.drawColour;
+    return &varMH.DrawState.drawColour;
 }
 std::array<uint8_t, 4>* GUI_METADATA::COLOUR_METADATA::resolveBackgroundColourChange(Master_Handler& varMH) {
-    return &varMH.CanvasHandler.DrawHandler.backgroundColour;
+    return &varMH.DrawState.backgroundColour;
 }
