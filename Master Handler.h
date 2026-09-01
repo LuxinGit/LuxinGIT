@@ -30,6 +30,7 @@ public:
 
     // NEW
     Action_State        ActionState;
+    Canvas_State        CanvasState;
 
     Master_Handler(int varwidth, int varheight);
 

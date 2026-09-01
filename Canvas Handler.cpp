@@ -30,9 +30,6 @@ coordinate Canvas_Handler::coordinateFromIndex(const size_t index, const int var
     c.x = index % varW; c.y = static_cast<int>(index / varW);
     return c;
 }
-size_t Canvas_Handler::indexFromCoord(const coordinate& c) {
-    return size_t(c.y) * DEFAULT_CANVAS_WIDTH_MAX + size_t(c.x);
-}
 
 bool Canvas_Handler::coordCheck(const coordinate& c, const size_t width, const size_t height) {
     if (c.x < 0 or static_cast<size_t>(c.x) >= width)   return false;
@@ -45,6 +42,10 @@ bool Canvas_Handler::coordCheck(const coordinate& c, const size_t width, const s
     bool Canvas_Handler::coordCheckEntire   (const coordinate& c) const {
         return coordCheck(c, DEFAULT_CANVAS_WIDTH_MAX, DEFAULT_CANVAS_HEIGHT_MAX);
     }
+
+size_t Canvas_Handler::indexFromCoord(const coordinate& c) {
+    return size_t(c.y) * DEFAULT_CANVAS_WIDTH_MAX + size_t(c.x);
+}
 
 luxel* Canvas_Handler::getLuxelFromCoord(const coordinate& c, bool onDisplay) {
     if (onDisplay) {
@@ -118,3 +119,54 @@ void Canvas_Handler::processCommand(const Command& command) {
 
             }
         }
+//// NEW
+
+namespace Canvas {
+    
+    namespace {
+
+        size_t indexFromCoord(const coordinate& c) {
+            return size_t(c.y) * DEFAULT_CANVAS_WIDTH_MAX + size_t(c.x);
+        }
+        void updateCanvasSize(Canvas_State& s, coordinate c)
+        {
+            if (!coordCheck(s, c, false)) return;
+            if(c.x) s.width = c.x;
+            if(c.y) s.height = c.y;
+            SDL_SetWindowSize(SDL_Handler::Window, s.width, s.height);
+        }
+
+    }
+
+    bool coordCheck(const Canvas_State& s, const coordinate& c, bool onDisplay) {
+        coordinate tC1 = (onDisplay) ? 
+            coordinate(s.width - 1, s.height - 1) : coordinate(DEFAULT_CANVAS_WIDTH_MAX, DEFAULT_CANVAS_HEIGHT_MAX);
+        if (c < coordinate(0,0))   return false;
+        if (c > tC1)  return false;
+        return true;
+    }
+    luxel* getLuxelFromCoord(Canvas_State& s, const coordinate& c, bool onDisplay) {
+        if (!coordCheck(s, c, onDisplay)) return nullptr;
+        return &s.canvas[indexFromCoord(c)];
+    }
+    
+    void processResetAll(Master_Handler& mh, Command& command) {
+        for (auto& l : mh.CanvasState.canvas) l.resetLuxel();
+        mh.ActionState.actionQueue = {};
+    }
+    void processCanvasSize(Master_Handler& mh, Command& command) {
+        
+        coordinate c = { 0, 0 };
+        
+        if (command.ID == COMMAND_ID::CANVAS_RESIZE_SET_PAYLOAD) 
+            c = std::get<coordinate>(command.payload);
+        else if (command.ID == COMMAND_ID::CANVAS_RESIZE_SET_HEIGHT)
+            c = { 0 , std::get<int>(command.payload) };
+        else if (command.ID == COMMAND_ID::CANVAS_RESIZE_SET_WIDTH)
+            c = { std::get<int>(command.payload), 0 };
+        
+        updateCanvasSize(mh.CanvasState, c);
+
+    }
+
+}

@@ -2,6 +2,11 @@
 #include "Canvas Handler.h"
 #include "Master Handler.h"
 
+void Change_Set::addLuxel(luxel* l, const std::array<uint8_t, 4>& oC) {
+    if (changedLuxels.insert(l).second)
+        changeSet.emplace_back(l, oC);
+}
+
 namespace Action {
 
     namespace {

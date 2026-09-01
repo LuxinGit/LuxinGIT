@@ -1,5 +1,6 @@
 #include "COMMAND REPO.h"
 #include "Action.h"
+#include "Canvas Handler.h"
 
 Command_Repo COMMAND_REPO = { {
 
@@ -98,7 +99,7 @@ Command_Repo COMMAND_REPO = { {
     // COLOUR
     {
         Command{COMMAND_ID::COLOUR_RESET, Command::META::CHANGE_COLOUR::DEFAULT, false},
-        COMMAND_PROCESSOR_ID::CANVAS_HANDLER,
+        COMMAND_PROCESSOR_ID::DRAW_HANDLER,
         std::nullopt,
         std::nullopt,
         "default_colour",
@@ -318,7 +319,8 @@ Command_Repo COMMAND_REPO = { {
         GUI_METADATA{
             GUI_METADATA::HEADER::FILE,
             "Reset All (Includes undo/redo history)"
-        }
+        },
+        &Canvas::processResetAll
     },
     {
         Command{COMMAND_ID::RESET_CURSOR, Command::META::RESET::RESET_CURSOR, false},
@@ -360,7 +362,8 @@ Command_Repo COMMAND_REPO = { {
         SDL_SCANCODE_7,
         std::nullopt,
         "resize",
-        std::nullopt
+        std::nullopt,
+        &Canvas::processCanvasSize
     },
     {
         Command{COMMAND_ID::CANVAS_RESIZE_SET_HEIGHT, Command::META::CANVAS_CHANGE_SIZE::SET_HEIGHT_TO_PAYLOAD, false, 400},
@@ -376,7 +379,8 @@ Command_Repo COMMAND_REPO = { {
                 DEFAULT_CANVAS_HEIGHT_MAX,
                 GUI_METADATA::SLIDER_METADATA::resolveCanvasHeight
             }
-        }
+        },
+        &Canvas::processCanvasSize
     },
     {
         Command{COMMAND_ID::CANVAS_RESIZE_SET_WIDTH, Command::META::CANVAS_CHANGE_SIZE::SET_WIDTH_TO_PAYLOAD, false, 400},
@@ -392,7 +396,8 @@ Command_Repo COMMAND_REPO = { {
                 DEFAULT_CANVAS_WIDTH_MAX,
                 GUI_METADATA::SLIDER_METADATA::resolveCanvasWidth
             }
-        }
+        },
+        &Canvas::processCanvasSize
     },
 
     } };

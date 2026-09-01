@@ -3,19 +3,17 @@
 #include "Command.h"
 #include <unordered_set>
 
+struct Change {
+	luxel* l;
+	std::array<uint8_t, 4> originalColour;
+};
+
 struct Change_Set {
-	struct Change {
-		luxel* l;
-		std::array<uint8_t, 4> originalColour;
-	};
 
 	std::vector<Change> changeSet;
 	std::unordered_set<luxel*> changedLuxels;
 
-	void addLuxel(luxel* l, const std::array<uint8_t, 4>& oC) {
-		if (changedLuxels.insert(l).second)
-			changeSet.emplace_back(l, oC);
-	}
+	void addLuxel(luxel* l, const std::array<uint8_t, 4>& oC);
 };
 
 struct Action_State {

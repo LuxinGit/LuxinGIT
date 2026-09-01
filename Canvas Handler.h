@@ -43,3 +43,23 @@ private:
             void processCanvasSizeCommand(const Command& command);
 
 };
+
+//// NEW
+
+struct Canvas_State {
+
+    int width;
+    int height;
+    std::vector<luxel> canvas;
+
+};
+
+namespace Canvas {
+
+    bool coordCheck(const Canvas_State& s, const coordinate& c, bool onDisplay);
+    luxel* getLuxelFromCoord(Canvas_State& s, const coordinate& c, bool onDisplay);
+    
+    void processResetAll(Master_Handler& mh, Command& command);
+    void processCanvasSize(Master_Handler& mh, Command& command);
+
+}
