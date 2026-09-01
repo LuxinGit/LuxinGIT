@@ -1,6 +1,7 @@
 #include "COMMAND REPO.h"
 #include "Action.h"
-#include "Canvas Handler.h"
+#include "Canvas.h"
+
 
 Command_Repo COMMAND_REPO = { {
 
@@ -11,7 +12,8 @@ Command_Repo COMMAND_REPO = { {
         SDL_SCANCODE_W,
         std::nullopt,
         "up",
-        std::nullopt
+        std::nullopt,
+        &Cursor::processMoveCursor
     },
     {
         Command{COMMAND_ID::MOVE_DOWN, Command::MOVE::DIRECTION::DOWN, true},
@@ -19,7 +21,8 @@ Command_Repo COMMAND_REPO = { {
         SDL_SCANCODE_S,
         std::nullopt,
         "down",
-        std::nullopt
+        std::nullopt,
+        &Cursor::processMoveCursor
     },
     {
         Command{COMMAND_ID::MOVE_LEFT, Command::MOVE::DIRECTION::LEFT, true},
@@ -27,7 +30,8 @@ Command_Repo COMMAND_REPO = { {
         SDL_SCANCODE_A,
         std::nullopt,
         "left",
-        std::nullopt
+        std::nullopt,
+        &Cursor::processMoveCursor
     },
     {
         Command{COMMAND_ID::MOVE_RIGHT, Command::MOVE::DIRECTION::RIGHT, true},
@@ -35,7 +39,8 @@ Command_Repo COMMAND_REPO = { {
         SDL_SCANCODE_D,
         std::nullopt,
         "right",
-        std::nullopt
+        std::nullopt,
+        &Cursor::processMoveCursor
     },
     {
         Command{COMMAND_ID::MOVE_RESET, Command::MOVE::SET::RESET_TO_ORIGIN, false},
@@ -43,7 +48,8 @@ Command_Repo COMMAND_REPO = { {
         SDL_SCANCODE_Q,
         std::nullopt,
         "reset",
-        std::nullopt
+        std::nullopt,
+        &Cursor::processMoveCursor
     },
     {
         Command{COMMAND_ID::MOVE_SET_POINT, Command::MOVE::SET::USE_PAYLOAD, false, DEFAULT_CURSOR_POINT},
@@ -51,7 +57,8 @@ Command_Repo COMMAND_REPO = { {
         std::nullopt,
         std::nullopt,
         "move",
-        std::nullopt
+        std::nullopt,
+        &Cursor::processMoveCursor
     },
     {
         Command{COMMAND_ID::MOVE_SAVE_ORIGIN, Command::META::SAVE_ORIGIN::NORMAL, false},
@@ -59,7 +66,8 @@ Command_Repo COMMAND_REPO = { {
         SDL_SCANCODE_2,
         std::nullopt,
         "save_origin",
-        std::nullopt
+        std::nullopt,
+        &Cursor::processChangeOrigin
     },
 
     // DRAW
@@ -69,15 +77,8 @@ Command_Repo COMMAND_REPO = { {
         SDL_SCANCODE_G,
         std::nullopt,
         "circle",
-        std::nullopt
-    },
-    {
-        Command{COMMAND_ID::DRAW_CIRCLE_RAINBOW, Command::DRAW::CIRCLE::RAINBOW, false},
-        COMMAND_PROCESSOR_ID::DRAW_HANDLER,
-        SDL_SCANCODE_L,
         std::nullopt,
-        "rainbow_circle",
-        std::nullopt
+        &Draw::processCircle
     },
     {
         Command{COMMAND_ID::DRAW_FILL_PAYLOAD, Command::DRAW::FILL::USE_PAYLOAD, false},
@@ -85,7 +86,8 @@ Command_Repo COMMAND_REPO = { {
         std::nullopt,
         std::nullopt,
         "fill",
-        std::nullopt
+        std::nullopt,
+        &Draw::processFill
     },
     {
         Command{COMMAND_ID::DRAW_FILL_DRAWCOLOUR, Command::DRAW::FILL::USE_DRAW_COLOUR, false},
@@ -93,25 +95,28 @@ Command_Repo COMMAND_REPO = { {
         SDL_SCANCODE_F,
         std::nullopt,
         std::nullopt,
-        std::nullopt
+        std::nullopt,
+        &Draw::processFill
     },
 
     // COLOUR
     {
-        Command{COMMAND_ID::COLOUR_RESET, Command::META::CHANGE_COLOUR::DEFAULT, false},
+        Command{COMMAND_ID::COLOUR_SET_DEFAULT, Command::META::CHANGE_COLOUR::DEFAULT, false},
         COMMAND_PROCESSOR_ID::DRAW_HANDLER,
         std::nullopt,
         std::nullopt,
         "default_colour",
-        std::nullopt
+        std::nullopt,
+        &Draw::processChangeColour
     },
     {
-        Command{COMMAND_ID::COLOUR_RANDOM, Command::META::CHANGE_COLOUR::RANDOM, false},
+        Command{COMMAND_ID::COLOUR_SET_RANDOM, Command::META::CHANGE_COLOUR::RANDOM, false},
         COMMAND_PROCESSOR_ID::DRAW_HANDLER,
         SDL_SCANCODE_J,
         std::nullopt,
         "random_colour",
-        std::nullopt
+        std::nullopt,
+        &Draw::processChangeColour
     },
     {
         Command{COMMAND_ID::COLOUR_SET_DRAW, Command::META::CHANGE_COLOUR::USE_PAYLOAD_DRAW, false, DEFAULT_DRAW_COLOUR},
@@ -125,7 +130,8 @@ Command_Repo COMMAND_REPO = { {
             GUI_METADATA::COLOUR_METADATA{
                 GUI_METADATA::COLOUR_METADATA::resolveDrawColourChange
             }
-        }
+        },
+        &Draw::processChangeColour
     },
     {
         Command{COMMAND_ID::COLOUR_SET_PICK, Command::META::CHANGE_COLOUR::USE_HOVERED_LUXEL, false, DEFAULT_DRAW_COLOUR},
@@ -134,6 +140,7 @@ Command_Repo COMMAND_REPO = { {
         SDL_BUTTON_MIDDLE,
         std::nullopt,
         std::nullopt,
+        &Draw::processChangeColour
     },
     {
         Command{COMMAND_ID::COLOUR_SET_BACKGROUND, Command::META::CHANGE_COLOUR::USE_PAYLOAD_BACKGROUND, false, DEFAULT_DRAW_COLOUR},
@@ -147,7 +154,8 @@ Command_Repo COMMAND_REPO = { {
             GUI_METADATA::COLOUR_METADATA{
                 GUI_METADATA::COLOUR_METADATA::resolveBackgroundColourChange
             }
-        }
+        },
+        &Draw::processChangeColour
     },
 
     // PEN MODE
@@ -160,7 +168,8 @@ Command_Repo COMMAND_REPO = { {
         GUI_METADATA{
             GUI_METADATA::HEADER::TOOLS,
             "Draw"
-        }
+        },
+        &Draw::processChangePenMode
     },
     {
         Command{COMMAND_ID::PENMODE_RUBBER, Command::META::CHANGE_PENMODE::RUBBER, false},
@@ -171,7 +180,8 @@ Command_Repo COMMAND_REPO = { {
         GUI_METADATA{
             GUI_METADATA::HEADER::TOOLS,
             "Rubber"
-        }
+        },
+        &Draw::processChangePenMode
     },
     {
         Command{COMMAND_ID::PENMODE_RAINBOW, Command::META::CHANGE_PENMODE::RAINBOW, false},
@@ -182,7 +192,8 @@ Command_Repo COMMAND_REPO = { {
         GUI_METADATA{
             GUI_METADATA::HEADER::TOOLS,
             "Rainbow"
-        }
+        },
+        &Draw::processChangePenMode
     },
 
     // PEN
@@ -192,7 +203,8 @@ Command_Repo COMMAND_REPO = { {
         SDL_SCANCODE_1,
         std::nullopt,
         "pen",
-        std::nullopt
+        std::nullopt,
+        &Draw::processPenDown
     },
     {
         Command{COMMAND_ID::PEN_HELD_DOWN, Command::META::CHANGE_PENMODE::PEN_DOWN, true, 1},
@@ -200,7 +212,8 @@ Command_Repo COMMAND_REPO = { {
         std::nullopt,
         SDL_BUTTON_LMASK,
         std::nullopt,
-        std::nullopt
+        std::nullopt,
+        &Draw::processPenDown
     },
 
     // DRAW STEP
@@ -210,7 +223,8 @@ Command_Repo COMMAND_REPO = { {
         SDL_SCANCODE_Z,
         std::nullopt,
         "step_down",
-        std::nullopt
+        std::nullopt,
+        &Cursor::processChangeDrawstep
     },
     {
         Command{COMMAND_ID::DRAWSTEP_INCREASE, Command::META::CHANGE_DRAWSTEP::ADD_PAYLOAD, false, 1},
@@ -218,7 +232,8 @@ Command_Repo COMMAND_REPO = { {
         SDL_SCANCODE_X,
         std::nullopt,
         "step_up",
-        std::nullopt
+        std::nullopt,
+        &Cursor::processChangeDrawstep
     },
     {
         Command{COMMAND_ID::DRAWSTEP_SET, Command::META::CHANGE_DRAWSTEP::SET_TO_PAYLOAD, false, 1},
@@ -234,7 +249,8 @@ Command_Repo COMMAND_REPO = { {
                 DEFAULT_DRAWSTEP_MAX,
                 GUI_METADATA::SLIDER_METADATA::resolveDrawstep
             }
-        }
+        },
+        &Cursor::processChangeDrawstep
     },
 
     // PEN WIDTH
@@ -244,7 +260,8 @@ Command_Repo COMMAND_REPO = { {
         SDL_SCANCODE_V,
         std::nullopt,
         "pen_thinner",
-        std::nullopt
+        std::nullopt,
+        &Draw::processChangePenMode
     },
     {
         Command{COMMAND_ID::PEN_WIDTH_INCREASE, Command::META::CHANGE_PEN_WIDTH::ADD_PAYLOAD, false, 1},
@@ -252,7 +269,8 @@ Command_Repo COMMAND_REPO = { {
         SDL_SCANCODE_B,
         std::nullopt,
         "pen_thicker",
-        std::nullopt
+        std::nullopt,
+        &Draw::processChangePenMode
     },
     {
         Command{COMMAND_ID::PEN_SET, Command::META::CHANGE_PEN_WIDTH::SET_TO_PAYLOAD, false, 1},
@@ -268,7 +286,8 @@ Command_Repo COMMAND_REPO = { {
                 DEFAULT_PENWIDTH_MAX,
                 GUI_METADATA::SLIDER_METADATA::resolvePenWidth
             }
-        }
+        },
+        &Draw::processChangePenMode
     },
 
     // INPUT
@@ -299,7 +318,8 @@ Command_Repo COMMAND_REPO = { {
         GUI_METADATA{
             GUI_METADATA::HEADER::FILE,
             "Reset Canvas"
-        }
+        },
+        &Draw::processClearCanvas
     },
     {
         Command{COMMAND_ID::RESET_ACTION_QUEUE, Command::META::RESET::RESET_ACTION_QUEUE, false},
@@ -328,7 +348,8 @@ Command_Repo COMMAND_REPO = { {
         SDL_SCANCODE_9,
         std::nullopt,
         "reset_cursor",
-        std::nullopt
+        std::nullopt,
+        &Cursor::processMoveCursor
     },
 
     // UNDO / REDO

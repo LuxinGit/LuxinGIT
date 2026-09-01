@@ -23,7 +23,7 @@ int main()
 {
     bool running = true;
 
-    Master_Handler MasterHandler(DEFAULT_CANVAS_WIDTH_CUR, DEFAULT_CANVAS_HEIGHT_CUR);
+    Master_Handler MasterHandler;
 
     while (running) {
 

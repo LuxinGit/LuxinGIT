@@ -3,10 +3,10 @@
 #include "imgui.h"
 
 SDL_Handler::SDL_Handler(Master_Handler& varMH) :
-	canvas(varMH.CanvasHandler.canvas),
-	canvasHeight(varMH.height),
-	canvasWidth(varMH.width),
-	CursorHandler(varMH.CanvasHandler.CursorHandler)
+	canvas			(varMH.CanvasState.canvas),
+	canvasHeight	(varMH.CanvasState.height),
+	canvasWidth		(varMH.CanvasState.width),
+	MasterHandler	(varMH)
 
 {
 	Window		= SDL_CreateWindow(DEFAULT_APPLICATION_NAME, canvasWidth, canvasHeight, 0);
@@ -59,17 +59,17 @@ void SDL_Handler::renderPresent() const {
 	SDL_RenderPresent(Renderer);
 }
 void SDL_Handler::renderCrosshair() const {
-	if (CursorHandler.enableCrosshair)
+	if (MasterHandler.CursorState.enableCrosshair)
 	{
-		auto [x, y] = CursorHandler.cursor;
-		int r = CursorHandler.CanvasHandler.DrawHandler.pen;
+		auto [x, y] = MasterHandler.CursorState.cursor;
+		int r = MasterHandler.DrawState.pen;
 		SDL_RenderLine(Renderer, x - r, y, x + r, y);
 		SDL_RenderLine(Renderer, x, y - r, x, y + r);
 	}
 };
 void SDL_Handler::renderFrame() {
 	GUIHandler->beginFrame();
-	CursorHandler.refreshCursor();
+	Cursor::checkCursorData(MasterHandler);
 	updateTexture();
 	renderTexture();
 	renderCrosshair(); // todo  fix the fact that we be rendering the crosshair regardless of whether or not we be using the gui

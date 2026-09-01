@@ -58,9 +58,15 @@ struct coordinate {
     coordinate operator+(const coordinate& other) const {
         return { x + other.x, y + other.y };
     }
-
     coordinate operator-(const coordinate& other) const {
         return { x - other.x, y - other.y };
+    }
+
+    explicit operator std::pair<float, float>() const {
+        return {
+            static_cast<float>(x),
+            static_cast<float>(y)
+        };
     }
 
     coordinate(const int& varx, const int& vary) : x(varx), y(vary) {}

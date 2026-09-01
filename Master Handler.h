@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Canvas Handler.h"
+#include "Canvas.h"
 #include "SDL Handler.h"
 #include "Command Handler.h"
 #include "Keyboard Handler.h"
@@ -17,10 +17,13 @@ private:
 
 public:
 
-    int width; int height;
+    // NEW
+    Action_State        ActionState;
+    Canvas_State        CanvasState;
+    Cursor_State        CursorState;
+    Draw_State          DrawState;
 
     // OLD
-    Canvas_Handler      CanvasHandler;
     SDL_Handler         SDLHandler;
     Command_Handler     CommandHandler;
     Keyboard_Handler    KeyboardHandler;
@@ -28,11 +31,7 @@ public:
     Mouse_Handler       MouseHandler;
     GUI_Handler         GUIHandler;
 
-    // NEW
-    Action_State        ActionState;
-    Canvas_State        CanvasState;
-
-    Master_Handler(int varwidth, int varheight);
+    Master_Handler();
 
     void renderFrame();
 

@@ -1,5 +1,5 @@
 #include "Action.h"
-#include "Canvas Handler.h"
+#include "Canvas.h"
 #include "Master Handler.h"
 
 void Change_Set::addLuxel(luxel* l, const std::array<uint8_t, 4>& oC) {

@@ -18,9 +18,10 @@ struct SDL_Handler {
     std::vector<luxel>& canvas;
     int& canvasWidth;
     int& canvasHeight;
-    Cursor_Handler& CursorHandler;
     GUI_Handler* GUIHandler;
     bool* enableMouse;
+
+    Master_Handler& MasterHandler;
 
     SDL_Handler(Master_Handler& varMH);
 

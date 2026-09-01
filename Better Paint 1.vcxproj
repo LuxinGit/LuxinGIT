@@ -136,13 +136,13 @@
       <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdcpp20</LanguageStandard>
       <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Release|x64'">stdcpp20</LanguageStandard>
     </ClCompile>
-    <ClCompile Include="Canvas Handler.cpp" />
+    <ClCompile Include="Canvas.cpp" />
     <ClCompile Include="CLI Handler.cpp" />
     <ClCompile Include="Command Handler.cpp" />
     <ClCompile Include="COMMAND.cpp" />
     <ClCompile Include="CONSTANTS.h" />
-    <ClCompile Include="Cursor Handler.cpp" />
-    <ClCompile Include="Draw Handler.cpp" />
+    <ClCompile Include="Cursor.cpp" />
+    <ClCompile Include="Draw.cpp" />
     <ClCompile Include="Keyboard Handler.cpp" />
     <ClCompile Include="Master Handler.cpp" />
     <ClCompile Include="Mouse Handler.cpp" />
@@ -151,13 +151,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Action.h" />
-    <ClInclude Include="Canvas Handler.h" />
+    <ClInclude Include="Canvas.h" />
     <ClInclude Include="CLI Handler.h" />
     <ClInclude Include="Command Handler.h" />
     <ClInclude Include="COMMAND REPO.h" />
     <ClInclude Include="COMMAND.h" />
-    <ClInclude Include="Cursor Handler.h" />
-    <ClInclude Include="Draw Handler.h" />
+    <ClInclude Include="Cursor.h" />
+    <ClInclude Include="Draw.h" />
     <ClInclude Include="GUI Handler.h" />
     <ClInclude Include="Keyboard Handler.h" />
     <ClInclude Include="Master Handler.h" />

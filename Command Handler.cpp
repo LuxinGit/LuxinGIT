@@ -26,18 +26,6 @@ void Command_Handler::processCommand(Command& command) {
     COMMAND_PROCESSOR_ID pID = def->processor;
 
     switch (pID) {
-        case COMMAND_PROCESSOR_ID::CANVAS_HANDLER:
-            MasterHandler.CanvasHandler.processCommand(command);
-            break;
-
-        case COMMAND_PROCESSOR_ID::CURSOR_HANDLER:
-            MasterHandler.CanvasHandler.CursorHandler.processCommand(command);
-            break;
-
-        case COMMAND_PROCESSOR_ID::DRAW_HANDLER:
-            MasterHandler.CanvasHandler.DrawHandler.processCommand(command);
-            break;
-
         case COMMAND_PROCESSOR_ID::CLI_HANDLER:
             MasterHandler.CLIHandler.processCommand(command);
             break;

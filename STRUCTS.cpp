@@ -1,5 +1,5 @@
 #include "STRUCTS.h"
-#include "Canvas Handler.h"
+#include "Canvas.h"
 
 //Colour location::changeColour(const Colour& c)
 //{
