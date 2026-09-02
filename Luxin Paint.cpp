@@ -9,6 +9,8 @@
 /*
 TO DO:
     
+    ARGUMENTS SHOULD BE MAP YES GOOD YES GOOD 
+
     cursor needs some better way to show on dark backgrounds.
     keybind reduce / increase brightness
     keybind remappings

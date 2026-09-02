@@ -7,9 +7,9 @@
 
 struct Draw_State {
 
-    std::array<uint8_t, 4>  drawColour       =  DEFAULT_DRAW_COLOUR;
-    std::array<uint8_t, 4>  backgroundColour =  DEFAULT_BACKGROUND_COLOUR;
-    std::array<uint8_t, 4>* activeColour     =  &drawColour;
+    colour  drawColour       =  DEFAULT_DRAW_COLOUR;
+    colour  backgroundColour =  DEFAULT_BACKGROUND_COLOUR;
+    colour* activeColour     =  &drawColour;
     
     int pen =                                   DEFAULT_PENWIDTH_CUR;
     bool penDown =                              !ENABLE_MOUSE;

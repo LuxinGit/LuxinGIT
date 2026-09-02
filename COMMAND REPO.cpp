@@ -1195,7 +1195,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
             }
         },
 
-        .processor = &Draw::processChangePenMode
+        .processor = &Draw::processChangePenWidth
     },
 
     {
@@ -1232,7 +1232,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
             }
         },
 
-        .processor = &Draw::processChangePenMode
+        .processor = &Draw::processChangePenWidth
     },
 
     {
@@ -1280,7 +1280,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
             }
         },
 
-        .processor = &Draw::processChangePenMode
+        .processor = &Draw::processChangePenWidth
     },
 
 

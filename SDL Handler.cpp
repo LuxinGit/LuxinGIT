@@ -60,7 +60,7 @@ void SDL_Handler::renderPresent() const {
 }
 void SDL_Handler::renderCrosshair() const {
 	if (MasterHandler.CursorState.enableCrosshair)
-	{
+	{	
 		auto [x, y] = MasterHandler.CursorState.cursor;
 		int r = MasterHandler.DrawState.pen;
 		SDL_RenderLine(Renderer, x - r, y, x + r, y);
