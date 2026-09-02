@@ -27,9 +27,9 @@ public:
 
 	Mouse_Handler(std::pair<float, float>& cursor, Master_Handler& varMasH);
 
-	void processCommand(const Command& command);
+	void processCommand(const Command_OLD& command);
 	
 	private:
-		void processAppCommand(const Command& command);
-			void processMouseCommand(const Command& command);
+		void processAppCommand(const Command_OLD& command);
+			void processMouseCommand(const Command_OLD& command);
 };

@@ -76,7 +76,7 @@ std::array<uint8_t, 4> CLI_Handler::convertColour(const std::string& input) {
     return ret;
 }
 
-Command::Payload CLI_Handler::harvestPayload() {
+Command_OLD::Payload_OLD CLI_Handler::harvestPayload() {
     std::string input = harvestInput(R"(
 Please input data for payload: 
 
@@ -157,27 +157,27 @@ void CLI_Handler::beginCLILoop() {
     CLI_Loop();
 }
 
-void CLI_Handler::processCommand(const Command& command) {
+void CLI_Handler::processCommand(const Command_OLD& command) {
     switch (command.type) {
-    case Command::TYPE::APP:
+    case Command_OLD::TYPE::APP:
         processAppCommand(command);
         break;
     }
 }
 
-    void CLI_Handler::processAppCommand(const Command& command) {
+    void CLI_Handler::processAppCommand(const Command_OLD& command) {
 
-        using action = Command::APP::ACTION;
+        using action = Command_OLD::APP::ACTION;
         switch (static_cast<action>(command.action)) {
         case (action::INPUT_MODE):
-            switch (static_cast<Command::APP::INPUT_MODE>(command.setting)) {
-            case (Command::APP::INPUT_MODE::CLI):
+            switch (static_cast<Command_OLD::APP::INPUT_MODE>(command.setting)) {
+            case (Command_OLD::APP::INPUT_MODE::CLI):
                 processCLICommand(command);
                 break;
             }
         }
     }
-        void CLI_Handler::processCLICommand(const Command& command) {
+        void CLI_Handler::processCLICommand(const Command_OLD& command) {
             beginCLILoop();
         }
 

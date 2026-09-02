@@ -36,19 +36,19 @@ namespace Action {
     }
 
 
-    void markChangedPixel(Action_State& s, luxel* l, const std::array<uint8_t, 4>& originalColour) {
+    void markChangedPixel(Action_State& s, luxel* l, const colour& originalColour) {
         s.currentAction.addLuxel(l, originalColour);
     }
     void commitCurrentAction(Action_State& s) {
         if (!s.currentAction.changeSet.empty()) addNewAction(s);
     }
-    void processUndo(Master_Handler& mh, Command&) {
+    void processUndo(Master_Handler& mh, Command::Command&) {
         undoAction(mh.ActionState);
     }
-    void processRedo(Master_Handler& mh, Command&) {
+    void processRedo(Master_Handler& mh, Command::Command&) {
         redoAction(mh.ActionState);
     }
-    void processClearActionQueue(Master_Handler& mh, Command&)
+    void processClearActionQueue(Master_Handler& mh, Command::Command&)
     {
         mh.ActionState.actionQueue = {}; 
     }

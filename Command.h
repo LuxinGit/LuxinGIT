@@ -64,7 +64,7 @@ enum class COMMAND_ID {
     INVALID
 };
 
-struct Command {
+struct Command_OLD {
 
 public:
 
@@ -249,24 +249,24 @@ public:
 
         };
 
-    using Payload = std::variant<std::monostate, int, std::pair<float, float>, std::array<uint8_t, 4>, coordinate>;
+    using Payload_OLD = std::variant<std::monostate, int, std::pair<float, float>, colour, coordinate>;
 
 private:
 
-    Command(COMMAND_ID varID, TYPE vartype, int varaction, int varsetting, bool varRepeatable, Payload varPayload = {});
+    Command_OLD(COMMAND_ID varID, TYPE vartype, int varaction, int varsetting, bool varRepeatable, Payload_OLD varPayload = {});
 
 public:
 
-    Command(COMMAND_ID varID, MOVE cmd, bool repeatable, Payload payload = {});
-    Command(COMMAND_ID varID, DRAW cmd, bool repeatable, Payload payload = {});
-    Command(COMMAND_ID varID, META cmd, bool repeatable, Payload payload = {});
-    Command(COMMAND_ID varID, APP cmd, bool repeatable, Payload payload = {});
+    Command_OLD(COMMAND_ID varID, MOVE cmd, bool repeatable, Payload_OLD payload = {});
+    Command_OLD(COMMAND_ID varID, DRAW cmd, bool repeatable, Payload_OLD payload = {});
+    Command_OLD(COMMAND_ID varID, META cmd, bool repeatable, Payload_OLD payload = {});
+    Command_OLD(COMMAND_ID varID, APP cmd, bool repeatable, Payload_OLD payload = {});
 
     TYPE type;
     int action; // differentiates between commands.
     int setting; // settings within commands.
     bool repeatable;
-    Payload payload;
+    Payload_OLD payload;
 
     COMMAND_ID ID;
 
@@ -306,14 +306,15 @@ struct GUI_METADATA {
         static int* resolveDrawstep(Master_Handler&);
         static int* resolveCanvasHeight(Master_Handler&);
         static int* resolveCanvasWidth(Master_Handler&);
+
     };
 
     struct COLOUR_METADATA {
-        using Resolver = std::array<uint8_t, 4>* (*)(Master_Handler&);
+        using Resolver = colour* (*)(Master_Handler&);
         Resolver getUnderlying;
-        std::array<uint8_t, 4>* underlying = nullptr;
-        static std::array<uint8_t, 4>* resolveDrawColourChange(Master_Handler& varMH);
-        static std::array<uint8_t, 4>* resolveBackgroundColourChange(Master_Handler& varMH);
+        colour* underlying = nullptr;
+        static colour* resolveDrawColourChange(Master_Handler& varMH);
+        static colour* resolveBackgroundColourChange(Master_Handler& varMH);
     };
 
     HEADER header;
@@ -329,11 +330,11 @@ struct GUI_METADATA {
         : header(varH), functionType(FUNCTION_TYPE::COLOUR), label(varL), metadata(varMD) {}
 };
 
-using Command_Processor = void(*)(Master_Handler&, Command&);
+using OLD_Command_Processor = void(*)(Master_Handler&, Command_OLD&);
 
 struct Command_Definition {
 
-    Command command;
+    Command_OLD command;
     COMMAND_PROCESSOR_ID processor;
 
     std::optional<SDL_Scancode> keyBinding;
@@ -341,7 +342,7 @@ struct Command_Definition {
     std::optional<std::string_view> cliBinding;
     std::optional<GUI_METADATA> guiBinding;
 
-    Command_Processor newProcessor = nullptr;
+    OLD_Command_Processor newProcessor = nullptr;
 
 };
 
@@ -393,3 +394,130 @@ void process__A__Command(const Command& command) {
 * 
 * 
 */
+
+//// NEW
+
+namespace Command {
+
+    using argument = std::variant<
+        int, 
+        colour, 
+        coordinate>;
+
+    enum class ARGTYPE {
+        INT,
+        COLOUR,
+        COORDINATE
+    };
+
+    struct Argument_Definition {
+        ARGTYPE type;
+        std::string_view name;
+        std::string_view desc;
+        std::optional<std::pair<argument, argument>> constraints;
+    };
+
+    struct Argument_Metadata {
+        std::vector<Argument_Definition> arguments;
+        std::vector<argument> defaultArgs;
+    };
+
+    struct Command {
+
+        COMMAND_ID              ID;
+        std::vector<argument>   args;
+
+    };
+
+    struct Command_Metadata {
+
+        std::string_view                commandDescription;
+        Argument_Metadata               argumentMetadata;
+
+    };
+
+    struct Keyboard_Metadata {
+
+        SDL_Scancode    SCANCODE;
+        bool            repeatable;
+
+    };
+
+    struct CLI_Metadata {
+
+        std::string_view    commandName;
+        std::string_view    help;
+    };
+
+    struct Mouse_Metadata {
+
+        SDL_MouseButtonFlags    MOUSECODE;
+
+    };
+
+    enum class HEADER {
+        FILE,
+        EDIT,
+        TOOLS,
+        COUNT
+    };
+
+    struct SLIDER_METADATA {
+        int minimum;
+        int maximum;
+
+        using Resolver = int& (*)(Master_Handler&);
+        Resolver resolve;
+    };
+
+    struct COLOUR_METADATA {
+        using Resolver = colour & (*)(Master_Handler&);
+        Resolver resolve;
+    };
+
+    int& resolvePenWidth(Master_Handler&);
+    int& resolveDrawstep(Master_Handler&);
+    int& resolveCanvasHeight(Master_Handler&);
+    int& resolveCanvasWidth(Master_Handler&);
+    colour& resolveDrawColourChange(Master_Handler& varMH);
+    colour& resolveBackgroundColourChange(Master_Handler& varMH);
+
+    enum class GUI_FUNCTION_TYPE {
+        BINARY,
+        SLIDER,
+        COLOUR
+    };
+
+    using GUI_TYPE_METADATA = std::variant<std::monostate, SLIDER_METADATA, COLOUR_METADATA>;
+
+    struct GUI_Metadata {
+
+        HEADER            header;
+        std::string_view  label;
+        GUI_FUNCTION_TYPE TYPE;
+        GUI_TYPE_METADATA typeMetadata;
+
+    };
+
+    struct Input_Metadata {
+
+        std::optional<Keyboard_Metadata>    keyboard;
+        std::optional<Mouse_Metadata>       mouse;
+        std::optional<CLI_Metadata>         cli;
+        std::optional<GUI_Metadata>         gui;
+
+    };
+
+    using Command_Processor = void(*)(Master_Handler&, Command&);
+
+    struct Command_Definition {
+
+        COMMAND_ID                       ID;
+        Command_Metadata    commandMetadata;
+        Input_Metadata        inputMetadata;
+
+        Command_Processor         processor;
+
+    };
+
+}

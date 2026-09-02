@@ -132,6 +132,7 @@
     <ClCompile Include="Action.cpp" />
     <ClCompile Include="COMMAND REPO.cpp" />
     <ClCompile Include="GUI Handler.cpp" />
+    <ClCompile Include="Input.cpp" />
     <ClCompile Include="Luxin Paint.cpp">
       <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdcpp20</LanguageStandard>
       <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Release|x64'">stdcpp20</LanguageStandard>
@@ -159,6 +160,7 @@
     <ClInclude Include="Cursor.h" />
     <ClInclude Include="Draw.h" />
     <ClInclude Include="GUI Handler.h" />
+    <ClInclude Include="Input.h" />
     <ClInclude Include="Keyboard Handler.h" />
     <ClInclude Include="Master Handler.h" />
     <ClInclude Include="Mouse Handler.h" />

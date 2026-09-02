@@ -28,6 +28,8 @@ static constexpr const char*                    DEFAULT_APPLICATION_NAME = "Luxi
 
 static constexpr bool							ENABLE_MOUSE =					true;
 static constexpr bool							ENABLE_CLI =					false;
+static constexpr bool							ENABLE_KEYBOARD =				true;
+static constexpr bool							ENABLE_GUI =					true;
 
 // CANVAS
 

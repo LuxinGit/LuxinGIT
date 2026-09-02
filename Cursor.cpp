@@ -7,7 +7,7 @@
 namespace Cursor {
 
     namespace {
-        std::pair<float,float> convertDirectionToSet(Cursor_State& s, Command& command) {
+        std::pair<float,float> convertDirectionToSet(Cursor_State& s, Command::Command& command) {
             
             float d = static_cast<float>(s.drawStep);
             
@@ -40,27 +40,27 @@ namespace Cursor {
         resetCursors(mh.CursorState, mh.CanvasState);
     }
 
-    void processMoveCursor(Master_Handler& mh, Command& command) {
+    void processMoveCursor(Master_Handler& mh, Command::Command& command) {
         
         Cursor_State& s = mh.CursorState;
         std::pair<float, float> c = s.deltaCursor;
 
         if (command.ID == COMMAND_ID::MOVE_SET_POINT)
-            c = static_cast<std::pair<float, float>>(std::get<coordinate>(command.payload));
+            c = std::get<coordinate>(command.args[0]);
         else if (command.ID == COMMAND_ID::RESET_CURSOR)
             c = s.origin;
         else c = convertDirectionToSet(s, command);
 
         std::swap(s.deltaCursor, c);
         command.ID = COMMAND_ID::MOVE_SET_POINT;
-        command.payload = c;
+        command.args[0] = c;
 
     }
-    void processChangeDrawstep(Master_Handler& mh, Command& command) {
+    void processChangeDrawstep(Master_Handler& mh, Command::Command& command) {
         
         Cursor_State& s = mh.CursorState;
         int d = s.drawStep;
-        int p = std::get<int>(command.payload);
+        int p = std::get<int>(command.args[0]);
 
         switch (command.ID) {
         case COMMAND_ID::DRAWSTEP_INCREASE:
@@ -78,10 +78,10 @@ namespace Cursor {
 
         std::swap(d, s.drawStep);
         command.ID = COMMAND_ID::DRAWSTEP_SET;
-        command.payload = d;
+        command.args[0] = d;
 
     }
-    void processChangeOrigin(Master_Handler& mh, Command& command) { 
+    void processChangeOrigin(Master_Handler& mh, Command::Command& command) { 
         mh.CursorState.origin = mh.CursorState.cursor;
     } // Probably expand this if I ever want to do stuf with origins, but for now this is fine.
 }

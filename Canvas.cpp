@@ -35,20 +35,20 @@ namespace Canvas {
         return &s.canvas[indexFromCoord(c)];
     }
     
-    void processResetAll(Master_Handler& mh, Command& command) {
+    void processResetAll(Master_Handler& mh, Command::Command& command) {
         for (auto& l : mh.CanvasState.canvas) l.resetLuxel();
         mh.ActionState.actionQueue = {};
     }
-    void processCanvasSize(Master_Handler& mh, Command& command) {
+    void processCanvasSize(Master_Handler& mh, Command::Command& command) {
         
         coordinate c = { 0, 0 };
         
         if (command.ID == COMMAND_ID::CANVAS_RESIZE_SET_PAYLOAD) 
-            c = std::get<coordinate>(command.payload);
+            c = std::get<coordinate>(command.args[0]);
         else if (command.ID == COMMAND_ID::CANVAS_RESIZE_SET_HEIGHT)
-            c = { 0 , std::get<int>(command.payload) };
+            c = { 0 , std::get<int>(command.args[0]) };
         else if (command.ID == COMMAND_ID::CANVAS_RESIZE_SET_WIDTH)
-            c = { std::get<int>(command.payload), 0 };
+            c = { std::get<int>(command.args[0]), 0 };
         
         updateCanvasSize(mh.CanvasState, c);
 

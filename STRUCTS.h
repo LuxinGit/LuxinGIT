@@ -6,7 +6,7 @@
 #include "CONSTANTS.h"
 #include <optional>
 
-using Colour = std::array<uint8_t, 4>;
+using colour = std::array<uint8_t, 4>;
 
 struct luxel {
 
@@ -62,7 +62,7 @@ struct coordinate {
         return { x - other.x, y - other.y };
     }
 
-    explicit operator std::pair<float, float>() const {
+    operator std::pair<float, float>() const {
         return {
             static_cast<float>(x),
             static_cast<float>(y)

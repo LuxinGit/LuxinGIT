@@ -1,20 +1,20 @@
 #include "Command Handler.h"
 #include "Master Handler.h"
 
-void Command_Handler::addCommand(Command command) {
+void Command_Handler::addCommand(Command_OLD command) {
     commandQueue.emplace_back(std::move(command));
 }
 void Command_Handler::constructCommand(COMMAND_ID command) {
     Command_Definition result = *COMMAND_ID_DEF_MAP[command];
     addCommand(result.command);
 }
-void Command_Handler::constructCommand(COMMAND_ID command, Command::Payload payload) {
+void Command_Handler::constructCommand(COMMAND_ID command, Command_OLD::Payload_OLD payload) {
     Command_Definition result = *COMMAND_ID_DEF_MAP[command];
     result.command.payload = payload;
     addCommand(result.command);
 }
 
-void Command_Handler::processCommand(Command& command) {
+void Command_Handler::processCommand(Command_OLD& command) {
 
     auto& def = COMMAND_ID_DEF_MAP.at(command.ID);
 

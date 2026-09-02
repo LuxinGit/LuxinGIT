@@ -7,28 +7,28 @@ namespace Draw {
         void drawCircle(
             Master_Handler& mh,
             const coordinate& c,
-            const Colour& col,
+            const colour& col,
             int radius,
             const bool fill); // We forward declare this, as otherwise drawPoint cannot find drawCircle that it uses for drawing the pen :)
 
-        Colour getRandomColour() {
+        colour getRandomColour() {
             return { static_cast<uint8_t>(rand() % 256),static_cast<uint8_t>(rand() % 256),static_cast<uint8_t>(rand() % 256), 255 };
         }
 
-        void drawPoint (Master_Handler& mh, luxel& p, const Colour& newColour) {
+        void drawPoint (Master_Handler& mh, luxel& p, const colour& newColour) {
             if (p.colour == newColour) return;
             Action::markChangedPixel(mh.ActionState, &p, p.colour);
             p.colour = newColour;
             if (p.colour != mh.DrawState.backgroundColour) mh.DrawState.pixelsDrawn++;
         }
-        void drawPoint (Master_Handler& mh, luxel* p, const Colour& colour) {
+        void drawPoint (Master_Handler& mh, luxel* p, const colour& colour) {
             if (!p) return;
             drawPoint(mh, *p, colour);
         }
-        void drawPoint (Master_Handler& mh, const coordinate& c, const Colour& colour) {
+        void drawPoint (Master_Handler& mh, const coordinate& c, const colour& colour) {
             drawPoint(mh, Canvas::getLuxelFromCoord(mh.CanvasState, c, true), colour);
         }
-        void drawPoint (Master_Handler& mh, const coordinate& c, const Colour& colour, const bool useP) {
+        void drawPoint (Master_Handler& mh, const coordinate& c, const colour& colour, const bool useP) {
             if (useP) drawCircle(mh, c, colour, mh.DrawState.pen, true);
             else drawPoint(mh, c, colour);
             if (mh.DrawState.penMode == Draw_State::PEN_MODE::RAINBOW)
@@ -37,7 +37,7 @@ namespace Draw {
                     mh.DrawState.pixelsDrawn = 0;
                 }
         }
-        void drawLine  (Master_Handler& mh, const coordinate& origin, const coordinate& destination, const Colour& col, const bool useP) {
+        void drawLine  (Master_Handler& mh, const coordinate& origin, const coordinate& destination, const colour& col, const bool useP) {
 
             int x0 = origin.x;
             int y0 = origin.y;
@@ -75,7 +75,7 @@ namespace Draw {
         void drawCircle(
             Master_Handler& mh, 
             const coordinate& c, 
-            const Colour& col,
+            const colour& col,
             int radius, 
             const bool fill) {
 
@@ -116,12 +116,12 @@ namespace Draw {
             }
         }
 
-        void fill(Master_Handler& mh, const coordinate& oc, const Colour& nColour) {
+        void fill(Master_Handler& mh, const coordinate& oc, const colour& nColour) {
 
             luxel* o = Canvas::getLuxelFromCoord(mh.CanvasState, oc, true);
             if (!o) return; // origin could not be on the display, and if so we don't want to fill around it.
             // this behaviour chosen instead of filling the pixel and then returning, fill should not be used as alias for drawPoint.
-            Colour oColour = o->colour;
+            colour oColour = o->colour;
             if (oColour == nColour) return;
 
             std::vector<coordinate> pixelStack = { oc };
@@ -154,12 +154,12 @@ namespace Draw {
         drawLine(mh, mh.CursorState.cursor, mh.CursorState.deltaCursor, *mh.DrawState.activeColour, true);
     }
 
-    void processChangePenWidth(Master_Handler& mh, Command& command) {
+    void processChangePenWidth(Master_Handler& mh, Command::Command& command) {
 
         Draw_State& s = mh.DrawState;
 
         int pen = s.pen;
-        int payload = std::get<int>(command.payload);
+        int payload = std::get<int>(command.args[0]);
 
         if (command.ID == COMMAND_ID::PEN_WIDTH_INCREASE)
             pen += payload;
@@ -177,34 +177,34 @@ namespace Draw {
         std::swap(s.pen, pen);
 
         command.ID = COMMAND_ID::PEN_SET;
-        command.payload = pen;
+        command.args[0] = pen;
     }
-    void processCircle(Master_Handler& mh, Command& command) {
-        int radius = std::holds_alternative<int>(command.payload)
-            ? std::get<int>(command.payload)
+    void processCircle(Master_Handler& mh, Command::Command& command) {
+        int radius = std::holds_alternative<int>(command.args[0])
+            ? std::get<int>(command.args[0])
             : mh.CursorState.drawStep * 10;
 
         drawCircle(mh, mh.CursorState.cursor, *mh.DrawState.activeColour, radius, false);
     }
-    void processFill(Master_Handler& mh, Command& command) {
+    void processFill(Master_Handler& mh, Command::Command& command) {
         
-        Colour colour;
+        colour c;
         
         switch (command.ID) {
         case(COMMAND_ID::DRAW_FILL_DRAWCOLOUR):
-            colour = *mh.DrawState.activeColour;
+            c = *mh.DrawState.activeColour;
             break;
         case(COMMAND_ID::DRAW_FILL_PAYLOAD):
-            colour = std::get<Colour>(command.payload);
+            c = std::get<colour>(command.args[0]);
             break;
         default:
             assert(false);
         }
         
-        fill(mh, mh.CursorState.cursor, colour);
+        fill(mh, mh.CursorState.cursor, c);
 
     }
-    void processPenDown(Master_Handler& mh, Command& command) {
+    void processPenDown(Master_Handler& mh, Command::Command& command) {
         
         Draw_State& s = mh.DrawState;
         
@@ -217,7 +217,7 @@ namespace Draw {
 
         if (s.penDown) drawPoint(mh, mh.CursorState.cursor, *s.activeColour);
     }
-    void processChangePenMode(Master_Handler& mh, Command& command) {
+    void processChangePenMode(Master_Handler& mh, Command::Command& command) {
         Draw_State& s = mh.DrawState;
 
         switch (command.ID) {
@@ -239,7 +239,7 @@ namespace Draw {
             // this isn't a great implementation but when I come to revisit drawing modes we can figure it out then.
             s.activeColour = &s.drawColour;
 
-            if (auto p = std::get_if<int>(&command.payload))
+            if (auto p = std::get_if<int>(&command.args[0]))
                 if (*p != s.pixelsToRainbow) 
                 {
                     std::swap(*p, s.pixelsToRainbow);
@@ -258,10 +258,10 @@ namespace Draw {
             assert(false);
         }
     }
-    void processChangeColour(Master_Handler& mh, Command& command) {
+    void processChangeColour(Master_Handler& mh, Command::Command& command) {
         Draw_State& s = mh.DrawState;
-        Colour c = {};
-        Colour* targetColour = s.activeColour;
+        colour c = {};
+        colour* targetColour = s.activeColour;
 
         switch (command.ID) {
         case COMMAND_ID::COLOUR_SET_DEFAULT: 
@@ -269,11 +269,11 @@ namespace Draw {
             else c = DEFAULT_BACKGROUND_COLOUR;  
             break;
         case COMMAND_ID::COLOUR_SET_DRAW:
-            c = std::get<Colour>(command.payload);
+            c = std::get<colour>(command.args[0]);
             targetColour = &s.drawColour;
             break;
         case COMMAND_ID::COLOUR_SET_BACKGROUND:
-            c = std::get<Colour>(command.payload);
+            c = std::get<colour>(command.args[0]);
             targetColour = &s.backgroundColour;
             break;
         case COMMAND_ID::COLOUR_SET_PICK:
@@ -292,10 +292,10 @@ namespace Draw {
             command.ID = COMMAND_ID::COLOUR_SET_BACKGROUND;
 
         std::swap(c, *targetColour);
-        command.payload = c;
+        command.args[0] = c;
 
     }
-    void processClearCanvas(Master_Handler& mh, Command& command) {
+    void processClearCanvas(Master_Handler& mh, Command::Command& command) {
         for (size_t y = 0; y < mh.CanvasState.height; ++y) {
             const size_t rowStart = y * DEFAULT_CANVAS_WIDTH_MAX;
 

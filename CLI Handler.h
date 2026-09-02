@@ -18,7 +18,7 @@ private:
     coordinate              convertCoord(const std::string& input);
     std::array<uint8_t, 4>  convertColour(const std::string& input);
 
-    Command::Payload harvestPayload();
+    Command_OLD::Payload_OLD harvestPayload();
 
     void createCommand();
     void CLI_Loop();
@@ -32,10 +32,10 @@ public:
     CLI_Handler(Master_Handler& mastH);
 
 
-    void processCommand(const Command& command);
+    void processCommand(const Command_OLD& command);
 
     private:
-        void processAppCommand(const Command& command);
-            void processCLICommand(const Command& command);
+        void processAppCommand(const Command_OLD& command);
+            void processCLICommand(const Command_OLD& command);
 
 };

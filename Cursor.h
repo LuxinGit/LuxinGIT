@@ -18,7 +18,7 @@ namespace Cursor {
 
     void checkCursorData(Master_Handler& mh);
     
-    void processMoveCursor(Master_Handler& mh, Command& command);
-    void processChangeDrawstep(Master_Handler& mh, Command& command);
-    void processChangeOrigin(Master_Handler& mh, Command& command);
+    void processMoveCursor(Master_Handler& mh, Command::Command& command);
+    void processChangeDrawstep(Master_Handler& mh, Command::Command& command);
+    void processChangeOrigin(Master_Handler& mh, Command::Command& command);
 }
