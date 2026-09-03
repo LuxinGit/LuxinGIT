@@ -130,7 +130,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Action.cpp" />
-    <ClCompile Include="COMMAND REPO.cpp" />
+    <ClCompile Include="Command Repo.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="Luxin Paint.cpp">
       <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdcpp20</LanguageStandard>
@@ -150,7 +150,7 @@
     <ClInclude Include="Action.h" />
     <ClInclude Include="Canvas.h" />
     <ClInclude Include="CLI Handler.h" />
-    <ClInclude Include="COMMAND REPO.h" />
+    <ClInclude Include="Command Repo.h" />
     <ClInclude Include="Command.h" />
     <ClInclude Include="Cursor.h" />
     <ClInclude Include="Draw.h" />
