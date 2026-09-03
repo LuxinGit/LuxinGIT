@@ -1,6 +1,8 @@
 #include "Input.h"
 #include "COMMAND REPO.h"
 #include "Master Handler.h"
+#include <imgui_impl_sdl3.h>
+#include <imgui_impl_sdlrenderer3.h>
 
 namespace Input {
 	
@@ -40,7 +42,7 @@ namespace Input {
 
 			if (!s.MouseState.enableMouse) return;
 
-			SDL_MouseButtonFlags mS = SDL_GetMouseState(&sC.cursor.first, &sC.cursor.second);
+			SDL_MouseButtonFlags mS = SDL_GetMouseState(&sC.deltaCursor.first, &sC.deltaCursor.second);
 
 			for (const auto& [button, def] : s.MouseState.mouseBindings) 
 				if (mS & button) Command::Processor::constructCommand(s, def);
@@ -352,12 +354,18 @@ namespace Input::GUI {
             ImGuiConfigFlags_NoMouseCursorChange;
     }
 
-
     void beginFrame()
     {
         ImGui_ImplSDLRenderer3_NewFrame();
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
+    }
+
+    void cleanupGUI()
+    {
+        ImGui_ImplSDLRenderer3_Shutdown();
+        ImGui_ImplSDL3_Shutdown();
+        ImGui::DestroyContext();
     }
 
 

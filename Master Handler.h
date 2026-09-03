@@ -2,19 +2,11 @@
 
 #include "Canvas.h"
 #include "SDL Handler.h"
-#include "Command Handler.h"
-#include "Keyboard Handler.h"
 #include "CLI Handler.h"
-#include "Mouse Handler.h"
 #include "Action.h"
 #include "Input.h"
-#include "GUI Handler.h"
 
 struct Master_Handler {
-
-private:
-
-    void initialiseBindings();
 
 public:
 

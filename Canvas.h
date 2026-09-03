@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <algorithm>
 
-#include "COMMAND.h"
+#include "Command.h"
 #include "Cursor.h"
 #include "Draw.h"
 

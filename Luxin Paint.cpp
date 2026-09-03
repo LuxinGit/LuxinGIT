@@ -3,7 +3,7 @@
 
 #include <SDL3/SDL.h>
 #include <imgui.h>
-#include "COMMAND.h"
+#include "Command.h"
 #include "Master Handler.h"
 
 /*

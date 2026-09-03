@@ -19,7 +19,6 @@ struct SDL_Handler {
     int& canvasWidth;
     int& canvasHeight;
     GUI_Handler* GUIHandler;
-    bool* enableMouse;
 
     Master_Handler& MasterHandler;
 

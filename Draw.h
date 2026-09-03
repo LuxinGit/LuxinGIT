@@ -2,7 +2,7 @@
 
 #include <array>
 
-#include "COMMAND.h"
+#include "Command.h"
 #include "CONSTANTS.h"
 
 struct Draw_State {

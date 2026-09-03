@@ -14,7 +14,6 @@ SDL_Handler::SDL_Handler(Master_Handler& varMH) :
 	initialiseTexture();
 }
 void SDL_Handler::setReferences() {
-	enableMouse = &MasterHandler.InputState.MouseState.enableMouse;
 	SDL_SetWindowRelativeMouseMode(Window, false);
 }
 void SDL_Handler::cleanup() const {
@@ -24,6 +23,7 @@ void SDL_Handler::cleanup() const {
 	SDL_Quit();
 }
 SDL_Handler::~SDL_Handler() {
+	Input::GUI::cleanupGUI();
 	cleanup();
 }
 
@@ -50,7 +50,7 @@ void SDL_Handler::registerCanvasSizeChange() const {
 	SDL_SetWindowSize(Window, canvasWidth, canvasHeight);
 }
 void SDL_Handler::checkShowMouse() const {
-	if (!*enableMouse or ImGui::GetIO().WantCaptureMouse) SDL_ShowCursor();
+	if (!MasterHandler.InputState.MouseState.enableMouse or ImGui::GetIO().WantCaptureMouse) SDL_ShowCursor();
 	else SDL_HideCursor();
 }
 

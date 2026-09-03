@@ -18,16 +18,10 @@
     <ClCompile Include="Luxin Paint.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="COMMAND.cpp">
+    <ClCompile Include="Command.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SDL Handler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Command Handler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Keyboard Handler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CLI Handler.cpp">
@@ -39,13 +33,7 @@
     <ClCompile Include="CONSTANTS.h">
       <Filter>Header Files</Filter>
     </ClCompile>
-    <ClCompile Include="Mouse Handler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Action.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GUI Handler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="STRUCTS.cpp">
@@ -68,16 +56,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="COMMAND.h">
+    <ClInclude Include="Command.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SDL Handler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Command Handler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Keyboard Handler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CLI Handler.h">
@@ -86,13 +68,7 @@
     <ClInclude Include="Master Handler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Mouse Handler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Action.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GUI Handler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="STRUCTS.h">

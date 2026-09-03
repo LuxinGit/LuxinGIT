@@ -1,6 +1,6 @@
 #pragma once
 
-#include "COMMAND.h"
+#include "Command.h"
 #include "CONSTANTS.h"
 
 struct Canvas_State;

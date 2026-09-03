@@ -2,15 +2,10 @@
 #include "COMMAND REPO.h"
 
 Master_Handler::Master_Handler() :
-    //CommandHandler(*this),
-    //KeyboardHandler(*this),
-    //MouseHandler(CursorState.deltaCursor, *this),
-    SDLHandler(*this),
-    //CLIHandler(*this),
-    //GUIHandler(*this)
+    SDLHandler(*this)
 {
-    initialiseBindings();
-    //if (ENABLE_CLI) CLIHandler.beginCLILoop();
+    Input::initialiseBindings(InputState);
+    Input::GUI::initialiseGUI(*this);
 };
 
 
@@ -23,8 +18,4 @@ bool Master_Handler::runFrame() {
 
 void Master_Handler::cleanup() const {
     SDLHandler.cleanup();
-}
-
-void Master_Handler::initialiseBindings() {
-    Input::initialiseBindings(InputState);
 }

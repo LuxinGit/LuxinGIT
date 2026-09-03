@@ -177,7 +177,7 @@ namespace Draw {
         std::swap(s.pen, pen);
 
         command.ID = COMMAND_ID::PEN_SET;
-        command.args[0] = pen;
+        command.args = { pen };
     }
     void processCircle(Master_Handler& mh, Command::Cmd& command) {
         int radius = std::holds_alternative<int>(command.args[0])
@@ -234,19 +234,19 @@ namespace Draw {
         case(COMMAND_ID::PENMODE_RAINBOW):
             // if payload has anything in it, check if thats different from what we have right now [for pixelsToRainbow].
             // and if so, set the pixels to rainbow == payload, and make sure we're in rainbow mode.
-
             // otherwise just make sure we flip between draw and rainbow.  all other penmodes disregarded.
             // this isn't a great implementation but when I come to revisit drawing modes we can figure it out then.
             s.activeColour = &s.drawColour;
 
-            if (auto p = std::get_if<int>(&command.args[0]))
-                if (*p != s.pixelsToRainbow) 
+            if (!command.args.empty()) {
+                int payload = std::get<int>(command.args[0]);
+                if (payload != s.pixelsToRainbow) 
                 {
-                    std::swap(*p, s.pixelsToRainbow);
+                    std::swap(payload, s.pixelsToRainbow);
                     s.penMode = Draw_State::PEN_MODE::RAINBOW;
                     return;
                 }
-           
+            }
             if (s.penMode == Draw_State::PEN_MODE::RAINBOW)
                 s.penMode = Draw_State::PEN_MODE::DRAW;
             else
@@ -292,7 +292,7 @@ namespace Draw {
             command.ID = COMMAND_ID::COLOUR_SET_BACKGROUND;
 
         std::swap(c, *targetColour);
-        command.args[0] = c;
+        command.args = { c };
 
     }
     void processClearCanvas(Master_Handler& mh, Command::Cmd& command) {

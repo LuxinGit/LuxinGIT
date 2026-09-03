@@ -1,5 +1,5 @@
 #pragma once
-#include "COMMAND.h"
+#include "Command.h"
 #include <unordered_set>
 
 struct Master_Handler;
@@ -62,6 +62,7 @@ namespace Input {
 namespace Input::GUI {
 
 	void initialiseGUI(Master_Handler& s);
+	void cleanupGUI();
 
 	void beginFrame();
 

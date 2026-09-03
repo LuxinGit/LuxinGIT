@@ -53,7 +53,7 @@ namespace Cursor {
 
         std::swap(s.deltaCursor, c);
         command.ID = COMMAND_ID::MOVE_SET_POINT;
-        command.args[0] = c;
+        command.args.emplace_back(c);
 
     }
     void processChangeDrawstep(Master_Handler& mh, Command::Cmd& command) {
