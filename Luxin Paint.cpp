@@ -27,19 +27,19 @@ int main()
 
     Master_Handler MasterHandler;
 
-    while (running) {
+    while (MasterHandler.runFrame()) {
 
-        SDL_Event event;
+        //SDL_Event event;
 
-        while (SDL_PollEvent(&event))
-        {
-            if(ENABLE_GUI) ImGui_ImplSDL3_ProcessEvent(&event);
+        //while (SDL_PollEvent(&event))
+        //{
+        //    if(ENABLE_GUI) ImGui_ImplSDL3_ProcessEvent(&event);
 
-            if (event.type == SDL_EVENT_QUIT)
-                running = false;  
-        }
+        //    if (event.type == SDL_EVENT_QUIT)
+        //        running = false;  
+        //}
 
-        MasterHandler.renderFrame();
+        //MasterHandler.runFrame();
 
     }
 

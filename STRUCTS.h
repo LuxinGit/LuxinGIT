@@ -54,6 +54,12 @@ struct coordinate {
     bool operator>(const coordinate& other) const {
         return (x > other.x or y > other.y); 
     }
+    bool operator>=(const coordinate& other) const {
+        return x >= other.x && y >= other.y;
+    }
+    bool operator<=(const coordinate& other) const {
+        return x <= other.x && y <= other.y;
+    }
 
     coordinate operator+(const coordinate& other) const {
         return { x + other.x, y + other.y };

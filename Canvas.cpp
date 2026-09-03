@@ -35,11 +35,11 @@ namespace Canvas {
         return &s.canvas[indexFromCoord(c)];
     }
     
-    void processResetAll(Master_Handler& mh, Command::Command& command) {
+    void processResetAll(Master_Handler& mh, Command::Cmd& command) {
         for (auto& l : mh.CanvasState.canvas) l.resetLuxel();
         mh.ActionState.actionQueue = {};
     }
-    void processCanvasSize(Master_Handler& mh, Command::Command& command) {
+    void processCanvasSize(Master_Handler& mh, Command::Cmd& command) {
         
         coordinate c = { 0, 0 };
         

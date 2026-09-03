@@ -2,428 +2,6 @@
 #include "Action.h"
 #include "Canvas.h"
 
-
-Command_Repo COMMAND_REPO = { {
-
-    //// MOVEMENT
-    //{
-    //    Command_OLD{COMMAND_ID::MOVE_UP, Command_OLD::MOVE::DIRECTION::UP, true},
-    //    COMMAND_PROCESSOR_ID::CURSOR_HANDLER,
-    //    SDL_SCANCODE_W,
-    //    std::nullopt,
-    //    "up",
-    //    std::nullopt,
-    //    &Cursor::processMoveCursor
-    //},
-    //{
-    //    Command_OLD{COMMAND_ID::MOVE_DOWN, Command_OLD::MOVE::DIRECTION::DOWN, true},
-    //    COMMAND_PROCESSOR_ID::CURSOR_HANDLER,
-    //    SDL_SCANCODE_S,
-    //    std::nullopt,
-    //    "down",
-    //    std::nullopt,
-    //    &Cursor::processMoveCursor
-    //},
-    //{
-    //    Command_OLD{COMMAND_ID::MOVE_LEFT, Command_OLD::MOVE::DIRECTION::LEFT, true},
-    //    COMMAND_PROCESSOR_ID::CURSOR_HANDLER,
-    //    SDL_SCANCODE_A,
-    //    std::nullopt,
-    //    "left",
-    //    std::nullopt,
-    //    &Cursor::processMoveCursor
-    //},
-    //{
-    //    Command_OLD{COMMAND_ID::MOVE_RIGHT, Command_OLD::MOVE::DIRECTION::RIGHT, true},
-    //    COMMAND_PROCESSOR_ID::CURSOR_HANDLER,
-    //    SDL_SCANCODE_D,
-    //    std::nullopt,
-    //    "right",
-    //    std::nullopt,
-    //    &Cursor::processMoveCursor
-    //},
-    //{
-    //    Command_OLD{COMMAND_ID::MOVE_RESET, Command_OLD::MOVE::SET::RESET_TO_ORIGIN, false},
-    //    COMMAND_PROCESSOR_ID::CURSOR_HANDLER,
-    //    SDL_SCANCODE_Q,
-    //    std::nullopt,
-    //    "reset",
-    //    std::nullopt,
-    //    &Cursor::processMoveCursor
-    //},
-    //{
-    //    Command_OLD{COMMAND_ID::MOVE_SET_POINT, Command_OLD::MOVE::SET::USE_PAYLOAD, false, DEFAULT_CURSOR_POINT},
-    //    COMMAND_PROCESSOR_ID::CURSOR_HANDLER,
-    //    std::nullopt,
-    //    std::nullopt,
-    //    "move",
-    //    std::nullopt,
-    //    &Cursor::processMoveCursor
-    //},
-    //{
-    //    Command_OLD{COMMAND_ID::MOVE_SAVE_ORIGIN, Command_OLD::META::SAVE_ORIGIN::NORMAL, false},
-    //    COMMAND_PROCESSOR_ID::CURSOR_HANDLER,
-    //    SDL_SCANCODE_2,
-    //    std::nullopt,
-    //    "save_origin",
-    //    std::nullopt,
-    //    &Cursor::processChangeOrigin
-    //},
-
-    //// DRAW
-    //{
-    //    Command_OLD{COMMAND_ID::DRAW_CIRCLE, Command_OLD::DRAW::CIRCLE::NORMAL, false},
-    //    COMMAND_PROCESSOR_ID::DRAW_HANDLER,
-    //    SDL_SCANCODE_G,
-    //    std::nullopt,
-    //    "circle",
-    //    std::nullopt,
-    //    &Draw::processCircle
-    //},
-    //{
-    //    Command_OLD{COMMAND_ID::DRAW_FILL_PAYLOAD, Command_OLD::DRAW::FILL::USE_PAYLOAD, false},
-    //    COMMAND_PROCESSOR_ID::DRAW_HANDLER,
-    //    std::nullopt,
-    //    std::nullopt,
-    //    "fill",
-    //    std::nullopt,
-    //    &Draw::processFill
-    //},
-    //{
-    //    Command_OLD{COMMAND_ID::DRAW_FILL_DRAWCOLOUR, Command_OLD::DRAW::FILL::USE_DRAW_COLOUR, false},
-    //    COMMAND_PROCESSOR_ID::DRAW_HANDLER,
-    //    SDL_SCANCODE_F,
-    //    std::nullopt,
-    //    std::nullopt,
-    //    std::nullopt,
-    //    &Draw::processFill
-    //},
-
-    //// COLOUR
-    //{
-    //    Command_OLD{COMMAND_ID::COLOUR_SET_DEFAULT, Command_OLD::META::CHANGE_COLOUR::DEFAULT, false},
-    //    COMMAND_PROCESSOR_ID::DRAW_HANDLER,
-    //    std::nullopt,
-    //    std::nullopt,
-    //    "default_colour",
-    //    std::nullopt,
-    //    &Draw::processChangeColour
-    //},
-    //{
-    //    Command_OLD{COMMAND_ID::COLOUR_SET_RANDOM, Command_OLD::META::CHANGE_COLOUR::RANDOM, false},
-    //    COMMAND_PROCESSOR_ID::DRAW_HANDLER,
-    //    SDL_SCANCODE_J,
-    //    std::nullopt,
-    //    "random_colour",
-    //    std::nullopt,
-    //    &Draw::processChangeColour
-    //},
-    //{
-    //    Command_OLD{COMMAND_ID::COLOUR_SET_DRAW, Command_OLD::META::CHANGE_COLOUR::USE_PAYLOAD_DRAW, false, DEFAULT_DRAW_COLOUR},
-    //    COMMAND_PROCESSOR_ID::DRAW_HANDLER,
-    //    std::nullopt,
-    //    std::nullopt,
-    //    "colour_draw",
-    //    GUI_METADATA{
-    //        GUI_METADATA::HEADER::TOOLS,
-    //        "Set draw colour",
-    //        GUI_METADATA::COLOUR_METADATA{
-    //            GUI_METADATA::COLOUR_METADATA::resolveDrawColourChange
-    //        }
-    //    },
-    //    &Draw::processChangeColour
-    //},
-    //{
-    //    Command_OLD{COMMAND_ID::COLOUR_SET_PICK, Command_OLD::META::CHANGE_COLOUR::USE_HOVERED_LUXEL, false, DEFAULT_DRAW_COLOUR},
-    //    COMMAND_PROCESSOR_ID::DRAW_HANDLER,
-    //    std::nullopt,
-    //    SDL_BUTTON_MIDDLE,
-    //    std::nullopt,
-    //    std::nullopt,
-    //    &Draw::processChangeColour
-    //},
-    //{
-    //    Command_OLD{COMMAND_ID::COLOUR_SET_BACKGROUND, Command_OLD::META::CHANGE_COLOUR::USE_PAYLOAD_BACKGROUND, false, DEFAULT_DRAW_COLOUR},
-    //    COMMAND_PROCESSOR_ID::DRAW_HANDLER,
-    //    std::nullopt,
-    //    std::nullopt,
-    //    "colour_background",
-    //    GUI_METADATA{
-    //        GUI_METADATA::HEADER::TOOLS,
-    //        "Set background colour",
-    //        GUI_METADATA::COLOUR_METADATA{
-    //            GUI_METADATA::COLOUR_METADATA::resolveBackgroundColourChange
-    //        }
-    //    },
-    //    &Draw::processChangeColour
-    //},
-
-    //// PEN MODE
-    //{
-    //    Command_OLD{COMMAND_ID::PENMODE_DRAW, Command_OLD::META::CHANGE_PENMODE::DRAW, false},
-    //    COMMAND_PROCESSOR_ID::DRAW_HANDLER,
-    //    SDL_SCANCODE_Y,
-    //    std::nullopt,
-    //    "penmode_draw",
-    //    GUI_METADATA{
-    //        GUI_METADATA::HEADER::TOOLS,
-    //        "Draw"
-    //    },
-    //    &Draw::processChangePenMode
-    //},
-    //{
-    //    Command_OLD{COMMAND_ID::PENMODE_RUBBER, Command_OLD::META::CHANGE_PENMODE::RUBBER, false},
-    //    COMMAND_PROCESSOR_ID::DRAW_HANDLER,
-    //    SDL_SCANCODE_U,
-    //    std::nullopt,
-    //    "penmode_rubber",
-    //    GUI_METADATA{
-    //        GUI_METADATA::HEADER::TOOLS,
-    //        "Rubber"
-    //    },
-    //    &Draw::processChangePenMode
-    //},
-    //{
-    //    Command_OLD{COMMAND_ID::PENMODE_RAINBOW, Command_OLD::META::CHANGE_PENMODE::RAINBOW, false},
-    //    COMMAND_PROCESSOR_ID::DRAW_HANDLER,
-    //    SDL_SCANCODE_E,
-    //    std::nullopt,
-    //    "penmode_rainbow",
-    //    GUI_METADATA{
-    //        GUI_METADATA::HEADER::TOOLS,
-    //        "Rainbow"
-    //    },
-    //    &Draw::processChangePenMode
-    //},
-
-    //// PEN
-    //{
-    //    Command_OLD{COMMAND_ID::PEN_DOWN, Command_OLD::META::CHANGE_PENMODE::PEN_DOWN, false, 0},
-    //    COMMAND_PROCESSOR_ID::DRAW_HANDLER,
-    //    SDL_SCANCODE_1,
-    //    std::nullopt,
-    //    "pen",
-    //    std::nullopt,
-    //    &Draw::processPenDown
-    //},
-    //{
-    //    Command_OLD{COMMAND_ID::PEN_HELD_DOWN, Command_OLD::META::CHANGE_PENMODE::PEN_DOWN, true, 1},
-    //    COMMAND_PROCESSOR_ID::DRAW_HANDLER,
-    //    std::nullopt,
-    //    SDL_BUTTON_LMASK,
-    //    std::nullopt,
-    //    std::nullopt,
-    //    &Draw::processPenDown
-    //},
-
-    //// DRAW STEP
-    //{
-    //    Command_OLD{COMMAND_ID::DRAWSTEP_DECREASE, Command_OLD::META::CHANGE_DRAWSTEP::ADD_PAYLOAD, false, -1},
-    //    COMMAND_PROCESSOR_ID::CURSOR_HANDLER,
-    //    SDL_SCANCODE_Z,
-    //    std::nullopt,
-    //    "step_down",
-    //    std::nullopt,
-    //    &Cursor::processChangeDrawstep
-    //},
-    //{
-    //    Command_OLD{COMMAND_ID::DRAWSTEP_INCREASE, Command_OLD::META::CHANGE_DRAWSTEP::ADD_PAYLOAD, false, 1},
-    //    COMMAND_PROCESSOR_ID::CURSOR_HANDLER,
-    //    SDL_SCANCODE_X,
-    //    std::nullopt,
-    //    "step_up",
-    //    std::nullopt,
-    //    &Cursor::processChangeDrawstep
-    //},
-    //{
-    //    Command_OLD{COMMAND_ID::DRAWSTEP_SET, Command_OLD::META::CHANGE_DRAWSTEP::SET_TO_PAYLOAD, false, 1},
-    //    COMMAND_PROCESSOR_ID::CURSOR_HANDLER,
-    //    std::nullopt,
-    //    std::nullopt,
-    //    "step_set",
-    //    GUI_METADATA{
-    //        GUI_METADATA::HEADER::TOOLS,
-    //        "Change Drawstep",
-    //        GUI_METADATA::SLIDER_METADATA{
-    //            DEFAULT_DRAWSTEP_MIN,
-    //            DEFAULT_DRAWSTEP_MAX,
-    //            GUI_METADATA::SLIDER_METADATA::resolveDrawstep
-    //        }
-    //    },
-    //    &Cursor::processChangeDrawstep
-    //},
-
-    //// PEN WIDTH
-    //{
-    //    Command_OLD{COMMAND_ID::PEN_WIDTH_DECREASE, Command_OLD::META::CHANGE_PEN_WIDTH::ADD_PAYLOAD, false, -1},
-    //    COMMAND_PROCESSOR_ID::DRAW_HANDLER,
-    //    SDL_SCANCODE_V,
-    //    std::nullopt,
-    //    "pen_thinner",
-    //    std::nullopt,
-    //    &Draw::processChangePenMode
-    //},
-    //{
-    //    Command_OLD{COMMAND_ID::PEN_WIDTH_INCREASE, Command_OLD::META::CHANGE_PEN_WIDTH::ADD_PAYLOAD, false, 1},
-    //    COMMAND_PROCESSOR_ID::DRAW_HANDLER,
-    //    SDL_SCANCODE_B,
-    //    std::nullopt,
-    //    "pen_thicker",
-    //    std::nullopt,
-    //    &Draw::processChangePenMode
-    //},
-    //{
-    //    Command_OLD{COMMAND_ID::PEN_SET, Command_OLD::META::CHANGE_PEN_WIDTH::SET_TO_PAYLOAD, false, 1},
-    //    COMMAND_PROCESSOR_ID::DRAW_HANDLER,
-    //    std::nullopt,
-    //    std::nullopt,
-    //    "pen_set",
-    //    GUI_METADATA{
-    //        GUI_METADATA::HEADER::TOOLS,
-    //        "Change Pen Width",
-    //        GUI_METADATA::SLIDER_METADATA{
-    //            DEFAULT_PENWIDTH_MIN,
-    //            DEFAULT_PENWIDTH_MAX,
-    //            GUI_METADATA::SLIDER_METADATA::resolvePenWidth
-    //        }
-    //    },
-    //    &Draw::processChangePenMode
-    //},
-
-    //// INPUT
-    //{
-    //    Command_OLD{COMMAND_ID::INPUT_CLI_ENABLE, Command_OLD::APP::INPUT_MODE::CLI, false},
-    //    COMMAND_PROCESSOR_ID::CLI_HANDLER,
-    //    SDL_SCANCODE_0,
-    //    std::nullopt,
-    //    std::nullopt,
-    //    std::nullopt
-    //},
-    //{
-    //    Command_OLD{COMMAND_ID::INPUT_MOUSE_ENABLE, Command_OLD::APP::INPUT_MODE::MOUSE, false},
-    //    COMMAND_PROCESSOR_ID::MOUSE_HANDLER,
-    //    SDL_SCANCODE_3,
-    //    std::nullopt,
-    //    std::nullopt,
-    //    std::nullopt
-    //},
-
-    //// RESET
-    //{
-    //    Command_OLD{COMMAND_ID::RESET_CANVAS, Command_OLD::META::RESET::RESET_CANVAS, false},
-    //    COMMAND_PROCESSOR_ID::DRAW_HANDLER,
-    //    SDL_SCANCODE_C,
-    //    std::nullopt,
-    //    "reset_canvas",
-    //    GUI_METADATA{
-    //        GUI_METADATA::HEADER::FILE,
-    //        "Reset Canvas"
-    //    },
-    //    &Draw::processClearCanvas
-    //},
-    //{
-    //    Command_OLD{COMMAND_ID::RESET_ACTION_QUEUE, Command_OLD::META::RESET::RESET_ACTION_QUEUE, false},
-    //    COMMAND_PROCESSOR_ID::ACTION_HANDLER,
-    //    std::nullopt,
-    //    std::nullopt,
-    //    "reset_action_queue",
-    //    std::nullopt,
-    //    &Action::processClearActionQueue
-    //},
-    //{
-    //    Command_OLD{COMMAND_ID::RESET_ALL, Command_OLD::META::RESET::RESET_ALL, false},
-    //    COMMAND_PROCESSOR_ID::CANVAS_HANDLER,
-    //    SDL_SCANCODE_R,
-    //    std::nullopt,
-    //    "reset_all",
-    //    GUI_METADATA{
-    //        GUI_METADATA::HEADER::FILE,
-    //        "Reset All (Includes undo/redo history)"
-    //    },
-    //    &Canvas::processResetAll
-    //},
-    //{
-    //    Command_OLD{COMMAND_ID::RESET_CURSOR, Command_OLD::META::RESET::RESET_CURSOR, false},
-    //    COMMAND_PROCESSOR_ID::CURSOR_HANDLER,
-    //    SDL_SCANCODE_9,
-    //    std::nullopt,
-    //    "reset_cursor",
-    //    std::nullopt,
-    //    &Cursor::processMoveCursor
-    //},
-
-    //// UNDO / REDO
-    //{
-    //    Command_OLD{COMMAND_ID::UNDO, Command_OLD::APP::UNDO_REDO::UNDO, false},
-    //    COMMAND_PROCESSOR_ID::ACTION_HANDLER,
-    //    SDL_SCANCODE_N,
-    //    std::nullopt,
-    //    "undo",
-    //    GUI_METADATA{
-    //        GUI_METADATA::HEADER::EDIT,
-    //        "Undo"
-    //    },
-    //    &Action::processUndo
-    //},
-    //{
-    //    Command_OLD{COMMAND_ID::REDO, Command_OLD::APP::UNDO_REDO::REDO, false},
-    //    COMMAND_PROCESSOR_ID::ACTION_HANDLER,
-    //    SDL_SCANCODE_M,
-    //    std::nullopt,
-    //    "redo",
-    //    GUI_METADATA{
-    //        GUI_METADATA::HEADER::EDIT,
-    //        "Redo"
-    //    },
-    //    &Action::processRedo
-    //},
-    //{
-    //    Command_OLD{COMMAND_ID::CANVAS_RESIZE_SET_PAYLOAD, Command_OLD::META::CANVAS_CHANGE_SIZE::SET_TO_PAYLOAD, false, coordinate{400, 400}},
-    //    COMMAND_PROCESSOR_ID::CANVAS_HANDLER,
-    //    SDL_SCANCODE_7,
-    //    std::nullopt,
-    //    "resize",
-    //    std::nullopt,
-    //    &Canvas::processCanvasSize
-    //},
-    //{
-    //    Command_OLD{COMMAND_ID::CANVAS_RESIZE_SET_HEIGHT, Command_OLD::META::CANVAS_CHANGE_SIZE::SET_HEIGHT_TO_PAYLOAD, false, 400},
-    //    COMMAND_PROCESSOR_ID::CANVAS_HANDLER,
-    //    std::nullopt,
-    //    std::nullopt,
-    //    "resize_height",
-    //    GUI_METADATA{
-    //        GUI_METADATA::HEADER::FILE,
-    //        "Adjust canvas height",
-    //        GUI_METADATA::SLIDER_METADATA{
-    //            DEFAULT_CANVAS_HEIGHT_MIN,
-    //            DEFAULT_CANVAS_HEIGHT_MAX,
-    //            GUI_METADATA::SLIDER_METADATA::resolveCanvasHeight
-    //        }
-    //    },
-    //    &Canvas::processCanvasSize
-    //},
-    //{
-    //    Command_OLD{COMMAND_ID::CANVAS_RESIZE_SET_WIDTH, Command_OLD::META::CANVAS_CHANGE_SIZE::SET_WIDTH_TO_PAYLOAD, false, 400},
-    //    COMMAND_PROCESSOR_ID::CANVAS_HANDLER,
-    //    std::nullopt,
-    //    std::nullopt,
-    //    "resize_width",
-    //    GUI_METADATA{
-    //        GUI_METADATA::HEADER::FILE,
-    //        "Adjust canvas width",
-    //        GUI_METADATA::SLIDER_METADATA{
-    //            DEFAULT_CANVAS_WIDTH_MIN,
-    //            DEFAULT_CANVAS_WIDTH_MAX,
-    //            GUI_METADATA::SLIDER_METADATA::resolveCanvasWidth
-    //        }
-    //    },
-    //    &Canvas::processCanvasSize
-    //},
-
-    } };
-
-
 //// NEW COMMAND REPO
 
 New_Command_Repo NEW_COMMAND_REPO = { {
@@ -782,7 +360,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
                 Command::GUI_FUNCTION_TYPE::COLOUR,
 
                 Command::COLOUR_METADATA{
-                    &Command::resolveDrawColourChange
+                    &Command::GUI_Resolver::resolveDrawColourChange
                 }
             }
         },
@@ -844,7 +422,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
                 Command::GUI_FUNCTION_TYPE::COLOUR,
 
                 Command::COLOUR_METADATA{
-                    Command::resolveBackgroundColourChange
+                    Command::GUI_Resolver::resolveBackgroundColourChange
                 }
             }
         },
@@ -1148,7 +726,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
                 Command::SLIDER_METADATA{
                     DEFAULT_DRAWSTEP_MIN,
                     DEFAULT_DRAWSTEP_MAX,
-                    Command::resolveDrawstep
+                    Command::GUI_Resolver::resolveDrawstep
                 }
             }
         },
@@ -1275,7 +853,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
                 Command::SLIDER_METADATA{
                     DEFAULT_PENWIDTH_MIN,
                     DEFAULT_PENWIDTH_MAX,
-                    Command::resolvePenWidth
+                    Command::GUI_Resolver::resolvePenWidth
                 }
             }
         },
@@ -1536,7 +1114,10 @@ New_Command_Repo NEW_COMMAND_REPO = { {
                         Command::ARGTYPE::COORDINATE,
                         "size",
                         "New canvas width and height.",
-                        std::nullopt
+                        std::pair<coordinate, coordinate>{
+                            { DEFAULT_CANVAS_WIDTH_MIN, DEFAULT_CANVAS_HEIGHT_MIN },
+                            { DEFAULT_CANVAS_WIDTH_MAX, DEFAULT_CANVAS_HEIGHT_MAX }
+                        }
                     }
                 },
 
@@ -1601,7 +1182,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
                 Command::SLIDER_METADATA{
                     DEFAULT_CANVAS_HEIGHT_MIN,
                     DEFAULT_CANVAS_HEIGHT_MAX,
-                    Command::resolveCanvasHeight
+                    Command::GUI_Resolver::resolveCanvasHeight
                 }
             }
         },
@@ -1649,7 +1230,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
                 Command::SLIDER_METADATA{
                     DEFAULT_CANVAS_WIDTH_MIN,
                     DEFAULT_CANVAS_WIDTH_MAX,
-                    Command::resolveCanvasWidth
+                    Command::GUI_Resolver::resolveCanvasWidth
                 }
             }
         },

@@ -13,9 +13,8 @@ SDL_Handler::SDL_Handler(Master_Handler& varMH) :
 	Renderer	= SDL_CreateRenderer(Window, nullptr);
 	initialiseTexture();
 }
-void SDL_Handler::setReferences(GUI_Handler& varGH, bool* varenableMouse) {
-	GUIHandler = &varGH;
-	enableMouse = varenableMouse;
+void SDL_Handler::setReferences() {
+	enableMouse = &MasterHandler.InputState.MouseState.enableMouse;
 	SDL_SetWindowRelativeMouseMode(Window, false);
 }
 void SDL_Handler::cleanup() const {
@@ -68,12 +67,12 @@ void SDL_Handler::renderCrosshair() const {
 	}
 };
 void SDL_Handler::renderFrame() {
-	GUIHandler->beginFrame();
+	Input::GUI::beginFrame();
 	Cursor::checkCursorData(MasterHandler);
 	updateTexture();
 	renderTexture();
 	renderCrosshair(); // todo  fix the fact that we be rendering the crosshair regardless of whether or not we be using the gui
-	GUIHandler->render();
+	Input::GUI::renderGUI(MasterHandler);
 	checkShowMouse();
 	renderPresent();
 }

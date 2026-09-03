@@ -18,7 +18,7 @@ struct Change_Set {
 
 struct Action_State {
 	Change_Set currentAction;
-	using Action = std::variant<Change_Set, Command::Command>;
+	using Action = std::variant<Change_Set, Command::Cmd>;
 	std::vector<Action> actionQueue;
 	int actionQueueIndex = 0;
 };
@@ -26,7 +26,7 @@ struct Action_State {
 namespace Action {
 	void markChangedPixel(Action_State&, luxel*, const colour& originalColour);
 	void commitCurrentAction(Action_State&);
-	void processUndo(Master_Handler&, Command::Command&);
-	void processRedo(Master_Handler&, Command::Command&);
-	void processClearActionQueue(Master_Handler& mh, Command::Command&); 
+	void processUndo(Master_Handler&, Command::Cmd&);
+	void processRedo(Master_Handler&, Command::Cmd&);
+	void processClearActionQueue(Master_Handler& mh, Command::Cmd&); 
 }

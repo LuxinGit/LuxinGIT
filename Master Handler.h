@@ -7,6 +7,7 @@
 #include "CLI Handler.h"
 #include "Mouse Handler.h"
 #include "Action.h"
+#include "Input.h"
 #include "GUI Handler.h"
 
 struct Master_Handler {
@@ -22,18 +23,19 @@ public:
     Canvas_State        CanvasState;
     Cursor_State        CursorState;
     Draw_State          DrawState;
+    Input_State         InputState;
 
     // OLD
     SDL_Handler         SDLHandler;
-    Command_Handler     CommandHandler;
+  /*  Command_Handler     CommandHandler;
     Keyboard_Handler    KeyboardHandler;
     CLI_Handler         CLIHandler;
     Mouse_Handler       MouseHandler;
-    GUI_Handler         GUIHandler;
+    GUI_Handler         GUIHandler;*/
 
     Master_Handler();
 
-    void renderFrame();
+    bool runFrame();
 
     void cleanup() const;
 

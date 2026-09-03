@@ -31,7 +31,7 @@ struct SDL_Handler {
 
     void registerCanvasSizeChange() const;
 
-    void setReferences(GUI_Handler& varGH, bool* varenableMouse);
+    void setReferences();
 
     void renderFrame();
     

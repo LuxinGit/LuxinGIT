@@ -7,7 +7,7 @@
 namespace Cursor {
 
     namespace {
-        std::pair<float,float> convertDirectionToSet(Cursor_State& s, Command::Command& command) {
+        std::pair<float,float> convertDirectionToSet(Cursor_State& s, Command::Cmd& command) {
             
             float d = static_cast<float>(s.drawStep);
             
@@ -40,7 +40,7 @@ namespace Cursor {
         resetCursors(mh.CursorState, mh.CanvasState);
     }
 
-    void processMoveCursor(Master_Handler& mh, Command::Command& command) {
+    void processMoveCursor(Master_Handler& mh, Command::Cmd& command) {
         
         Cursor_State& s = mh.CursorState;
         std::pair<float, float> c = s.deltaCursor;
@@ -56,7 +56,7 @@ namespace Cursor {
         command.args[0] = c;
 
     }
-    void processChangeDrawstep(Master_Handler& mh, Command::Command& command) {
+    void processChangeDrawstep(Master_Handler& mh, Command::Cmd& command) {
         
         Cursor_State& s = mh.CursorState;
         int d = s.drawStep;
@@ -81,7 +81,7 @@ namespace Cursor {
         command.args[0] = d;
 
     }
-    void processChangeOrigin(Master_Handler& mh, Command::Command& command) { 
+    void processChangeOrigin(Master_Handler& mh, Command::Cmd& command) { 
         mh.CursorState.origin = mh.CursorState.cursor;
     } // Probably expand this if I ever want to do stuf with origins, but for now this is fine.
 }

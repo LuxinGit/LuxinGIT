@@ -154,7 +154,7 @@ namespace Draw {
         drawLine(mh, mh.CursorState.cursor, mh.CursorState.deltaCursor, *mh.DrawState.activeColour, true);
     }
 
-    void processChangePenWidth(Master_Handler& mh, Command::Command& command) {
+    void processChangePenWidth(Master_Handler& mh, Command::Cmd& command) {
 
         Draw_State& s = mh.DrawState;
 
@@ -179,14 +179,14 @@ namespace Draw {
         command.ID = COMMAND_ID::PEN_SET;
         command.args[0] = pen;
     }
-    void processCircle(Master_Handler& mh, Command::Command& command) {
+    void processCircle(Master_Handler& mh, Command::Cmd& command) {
         int radius = std::holds_alternative<int>(command.args[0])
             ? std::get<int>(command.args[0])
             : mh.CursorState.drawStep * 10;
 
         drawCircle(mh, mh.CursorState.cursor, *mh.DrawState.activeColour, radius, false);
     }
-    void processFill(Master_Handler& mh, Command::Command& command) {
+    void processFill(Master_Handler& mh, Command::Cmd& command) {
         
         colour c;
         
@@ -204,7 +204,7 @@ namespace Draw {
         fill(mh, mh.CursorState.cursor, c);
 
     }
-    void processPenDown(Master_Handler& mh, Command::Command& command) {
+    void processPenDown(Master_Handler& mh, Command::Cmd& command) {
         
         Draw_State& s = mh.DrawState;
         
@@ -217,7 +217,7 @@ namespace Draw {
 
         if (s.penDown) drawPoint(mh, mh.CursorState.cursor, *s.activeColour);
     }
-    void processChangePenMode(Master_Handler& mh, Command::Command& command) {
+    void processChangePenMode(Master_Handler& mh, Command::Cmd& command) {
         Draw_State& s = mh.DrawState;
 
         switch (command.ID) {
@@ -258,7 +258,7 @@ namespace Draw {
             assert(false);
         }
     }
-    void processChangeColour(Master_Handler& mh, Command::Command& command) {
+    void processChangeColour(Master_Handler& mh, Command::Cmd& command) {
         Draw_State& s = mh.DrawState;
         colour c = {};
         colour* targetColour = s.activeColour;
@@ -295,7 +295,7 @@ namespace Draw {
         command.args[0] = c;
 
     }
-    void processClearCanvas(Master_Handler& mh, Command::Command& command) {
+    void processClearCanvas(Master_Handler& mh, Command::Cmd& command) {
         for (size_t y = 0; y < mh.CanvasState.height; ++y) {
             const size_t rowStart = y * DEFAULT_CANVAS_WIDTH_MAX;
 

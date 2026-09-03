@@ -42,13 +42,13 @@ namespace Action {
     void commitCurrentAction(Action_State& s) {
         if (!s.currentAction.changeSet.empty()) addNewAction(s);
     }
-    void processUndo(Master_Handler& mh, Command::Command&) {
+    void processUndo(Master_Handler& mh, Command::Cmd&) {
         undoAction(mh.ActionState);
     }
-    void processRedo(Master_Handler& mh, Command::Command&) {
+    void processRedo(Master_Handler& mh, Command::Cmd&) {
         redoAction(mh.ActionState);
     }
-    void processClearActionQueue(Master_Handler& mh, Command::Command&)
+    void processClearActionQueue(Master_Handler& mh, Command::Cmd&)
     {
         mh.ActionState.actionQueue = {}; 
     }

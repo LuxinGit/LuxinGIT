@@ -2,24 +2,23 @@
 #include "COMMAND REPO.h"
 
 Master_Handler::Master_Handler() :
-    CommandHandler(*this),
-    KeyboardHandler(*this),
-    MouseHandler(CursorState.deltaCursor, *this),
+    //CommandHandler(*this),
+    //KeyboardHandler(*this),
+    //MouseHandler(CursorState.deltaCursor, *this),
     SDLHandler(*this),
-    CLIHandler(*this),
-    GUIHandler(*this)
+    //CLIHandler(*this),
+    //GUIHandler(*this)
 {
     initialiseBindings();
-    SDLHandler.setReferences(GUIHandler, &MouseHandler.enableMouse);
-    if (ENABLE_CLI) CLIHandler.beginCLILoop();
+    //if (ENABLE_CLI) CLIHandler.beginCLILoop();
 };
 
 
-void Master_Handler::renderFrame() {
-    KeyboardHandler.harvestKeyboardState();
-    MouseHandler.harvestMouseState();
-    CommandHandler.processCommands();
+bool Master_Handler::runFrame() {
+    if (!Input::harvestApplicationInputs(*this)) return false;
+    Command::Processor::processCommands(*this);
     SDLHandler.renderFrame();
+    return true;
 }
 
 void Master_Handler::cleanup() const {
@@ -27,21 +26,5 @@ void Master_Handler::cleanup() const {
 }
 
 void Master_Handler::initialiseBindings() {
-    for (const auto& def : COMMAND_REPO) {
-
-        const COMMAND_ID ID = def.command.ID;
-        COMMAND_ID_DEF_MAP.emplace(ID, &def);
-
-        if (def.keyBinding)
-            KeyboardHandler.keyBindings.emplace(*def.keyBinding, ID);
-
-        if (def.mouseBinding)
-            MouseHandler.mouseBindings.emplace(*def.mouseBinding, ID);
-
-        if (def.cliBinding) {
-            CLIHandler.stringMapping.emplace(*def.cliBinding, ID);
-        }
-
-        GUIHandler.initialiseBinding(def);
-    }
+    Input::initialiseBindings(InputState);
 }

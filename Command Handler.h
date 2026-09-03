@@ -26,4 +26,3 @@ public:
 
     Command_Handler(Master_Handler& mastH);
 };
-
