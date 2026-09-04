@@ -1,5 +1,6 @@
 #include "Command.h"
 #include "Application/Application.h"
+#include "Input.h"
 
 #include <variant>
 #include <unordered_map>
@@ -36,10 +37,10 @@ namespace Command::Processor {
 
     namespace {
 
-        void addCommand(Input_State& s, Cmd command) {
-            s.CommandState.commandQueue.emplace_back(command);
+        void addCommand(Command_State& s, Cmd command) {
+            s.commandQueue.emplace_back(command);
         }
-        void addCommand(Input_State& s, COMMAND_ID ID, std::vector<argument> args, Command_Processor p) {
+        void addCommand(Command_State& s, COMMAND_ID ID, std::vector<argument> args, Command_Processor p) {
             addCommand(s, { ID, args, p});
         }
 
@@ -90,7 +91,7 @@ namespace Command::Processor {
 
 
 
-    std::pair<int, returnCode> constructCommand(Input_State& s, const Command_Definition* def, std::vector<argument> args)
+    std::pair<int, returnCode> constructCommand(Command_State& s, const Command_Definition* def, std::vector<argument> args)
     {
 
         const Definition::Argument_Metadata& aMD = def->commandMetadata.argumentMetadata;
@@ -137,13 +138,13 @@ namespace Command::Processor {
 
     void processCommands(Application_State& s)
     {
-        if (s.InputState.CommandState.commandQueue.size() == 0) Action::commitCurrentAction(s.ActionState);
+        if (s.CommandState.commandQueue.size() == 0) Action::commitCurrentAction(s.ActionState);
 
-        for (auto& c : s.InputState.CommandState.commandQueue) {
+        for (auto& c : s.CommandState.commandQueue) {
             c.processor(s, c);
         }
 
-        s.InputState.CommandState.commandQueue = {};
+        s.CommandState.commandQueue = {};
 
     }
 

@@ -36,9 +36,6 @@
     <ClCompile Include="Command\Action.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Command\CLI Handler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Command\Command Repo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -72,9 +69,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Command\Action.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Command\CLI Handler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Command\Command Repo.h">

@@ -75,6 +75,10 @@ struct coordinate {
         };
     }
 
+    operator std::string() const{
+        return ("{" + std::to_string(x) + "," + std::to_string(y) + "}");
+    }
+
     coordinate(const int& varx, const int& vary) : x(varx), y(vary) {}
     coordinate(const std::pair<int, int>& varC) : x(varC.first), y(varC.second) {}
     coordinate(const float& varfx, const float& varfy) : x(static_cast<int>(varfx)), y(static_cast<int>(varfy)) {}

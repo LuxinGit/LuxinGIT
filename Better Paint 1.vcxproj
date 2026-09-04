@@ -140,7 +140,6 @@
     <ClCompile Include="Canvas\Cursor.cpp" />
     <ClCompile Include="Canvas\Draw.cpp" />
     <ClCompile Include="Command\Action.cpp" />
-    <ClCompile Include="Command\CLI Handler.cpp" />
     <ClCompile Include="Command\Command Repo.cpp" />
     <ClCompile Include="Command\Command.cpp" />
     <ClCompile Include="Command\Input.cpp" />
@@ -154,7 +153,6 @@
     <ClInclude Include="Canvas\Cursor.h" />
     <ClInclude Include="Canvas\Draw.h" />
     <ClInclude Include="Command\Action.h" />
-    <ClInclude Include="Command\CLI Handler.h" />
     <ClInclude Include="Command\Command Repo.h" />
     <ClInclude Include="Command\Command.h" />
     <ClInclude Include="Command\Input.h" />

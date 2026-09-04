@@ -182,7 +182,7 @@ namespace Draw {
         command.args = { pen };
     }
     void processCircle(Application_State& mh, Command::Cmd& command) {
-        int radius = std::holds_alternative<int>(command.args[0])
+        int radius = !command.args.empty()
             ? std::get<int>(command.args[0])
             : mh.CursorState.drawStep * 10;
 

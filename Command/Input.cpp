@@ -1,8 +1,10 @@
 #include "Input.h"
 #include "COMMAND REPO.h"
+#include "Application/STRUCTS.h"
 #include "Application/Application.h"
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_sdlrenderer3.h>
+#include <iostream>
 
 namespace Input {
 	
@@ -25,7 +27,7 @@ namespace Input {
 
 		}
 
-		void harvestKeyboardState(Input_State& s) {
+		void harvestKeyboardState(Input_State& s, Command_State& cS) {
 
 			if (ImGui::GetIO().WantCaptureKeyboard) return;
 
@@ -33,19 +35,19 @@ namespace Input {
 			for (const auto& [scancode, def] : s.KeyboardState.keyBindings) {
 				if (kS[scancode] &&
 					(def->inputMetadata.keyboard->repeatable || !s.KeyboardState.previousKeyboardState[scancode]))
-					Command::Processor::constructCommand(s, def);
+					Command::Processor::constructCommand(cS, def);
 
 				s.KeyboardState.previousKeyboardState[scancode] = kS[scancode];
 			}
 		}
-		void harvestMouseState(Input_State& s, Cursor_State& sC) {
+		void harvestMouseState(Input_State& s, Cursor_State& sC, Command_State& cS) {
 
 			if (!s.MouseState.enableMouse) return;
 
 			SDL_MouseButtonFlags mS = SDL_GetMouseState(&sC.deltaCursor.first, &sC.deltaCursor.second);
 
 			for (const auto& [button, def] : s.MouseState.mouseBindings) 
-				if (mS & button) Command::Processor::constructCommand(s, def);
+				if (mS & button) Command::Processor::constructCommand(cS, def);
 
 		}
         void checkShowMouse(Input_State& iS) {
@@ -55,9 +57,9 @@ namespace Input {
         }
 		void harvestUserPeripheralInputs(Application_State& s)
 		{
-			harvestKeyboardState(s.InputState);
+			harvestKeyboardState(s.InputState, s.CommandState);
 			if (!ImGui::GetIO().WantCaptureMouse)
-				harvestMouseState(s.InputState, s.CursorState);
+				harvestMouseState(s.InputState, s.CursorState, s.CommandState);
             checkShowMouse(s.InputState);
 		}
 
@@ -88,6 +90,10 @@ namespace Input {
 
 	}
 
+    void enableMouse(Application_State& s, Command::Cmd&) {
+        s.InputState.MouseState.enableMouse = !s.InputState.MouseState.enableMouse;
+    }
+
 }
 
 namespace Input::GUI {
@@ -105,7 +111,7 @@ namespace Input::GUI {
 
             if (ImGui::MenuItem(md.label.data())) {
                 Command::Processor::constructCommand(
-                    s.InputState,
+                    s.CommandState,
                     def
                 );
             }
@@ -185,7 +191,7 @@ namespace Input::GUI {
                 sMD.maximum))
             {
                 Command::Processor::constructCommand(
-                    s.InputState,
+                    s.CommandState,
                     def,
                     { payload }
                 );
@@ -214,7 +220,7 @@ namespace Input::GUI {
                 displayload.data()))
             {
                 Command::Processor::constructCommand(
-                    s.InputState,
+                    s.CommandState,
                     def,
                     {
                         luxel::floatsToColour(displayload)
@@ -240,7 +246,7 @@ namespace Input::GUI {
                 }
 
                 Command::Processor::constructCommand(
-                    s.InputState,
+                    s.CommandState,
                     def,
                     { value }
                 );
@@ -387,6 +393,213 @@ namespace Input::GUI {
             ImGui::GetDrawData(),
             s.SDLState.Renderer
         );
+    }
+
+}
+
+namespace Input::CLI {
+
+    namespace {
+    
+        std::string harvestInput(const std::string& Question, bool linebreak = true) 
+        {
+            std::cout << Question << std::endl;
+            std::string output;
+            std::cin >> output;
+            if (linebreak) std::cout << std::endl;
+            return output;
+        }
+
+        bool safestoi(const std::string& s, int& i) {
+            
+            try {
+                i = std::stoi(s);
+            } 
+            catch (...) {
+                return false;
+            }
+            return true;
+
+        }
+
+        bool harvestIntegerInput(const std::string& q, int& i) {
+
+            while (!safestoi(harvestInput(q), i)) {
+                std::cout << "Invalid input (not a number?)" << std::endl;
+                if (harvestInput("Quit input? [Y]") == "Y") return false;
+            }
+
+            return true;
+
+        }
+
+        bool harvestArgumentInput(std::vector<int>& ret) {
+            
+            for (size_t i = 0; i < ret.size(); i++) {
+                if (!harvestIntegerInput("Enter value " + std::to_string(i + 1) + ":", ret[i]))
+                    return false;
+            }
+            return true;
+
+        }
+
+        colour convertVecToColour(const std::vector<int>& v) {
+            colour ret = {};
+            
+            for (size_t i = 0; i < v.size(); i++) {
+                ret[i] = static_cast<uint8_t>(v[i]);
+            }
+
+            return ret;
+
+        }
+
+        bool harvestArgument(Command::Argument::ARGTYPE t, Command::argument& arg) 
+        {
+            std::vector<int> ret;
+            switch (t) {
+            case Command::Argument::ARGTYPE::INT:
+
+                ret = std::vector<int>(1);
+                if (!harvestArgumentInput(ret)) return false;
+                arg = ret[0];
+                return true;
+
+            case Command::Argument::ARGTYPE::COORDINATE:
+                
+                ret = std::vector<int>(2);
+                if (!harvestArgumentInput(ret)) return false;
+                arg = coordinate{ ret[0], ret[1] };
+                return true;
+
+            case Command::Argument::ARGTYPE::COLOUR:
+                
+                ret = std::vector<int>(4);
+                if (!harvestArgumentInput(ret)) return false;
+                arg = convertVecToColour(ret);
+                return true;
+
+            default:
+                return false;
+            }
+        }
+
+        bool createCommand(Input_State::CLI_State& CLIS, Command_State& cS, const std::string& input) {
+
+            if (!CLIS.commandLineBindings.contains(input)) return false;
+
+            auto def = CLIS.commandLineBindings.at(input);
+
+            const auto& defArgs = def->commandMetadata.argumentMetadata.arguments;
+                // std::vector<argument_definition>
+
+            if (defArgs.empty()
+                or harvestInput("Use default arguments? [Y]") == "Y") {
+                Command::Processor::constructCommand(cS, def);
+                return true;
+            }
+
+            std::vector<Command::argument> args = std::vector<Command::argument>(defArgs.size());
+
+            for (size_t i = 0; i < defArgs.size(); i++) {
+
+                if (!harvestArgument(defArgs[i].type, args[i]))
+                    return false;
+
+            }
+            
+            while (true) {
+
+                // Yeah like if you're really bored you can refactor this.
+
+                const auto& retVal = Command::Processor::constructCommand(cS, def, args);
+
+                switch (retVal.second) {
+                case Command::Processor::returnCode::ARG_RANGE_INVALID:
+                    if (harvestInput("Argument[" + std::to_string(retVal.first) + "] not within range.  Replace?\n [Y] (or quits otherwise)") != "Y")
+                        return false;
+                    if (defArgs[retVal.first].type == Command::Argument::ARGTYPE::INT) {
+                        std::cout << "Expected range:\nMin: " + std::to_string(std::get<int>(def->commandMetadata.argumentMetadata.arguments[retVal.first].constraints->first));
+                        std::cout << "\nMax: " + std::to_string(std::get<int>(def->commandMetadata.argumentMetadata.arguments[retVal.first].constraints->second));
+                    }
+                    else {
+                        std::cout << "Expected range:\nMin: " + static_cast<std::string>(std::get<coordinate>(def->commandMetadata.argumentMetadata.arguments[retVal.first].constraints->first));
+                        std::cout << "\nMax: " + static_cast<std::string>(std::get<coordinate>(def->commandMetadata.argumentMetadata.arguments[retVal.first].constraints->second));
+                    }
+                    std::cout << std::endl;
+                    harvestArgument(defArgs[retVal.first].type, args[retVal.first]);
+                    break;
+                default:
+                    return true;
+                    // we could sanity check other stuff here but given that the other edge cases are handled within harvest argument I'm not too concerned.
+                    // worth noting that colour currently doesn't have a constraint check but I can't think of a valid use case where this would be a concern.
+                }
+            }
+
+        }
+
+        bool retrieveHelp(Input_State::CLI_State& CLIS, const std::string& input) 
+        {
+            
+            if (!CLIS.commandLineBindings.contains(input)) return false;
+            auto def = CLIS.commandLineBindings.at(input);
+            std::cout << def->inputMetadata.cli->help << std::endl;
+            return true;
+
+        }
+
+		void CLILoop(Application_State& s) {
+            Input_State::CLI_State& CLIS = s.InputState.CLIState;
+            Command_State& cS = s.CommandState;
+			while (true) {
+				std::cout << R"(
+You are at the beginning of the CLI loop.
+
+Options:
+
+    [1] Add command.
+    [2] Execute current commands.
+    [3] Get help for a command name.
+    [4] List all command names.
+    [5] Quit.
+
+)" << std::endl;
+				switch (std::stoi(harvestInput(""))) {
+				case 1:
+                    if (createCommand(CLIS, cS, harvestInput("Enter the name of the command: ")) == false)
+                        std::cout << "No command generated." << std::endl;
+                    else 
+                        std::cout << "Command added successfully!" << std::endl;
+					break;
+				case 2:
+                    Command::Processor::processCommands(s);
+					break;
+                case 3:
+                    if (!retrieveHelp(CLIS, harvestInput("Enter the name of the command you would like more information on:")))
+                        std::cout << "Invalid command name." << std::endl;
+                    break;
+                case 4:
+                    for (const auto& [binding, def] : s.InputState.CLIState.commandLineBindings) {
+                        std::cout << def->inputMetadata.cli->commandName << std::endl;
+                    }
+                    break;
+				case 5:
+					if (cS.commandQueue.size()) if (harvestInput("You have unexecuted commands.  Continue? [Y]") != "Y") break;
+                    cS.commandQueue = {};
+					return;
+				default:
+					continue;
+				}
+			}
+
+		}
+
+	}
+
+    void openCLI(Application_State& s, Command::Cmd&)
+    {
+        s.CommandState.commandQueue = {};
+        CLILoop(s);
     }
 
 }

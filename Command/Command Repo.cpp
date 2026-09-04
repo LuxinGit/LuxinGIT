@@ -887,7 +887,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
             }
         },
 
-        .processor = nullptr
+        .processor = &Input::CLI::openCLI
     },
 
     {
@@ -908,7 +908,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
             }
         },
 
-        .processor = nullptr
+        .processor = &Input::enableMouse
     },
 
 

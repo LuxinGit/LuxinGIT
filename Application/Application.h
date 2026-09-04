@@ -17,6 +17,7 @@ public:
     Cursor_State        CursorState;
     Draw_State          DrawState;
     Input_State         InputState;
+    Command_State       CommandState;
     SDL_State           SDLState;
 
 };

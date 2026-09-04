@@ -13,6 +13,8 @@
 
 struct Application_State;
 
+
+
 enum class COMMAND_ID {
     MOVE_UP,
     MOVE_DOWN,
@@ -66,11 +68,21 @@ enum class COMMAND_ID {
 };
 
 namespace Command {
+
     using argument = std::variant<
         int,
         colour,
         coordinate>;
+
+    struct Cmd;
+
 }
+
+struct Command_State {
+
+    std::vector<Command::Cmd> commandQueue;
+
+};
 
 namespace Command::Argument {
 
@@ -190,8 +202,6 @@ namespace Command::Definition {
 
 namespace Command {
 
-    struct Cmd;
-
     using Command_Processor = void(*)(Application_State&, Cmd&);
 
     struct Cmd {
@@ -225,6 +235,6 @@ namespace Command::Processor {
         ARG_RANGE_INVALID
     };
 
-    std::pair<int, returnCode> constructCommand(Input_State& s, const Command_Definition* def, std::vector<argument> args = {});
+    std::pair<int, returnCode> constructCommand(Command_State& s, const Command_Definition* def, std::vector<argument> args = {});
     void processCommands(Application_State&);
 }

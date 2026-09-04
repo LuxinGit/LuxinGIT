@@ -29,7 +29,6 @@ struct Input_State {
 	struct GUI_State {
 
 		bool enableGUI = ENABLE_GUI;
-
 		using def = const Command::Command_Definition*;
 
 		std::array<
@@ -40,18 +39,10 @@ struct Input_State {
 		std::unordered_set<def> openPopouts;
 	};
 
-	struct Command_State {
-
-		std::vector<Command::Cmd> commandQueue;
-
-	};
-
 	Keyboard_State	 KeyboardState;
 	Mouse_State			MouseState;
 	CLI_State			  CLIState;
 	GUI_State			  GUIState;
-	
-	Command_State	  CommandState;
 
 };
 
@@ -60,6 +51,8 @@ namespace Input {
 	void initialiseBindings(Input_State& s);
 
 	bool harvestApplicationInputs(Application_State& s);
+
+	void enableMouse(Application_State& s, Command::Cmd&);
 
 }
 
@@ -71,5 +64,11 @@ namespace Input::GUI {
 	void beginFrame();
 
 	void renderGUI(Application_State& s);
+
+}
+
+namespace Input::CLI {
+
+	void openCLI(Application_State& s, Command::Cmd&);
 
 }
