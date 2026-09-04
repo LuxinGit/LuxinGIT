@@ -503,6 +503,10 @@ namespace Input::CLI {
 
             for (size_t i = 0; i < defArgs.size(); i++) {
 
+                if (!defArgs[i].required)
+                    if (harvestInput("This argument (" + std::string(defArgs[i].name) + ") is not required.  Input anyway? [Y]") != "Y")
+                        continue;
+
                 if (!harvestArgument(defArgs[i].type, args[i]))
                     return false;
 

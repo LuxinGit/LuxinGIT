@@ -237,17 +237,33 @@ New_Command_Repo NEW_COMMAND_REPO = { {
                         Command::Argument::ARGTYPE::COLOUR,
                         "colour",
                         "Colour used for the fill.",
-                        std::nullopt
+                        std::nullopt,
+                        false
+                    },
+                    {
+                        Command::Argument::ARGTYPE::COORDINATE,
+                        "coordinate",
+                        "Colour used for the fill location.",
+                        std::pair<coordinate, coordinate>{
+                            { DEFAULT_CANVAS_WIDTH_MIN, DEFAULT_CANVAS_HEIGHT_MIN },
+                            { DEFAULT_CANVAS_WIDTH_MAX, DEFAULT_CANVAS_HEIGHT_MAX }
+                        },
+                        false
                     }
                 },
 
                 .defaultArgs = {
-                    DEFAULT_DRAW_COLOUR
+                    std::monostate(),
+                    std::monostate()
                 }
             }
         },
 
         .inputMetadata = {
+            .keyboard = inp::Keyboard_Metadata{
+                SDL_SCANCODE_F,
+                false
+            },
             .cli = inp::CLI_Metadata{
                 "fill",
                 "Flood-fill the region under the cursor using a specified colour."
@@ -256,28 +272,6 @@ New_Command_Repo NEW_COMMAND_REPO = { {
 
         .processor = &Draw::processFill
     },
-
-    {
-        .ID = COMMAND_ID::DRAW_FILL_DRAWCOLOUR,
-
-        .commandMetadata = {
-            .commandDescription = "Flood-fill using the current draw colour.",
-            .argumentMetadata = {
-                .arguments = {},
-                .defaultArgs = {}
-            }
-        },
-
-        .inputMetadata = {
-            .keyboard = inp::Keyboard_Metadata{
-                SDL_SCANCODE_F,
-                false
-            }
-        },
-
-        .processor = &Draw::processFill
-    },
-
 
     // ============================================================
     // COLOUR

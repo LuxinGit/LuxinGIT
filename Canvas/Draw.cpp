@@ -188,22 +188,26 @@ namespace Draw {
 
         drawCircle(mh, mh.CursorState.cursor, *mh.DrawState.activeColour, radius, false);
     }
-    void processFill(Application_State& mh, Command::Cmd& command) {
+    void processFill(Application_State& s, Command::Cmd& command) {
         
         colour c;
+        coordinate coor = s.CursorState.cursor;
         
         switch (command.ID) {
-        case(COMMAND_ID::DRAW_FILL_DRAWCOLOUR):
-            c = *mh.DrawState.activeColour;
-            break;
         case(COMMAND_ID::DRAW_FILL_PAYLOAD):
-            c = std::get<colour>(command.args[0]);
+            if (auto* arg = std::get_if<colour>(&command.args[0]))
+                c = *arg;
+            else c = *s.DrawState.activeColour;
             break;
         default:
             assert(false);
+            return;
         }
-        
-        fill(mh, mh.CursorState.cursor, c);
+
+        if (auto* arg = std::get_if<coordinate>(&command.args[1]))
+            coor = *arg;
+
+        fill(s, coor, c);
 
     }
     void processPenDown(Application_State& mh, Command::Cmd& command) {

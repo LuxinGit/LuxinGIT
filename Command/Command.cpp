@@ -114,11 +114,21 @@ namespace Command::Processor {
             return { 0, returnCode::SUCCESS };
         }
 
-        if (args.size() != aMD.arguments.size()) return { 0 , returnCode::ARG_COUNT_INVALID };
+        if (args.size() > aMD.arguments.size()) return { 0 , returnCode::ARG_COUNT_INVALID };
+        if (args.size() < aMD.arguments.size()) args.resize(aMD.arguments.size());
 
         for (int i = 0; i < args.size(); i++) {
 
             const Argument::Argument_Definition& adef = aMD.arguments[i];
+            
+            if (std::holds_alternative<std::monostate>(args[i])) {
+                if (adef.required)
+                    return { static_cast<int>(i), returnCode::ARG_COUNT_INVALID };
+
+                command.args.emplace_back(std::monostate{});
+                continue;
+            }
+
             size_t a = args[i].index();
             if (args[i].index() != static_cast<size_t>(adef.type))
                 return { i, returnCode::ARG_TYPE_INVALID };

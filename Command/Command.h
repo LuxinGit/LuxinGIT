@@ -27,7 +27,6 @@ enum class COMMAND_ID {
     DRAW_CIRCLE,
 
     DRAW_FILL_PAYLOAD,
-    DRAW_FILL_DRAWCOLOUR,
 
     CANVAS_RESIZE_SET_PAYLOAD,
     CANVAS_RESIZE_SET_WIDTH,
@@ -70,6 +69,7 @@ enum class COMMAND_ID {
 namespace Command {
 
     using argument = std::variant<
+        std::monostate,
         int,
         colour,
         coordinate>;
@@ -87,9 +87,9 @@ struct Command_State {
 namespace Command::Argument {
 
     enum class ARGTYPE {
-        INT = 0,
-        COLOUR = 1,
-        COORDINATE = 2
+        INT = 1,
+        COLOUR = 2,
+        COORDINATE = 3
     };
 
     struct Argument_Definition {
@@ -97,6 +97,7 @@ namespace Command::Argument {
         std::string_view name;
         std::string_view desc;
         std::optional<std::pair<argument, argument>> constraints;
+        bool required = true;
     };
 
 }
