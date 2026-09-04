@@ -1,10 +1,8 @@
-// Better Paint 1.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
 
 #include <SDL3/SDL.h>
 #include <imgui.h>
 #include "Command.h"
-#include "Master Handler.h"
+#include "Application.h"
 
 /*
 TO DO:
@@ -23,26 +21,15 @@ TO DO:
 
 int main()
 {
-    bool running = true;
 
-    Master_Handler MasterHandler;
+    Application_State AppState;
 
-    while (MasterHandler.runFrame()) {
+    LuxinPaint::initialiseApplicationState(AppState);
 
-        //SDL_Event event;
+    while (LuxinPaint::runFrame(AppState));
 
-        //while (SDL_PollEvent(&event))
-        //{
-        //    if(ENABLE_GUI) ImGui_ImplSDL3_ProcessEvent(&event);
+    LuxinPaint::cleanup(AppState);
 
-        //    if (event.type == SDL_EVENT_QUIT)
-        //        running = false;  
-        //}
-
-        //MasterHandler.runFrame();
-
-    }
-
-    MasterHandler.cleanup();
     return 0;
+
 }

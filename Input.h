@@ -2,7 +2,7 @@
 #include "Command.h"
 #include <unordered_set>
 
-struct Master_Handler;
+struct Application_State;
 
 struct Input_State {
 
@@ -30,7 +30,7 @@ struct Input_State {
 
 		std::array<
 			std::vector<def>,
-			static_cast<size_t>(Command::HEADER::COUNT)
+			static_cast<size_t>(Command::Definition::Input::GUI::HEADER::COUNT)
 		> headers;
 
 		std::unordered_set<def> openPopouts;
@@ -55,17 +55,17 @@ namespace Input {
 
 	void initialiseBindings(Input_State& s);
 
-	bool harvestApplicationInputs(Master_Handler& s);
+	bool harvestApplicationInputs(Application_State& s);
 
 }
 
 namespace Input::GUI {
 
-	void initialiseGUI(Master_Handler& s);
+	void initialiseGUI(Application_State& s);
 	void cleanupGUI();
 
 	void beginFrame();
 
-	void renderGUI(Master_Handler& s);
+	void renderGUI(Application_State& s);
 
 }

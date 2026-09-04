@@ -16,9 +16,9 @@ struct Cursor_State {
 
 namespace Cursor {
 
-    void checkCursorData(Master_Handler& mh);
+    void checkCursorData(Application_State& mh);
     
-    void processMoveCursor(Master_Handler& mh, Command::Cmd& command);
-    void processChangeDrawstep(Master_Handler& mh, Command::Cmd& command);
-    void processChangeOrigin(Master_Handler& mh, Command::Cmd& command);
+    void processMoveCursor(Application_State& mh, Command::Cmd& command);
+    void processChangeDrawstep(Application_State& mh, Command::Cmd& command);
+    void processChangeOrigin(Application_State& mh, Command::Cmd& command);
 }

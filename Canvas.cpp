@@ -1,5 +1,5 @@
 #include "Canvas.h"
-#include "Master Handler.h"
+#include "Application.h"
 
 luxel::luxel() { colour = DEFAULT_BACKGROUND_COLOUR; }
 void luxel::resetLuxel() {
@@ -35,11 +35,11 @@ namespace Canvas {
         return &s.canvas[indexFromCoord(c)];
     }
     
-    void processResetAll(Master_Handler& mh, Command::Cmd& command) {
+    void processResetAll(Application_State& mh, Command::Cmd& command) {
         for (auto& l : mh.CanvasState.canvas) l.resetLuxel();
         mh.ActionState.actionQueue = {};
     }
-    void processCanvasSize(Master_Handler& mh, Command::Cmd& command) {
+    void processCanvasSize(Application_State& mh, Command::Cmd& command) {
         
         coordinate c = { 0, 0 };
         

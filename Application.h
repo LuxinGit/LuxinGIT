@@ -6,7 +6,7 @@
 #include "Action.h"
 #include "Input.h"
 
-struct Master_Handler {
+struct Application_State {
 
 public:
 
@@ -18,10 +18,14 @@ public:
     Input_State         InputState;
     SDL_State           SDLState;
 
-    Master_Handler();
-
-    bool runFrame();
-
-    void cleanup();
-
 };
+
+namespace LuxinPaint {
+
+    void initialiseApplicationState(Application_State&);
+
+    bool runFrame(Application_State&);
+
+    void cleanup(Application_State&);
+
+}

@@ -1,6 +1,6 @@
 #include "Action.h"
 #include "Canvas.h"
-#include "Master Handler.h"
+#include "Application.h"
 
 void Change_Set::addLuxel(luxel* l, const std::array<uint8_t, 4>& oC) {
     if (changedLuxels.insert(l).second)
@@ -16,7 +16,7 @@ namespace Action {
             s.actionQueue.emplace_back(std::move(s.currentAction));
             s.currentAction = {};
         }
-        void processAction(Master_Handler& mh, Action_State& s) {
+        void processAction(Application_State& mh, Action_State& s) {
 
             if (auto* cmd = std::get_if<Command::Cmd>(&s.actionQueue[s.actionQueueIndex])) 
             {
@@ -27,12 +27,12 @@ namespace Action {
             }
 
         }
-        void undoAction(Master_Handler& mh, Action_State& s) {
+        void undoAction(Application_State& mh, Action_State& s) {
             if (s.actionQueueIndex < 1) return;
             processAction(mh, s);
             s.actionQueueIndex--;
         }
-        void redoAction(Master_Handler& mh, Action_State& s) {
+        void redoAction(Application_State& mh, Action_State& s) {
             if (s.actionQueueIndex + 1 >= static_cast<int>(s.actionQueue.size())) return;
             s.actionQueueIndex++;
             processAction(mh, s);
@@ -46,13 +46,13 @@ namespace Action {
     void commitCurrentAction(Action_State& s) {
         if (!s.currentAction.changeSet.empty()) addNewAction(s);
     }
-    void processUndo(Master_Handler& mh, Command::Cmd&) {
+    void processUndo(Application_State& mh, Command::Cmd&) {
         undoAction(mh, mh.ActionState);
     }
-    void processRedo(Master_Handler& mh, Command::Cmd&) {
+    void processRedo(Application_State& mh, Command::Cmd&) {
         redoAction(mh, mh.ActionState);
     }
-    void processClearActionQueue(Master_Handler& mh, Command::Cmd&)
+    void processClearActionQueue(Application_State& mh, Command::Cmd&)
     {
         mh.ActionState.actionQueue = {}; 
     }

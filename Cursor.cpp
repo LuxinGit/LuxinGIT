@@ -2,7 +2,7 @@
 
 #include "Cursor.h"
 #include "Canvas.h"
-#include "Master Handler.h"
+#include "Application.h"
 
 namespace Cursor {
 
@@ -33,14 +33,14 @@ namespace Cursor {
         }
     }
 
-    void checkCursorData(Master_Handler& mh) {
+    void checkCursorData(Application_State& mh) {
         if (mh.DrawState.penDown and mh.CursorState.cursor != mh.CursorState.deltaCursor) 
             Draw::drawLineToNewCursor(mh);
         if (mh.DrawState.penContinuous) { mh.DrawState.penContinuous = false; mh.DrawState.penDown = false; }
         resetCursors(mh.CursorState, mh.CanvasState);
     }
 
-    void processMoveCursor(Master_Handler& mh, Command::Cmd& command) {
+    void processMoveCursor(Application_State& mh, Command::Cmd& command) {
         
         Cursor_State& s = mh.CursorState;
         std::pair<float, float> c = s.deltaCursor;
@@ -56,7 +56,7 @@ namespace Cursor {
         command.args = { c };
 
     }
-    void processChangeDrawstep(Master_Handler& mh, Command::Cmd& command) {
+    void processChangeDrawstep(Application_State& mh, Command::Cmd& command) {
         
         Cursor_State& s = mh.CursorState;
         int d = s.drawStep;
@@ -73,7 +73,7 @@ namespace Cursor {
         command.args = { d };
 
     }
-    void processChangeOrigin(Master_Handler& mh, Command::Cmd& command) { 
+    void processChangeOrigin(Application_State& mh, Command::Cmd& command) { 
         mh.CursorState.origin = mh.CursorState.cursor;
     } // Probably expand this if I ever want to do stuf with origins, but for now this is fine.
 }

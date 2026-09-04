@@ -13,7 +13,7 @@
 #include <cassert>
 
 
-struct Master_Handler;
+struct Application_State;
 
 enum class COMMAND_ID {
     MOVE_UP,
@@ -68,11 +68,13 @@ enum class COMMAND_ID {
 };
 
 namespace Command {
-
     using argument = std::variant<
-        int, 
-        colour, 
+        int,
+        colour,
         coordinate>;
+}
+
+namespace Command::Argument {
 
     enum class ARGTYPE {
         INT = 0,
@@ -87,18 +89,10 @@ namespace Command {
         std::optional<std::pair<argument, argument>> constraints;
     };
 
-    struct Argument_Metadata {
-        std::vector<Argument_Definition> arguments;
-        std::vector<argument> defaultArgs;
-    };
+}
 
-    struct Command_Metadata {
 
-        std::string_view                commandDescription;
-        Argument_Metadata                 argumentMetadata;
-        bool                              undoable = false;
-
-    };
+namespace Command::Definition::Input {
 
     struct Keyboard_Metadata {
 
@@ -119,6 +113,10 @@ namespace Command {
 
     };
 
+}
+
+namespace Command::Definition::Input::GUI {
+
     enum class HEADER {
         FILE,
         EDIT,
@@ -130,16 +128,16 @@ namespace Command {
         int minimum;
         int maximum;
 
-        using Resolver = int& (*)(Master_Handler&);
+        using Resolver = int& (*)(Application_State&);
         Resolver resolve;
     };
 
     struct COLOUR_METADATA {
-        using Resolver = colour & (*)(Master_Handler&);
+        using Resolver = colour & (*)(Application_State&);
         Resolver resolve;
     };
 
-    enum class GUI_FUNCTION_TYPE {
+    enum class FUNCTION_TYPE {
         BINARY,
         SLIDER,
         COLOUR
@@ -151,52 +149,76 @@ namespace Command {
 
         HEADER            header;
         std::string_view  label;
-        GUI_FUNCTION_TYPE TYPE;
+        FUNCTION_TYPE TYPE;
         GUI_TYPE_METADATA typeMetadata;
+
+    };
+
+}
+
+namespace Command::Definition::Input::GUI::Resolver {
+    int& resolvePenWidth(Application_State&);
+    int& resolveDrawstep(Application_State&);
+    int& resolveCanvasHeight(Application_State&);
+    int& resolveCanvasWidth(Application_State&);
+    colour& resolveDrawColourChange(Application_State&);
+    colour& resolveBackgroundColourChange(Application_State&);
+}
+
+
+namespace Command::Definition {
+
+    struct Argument_Metadata {
+        std::vector<::Command::Argument::Argument_Definition> arguments;
+        std::vector<argument>                               defaultArgs;
+    };
+
+    struct Command_Metadata {
+
+        std::string_view                commandDescription;
+        Argument_Metadata                 argumentMetadata;
+        bool                              undoable = false;
 
     };
 
     struct Input_Metadata {
 
-        std::optional<Keyboard_Metadata>    keyboard;
-        std::optional<Mouse_Metadata>       mouse;
-        std::optional<CLI_Metadata>         cli;
-        std::optional<GUI_Metadata>         gui;
+        std::optional<Input::Keyboard_Metadata>    keyboard;
+        std::optional<Input::Mouse_Metadata>          mouse;
+        std::optional<Input::CLI_Metadata>              cli;
+        std::optional<Input::GUI::GUI_Metadata>         gui;
 
     };
 
+}
+
+namespace Command {
+
     struct Cmd;
 
-    using Command_Processor = void(*)(Master_Handler&, Cmd&);
+    using Command_Processor = void(*)(Application_State&, Cmd&);
 
     struct Cmd {
 
-        COMMAND_ID                     ID;
-        std::vector<argument>        args;
-        Command_Processor       processor;
+        COMMAND_ID                                        ID;
+        std::vector<argument>                           args;
+        Command_Processor                          processor;
 
     };
 
     struct Command_Definition {
 
-        COMMAND_ID                       ID;
-        Command_Metadata    commandMetadata;
-        Input_Metadata        inputMetadata;
+        COMMAND_ID                                   ID;
+        Definition::Command_Metadata    commandMetadata;
+        Definition::Input_Metadata        inputMetadata;
 
-        Command_Processor         processor;
+        Command_Processor                     processor;
 
     };
 
 }
 
-namespace Command::GUI_Resolver {
-    int& resolvePenWidth(Master_Handler&);
-    int& resolveDrawstep(Master_Handler&);
-    int& resolveCanvasHeight(Master_Handler&);
-    int& resolveCanvasWidth(Master_Handler&);
-    colour& resolveDrawColourChange(Master_Handler&);
-    colour& resolveBackgroundColourChange(Master_Handler&);
-}
+
 
 struct Input_State;
 
@@ -210,5 +232,5 @@ namespace Command::Processor {
     };
 
     std::pair<int, returnCode> constructCommand(Input_State& s, const Command_Definition* def, std::vector<argument> args = {});
-    void processCommands(Master_Handler&);
+    void processCommands(Application_State&);
 }

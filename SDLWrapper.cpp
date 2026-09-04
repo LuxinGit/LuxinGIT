@@ -1,5 +1,5 @@
 #include "SDLWrapper.h"
-#include "Master Handler.h"
+#include "Application.h"
 #include "imgui.h"
 
 namespace SDL {
@@ -33,7 +33,7 @@ namespace SDL {
 		SDL_SetWindowRelativeMouseMode(ss.Window, false);
 	}
 
-	void renderFrame(Master_Handler& s) {
+	void renderFrame(Application_State& s) {
 		Input::GUI::beginFrame();
 		Cursor::checkCursorData(s);
 		updateTexture	(s.SDLState, s.CanvasState);

@@ -90,16 +90,3 @@ struct coordinate_hash {
         return h1 ^ (h2 << 1);
     }
 };
-
-//struct location {
-//    
-//    Colour colour;
-//    std::optional<size_t> cIndex;
-//    luxel* l;
-//
-//    location() : colour(DEFAULT_BACKGROUND_COLOUR), cIndex(std::nullopt), l(nullptr) {}
-//    location(const Colour& c, size_t i, luxel* p) : colour(c), cIndex(i), l(p) {}
-//
-//    Colour changeColour(const Colour&);
-//    void processScopeChange(luxel* p = false, std::optional<size_t> vCIndex = std::nullopt);
-//}; 

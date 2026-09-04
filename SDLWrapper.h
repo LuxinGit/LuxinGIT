@@ -3,7 +3,7 @@
 #include "STRUCTS.h"
 #include <vector>
 
-struct Master_Handler;
+struct Application_State;
 struct Canvas_State;
 
 struct SDL_State {
@@ -18,7 +18,7 @@ namespace SDL {
 
     void initialiseSDL(SDL_State&, Canvas_State&);
 
-    void renderFrame(Master_Handler&);
+    void renderFrame(Application_State&);
 
     void cleanup(SDL_State&);
 

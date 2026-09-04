@@ -1,31 +1,31 @@
 #include "Command.h"
-#include "Master Handler.h"
+#include "Application.h"
 
 #include <variant>
 #include <unordered_map>
 #include <array>
 
-namespace Command::GUI_Resolver {
+namespace Command::Definition::Input::GUI::Resolver {
 
-    int& resolvePenWidth(Master_Handler& varMH) {
+    int& resolvePenWidth(Application_State& varMH) {
         return varMH.DrawState.pen;
     }
-    int& resolveDrawstep(Master_Handler& varMH) {
+    int& resolveDrawstep(Application_State& varMH) {
         return varMH.CursorState.drawStep;
     }
-    int& resolveCanvasWidth(Master_Handler& varMH)
+    int& resolveCanvasWidth(Application_State& varMH)
     {
         return varMH.CanvasState.width;
     }
-    int& resolveCanvasHeight(Master_Handler& varMH)
+    int& resolveCanvasHeight(Application_State& varMH)
     {
         return varMH.CanvasState.height;
     }
-    colour& resolveDrawColourChange(Master_Handler& varMH)
+    colour& resolveDrawColourChange(Application_State& varMH)
     {
         return varMH.DrawState.drawColour;
     }
-    colour& resolveBackgroundColourChange(Master_Handler& varMH)
+    colour& resolveBackgroundColourChange(Application_State& varMH)
     {
         return varMH.DrawState.backgroundColour;
     }
@@ -92,7 +92,8 @@ namespace Command::Processor {
 
     std::pair<int, returnCode> constructCommand(Input_State& s, const Command_Definition* def, std::vector<argument> args)
     {
-        const Argument_Metadata& aMD = def->commandMetadata.argumentMetadata;
+
+        const Definition::Argument_Metadata& aMD = def->commandMetadata.argumentMetadata;
 
         Cmd command = { def->ID, {} , def->processor};
 
@@ -116,7 +117,7 @@ namespace Command::Processor {
 
         for (int i = 0; i < args.size(); i++) {
 
-            const Argument_Definition& adef = aMD.arguments[i];
+            const Argument::Argument_Definition& adef = aMD.arguments[i];
             size_t a = args[i].index();
             if (args[i].index() != static_cast<size_t>(adef.type))
                 return { i, returnCode::ARG_TYPE_INVALID };
@@ -134,7 +135,7 @@ namespace Command::Processor {
 
     }
 
-    void processCommands(Master_Handler& s)
+    void processCommands(Application_State& s)
     {
         if (s.InputState.CommandState.commandQueue.size() == 0) Action::commitCurrentAction(s.ActionState);
 

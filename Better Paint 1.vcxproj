@@ -142,7 +142,7 @@
     <ClCompile Include="CONSTANTS.h" />
     <ClCompile Include="Cursor.cpp" />
     <ClCompile Include="Draw.cpp" />
-    <ClCompile Include="Master Handler.cpp" />
+    <ClCompile Include="Application.cpp" />
     <ClCompile Include="SDLWrapper.cpp" />
     <ClCompile Include="STRUCTS.cpp" />
   </ItemGroup>
@@ -155,7 +155,7 @@
     <ClInclude Include="Cursor.h" />
     <ClInclude Include="Draw.h" />
     <ClInclude Include="Input.h" />
-    <ClInclude Include="Master Handler.h" />
+    <ClInclude Include="Application.h" />
     <ClInclude Include="SDLWrapper.h" />
     <ClInclude Include="STRUCTS.h" />
   </ItemGroup>

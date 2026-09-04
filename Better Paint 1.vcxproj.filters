@@ -27,7 +27,7 @@
     <ClCompile Include="CLI Handler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Master Handler.cpp">
+    <ClCompile Include="Application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CONSTANTS.h">
@@ -65,7 +65,7 @@
     <ClInclude Include="CLI Handler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Master Handler.h">
+    <ClInclude Include="Application.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Action.h">

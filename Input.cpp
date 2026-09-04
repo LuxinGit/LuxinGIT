@@ -1,6 +1,6 @@
 #include "Input.h"
 #include "COMMAND REPO.h"
-#include "Master Handler.h"
+#include "Application.h"
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_sdlrenderer3.h>
 
@@ -53,7 +53,7 @@ namespace Input {
                 ImGui::GetIO().WantCaptureMouse) SDL_ShowCursor();
             else SDL_HideCursor();
         }
-		void harvestUserPeripheralInputs(Master_Handler& s)
+		void harvestUserPeripheralInputs(Application_State& s)
 		{
 			harvestKeyboardState(s.InputState);
 			if (!ImGui::GetIO().WantCaptureMouse)
@@ -71,14 +71,14 @@ namespace Input {
 			if (def.inputMetadata.mouse)	s.MouseState.mouseBindings		[def.inputMetadata.mouse->MOUSECODE]	= &def;
 			if (def.inputMetadata.cli)		s.CLIState.commandLineBindings	[def.inputMetadata.cli->commandName]	= &def;
 			if (def.inputMetadata.gui) {
-				const Command::GUI_Metadata& gui = *def.inputMetadata.gui;
+				const Command::Definition::Input::GUI::GUI_Metadata& gui = *def.inputMetadata.gui;
 				s.GUIState.headers[static_cast<size_t>(gui.header)].emplace_back(&def);
 			}
 
 		}
 	}
 
-	bool harvestApplicationInputs(Master_Handler& s) {
+	bool harvestApplicationInputs(Application_State& s) {
 
 		if (!harvestEventStates()) return false; // false if quit called
 			
@@ -97,10 +97,10 @@ namespace Input::GUI {
         using commandDefinition = const Command::Command_Definition*;
 
         void binaryMenuItem(
-            Master_Handler& s,
+            Application_State& s,
             commandDefinition def)
         {
-            const Command::GUI_Metadata& md =
+            const Command::Definition::Input::GUI::GUI_Metadata& md =
                 *def->inputMetadata.gui;
 
             if (ImGui::MenuItem(md.label.data())) {
@@ -112,10 +112,10 @@ namespace Input::GUI {
         }
 
         void nonbinaryMenuItem(
-            Master_Handler& s,
+            Application_State& s,
             commandDefinition def)
         {
-            const Command::GUI_Metadata& md =
+            const Command::Definition::Input::GUI::GUI_Metadata& md =
                 *def->inputMetadata.gui;
 
             auto& openPopouts =
@@ -131,15 +131,15 @@ namespace Input::GUI {
         }
 
         void menuItem(
-            Master_Handler& s,
+            Application_State& s,
             commandDefinition def)
         {
-            const Command::GUI_Metadata& md =
+            const Command::Definition::Input::GUI::GUI_Metadata& md =
                 *def->inputMetadata.gui;
 
             switch (md.TYPE) {
 
-            case Command::GUI_FUNCTION_TYPE::BINARY:
+            case Command::Definition::Input::GUI::FUNCTION_TYPE::BINARY:
                 binaryMenuItem(s, def);
                 break;
 
@@ -150,7 +150,7 @@ namespace Input::GUI {
         }
 
         void menu(
-            Master_Handler& s,
+            Application_State& s,
             const char* name,
             const std::vector<commandDefinition>& commands)
         {
@@ -164,14 +164,14 @@ namespace Input::GUI {
         }
 
         void sliderPopout(
-            Master_Handler& s,
+            Application_State& s,
             commandDefinition def)
         {
-            const Command::GUI_Metadata& md =
+            const Command::Definition::Input::GUI::GUI_Metadata& md =
                 *def->inputMetadata.gui;
 
-            const Command::SLIDER_METADATA& sMD =
-                std::get<Command::SLIDER_METADATA>(
+            const Command::Definition::Input::GUI::SLIDER_METADATA& sMD =
+                std::get<Command::Definition::Input::GUI::SLIDER_METADATA>(
                     md.typeMetadata
                 );
 
@@ -193,14 +193,14 @@ namespace Input::GUI {
         }
 
         void colourPopout(
-            Master_Handler& s,
+            Application_State& s,
             commandDefinition def)
         {
-            const Command::GUI_Metadata& md =
+            const Command::Definition::Input::GUI::GUI_Metadata& md =
                 *def->inputMetadata.gui;
 
-            const Command::COLOUR_METADATA& cMD =
-                std::get<Command::COLOUR_METADATA>(
+            const Command::Definition::Input::GUI::COLOUR_METADATA& cMD =
+                std::get<Command::Definition::Input::GUI::COLOUR_METADATA>(
                     md.typeMetadata
                 );
 
@@ -248,10 +248,10 @@ namespace Input::GUI {
         }
 
         bool renderPopout(
-            Master_Handler& s,
+            Application_State& s,
             commandDefinition def)
         {
-            const Command::GUI_Metadata& md =
+            const Command::Definition::Input::GUI::GUI_Metadata& md =
                 *def->inputMetadata.gui;
 
             bool open = true;
@@ -266,11 +266,11 @@ namespace Input::GUI {
 
             switch (md.TYPE) {
 
-            case Command::GUI_FUNCTION_TYPE::SLIDER:
+            case Command::Definition::Input::GUI::FUNCTION_TYPE::SLIDER:
                 sliderPopout(s, def);
                 break;
 
-            case Command::GUI_FUNCTION_TYPE::COLOUR:
+            case Command::Definition::Input::GUI::FUNCTION_TYPE::COLOUR:
                 colourPopout(s, def);
                 break;
 
@@ -283,7 +283,7 @@ namespace Input::GUI {
             return open;
         }
 
-        void checkForPopouts(Master_Handler& s)
+        void checkForPopouts(Application_State& s)
         {
             auto& openPopouts =
                 s.InputState.GUIState.openPopouts;
@@ -299,7 +299,7 @@ namespace Input::GUI {
                 openPopouts.erase(def);
         }
 
-        void renderMenuBar(Master_Handler& s)
+        void renderMenuBar(Application_State& s)
         {
             auto& headers =
                 s.InputState.GUIState.headers;
@@ -311,7 +311,7 @@ namespace Input::GUI {
                 s,
                 "File",
                 headers[
-                    static_cast<size_t>(Command::HEADER::FILE)
+                    static_cast<size_t>(Command::Definition::Input::GUI::HEADER::FILE)
                 ]
             );
 
@@ -319,7 +319,7 @@ namespace Input::GUI {
                 s,
                 "Edit",
                 headers[
-                    static_cast<size_t>(Command::HEADER::EDIT)
+                    static_cast<size_t>(Command::Definition::Input::GUI::HEADER::EDIT)
                 ]
             );
 
@@ -327,7 +327,7 @@ namespace Input::GUI {
                 s,
                 "Tools",
                 headers[
-                    static_cast<size_t>(Command::HEADER::TOOLS)
+                    static_cast<size_t>(Command::Definition::Input::GUI::HEADER::TOOLS)
                 ]
             );
 
@@ -336,7 +336,7 @@ namespace Input::GUI {
 
     }
 
-    void initialiseGUI(Master_Handler& s)
+    void initialiseGUI(Application_State& s)
     {
         IMGUI_CHECKVERSION();
 
@@ -373,7 +373,7 @@ namespace Input::GUI {
     }
 
 
-    void renderGUI(Master_Handler& s)
+    void renderGUI(Application_State& s)
     {
         if (!s.InputState.GUIState.enableGUI)
             return;

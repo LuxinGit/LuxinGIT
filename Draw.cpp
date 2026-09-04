@@ -1,11 +1,11 @@
 #include "Draw.h"
-#include "Master Handler.h"
+#include "Application.h"
 
 namespace Draw {
     namespace {
 
         void drawCircle(
-            Master_Handler& mh,
+            Application_State& mh,
             const coordinate& c,
             const colour& col,
             int radius,
@@ -15,20 +15,20 @@ namespace Draw {
             return { static_cast<uint8_t>(rand() % 256),static_cast<uint8_t>(rand() % 256),static_cast<uint8_t>(rand() % 256), 255 };
         }
 
-        void drawPoint (Master_Handler& mh, luxel& p, const colour& newColour) {
+        void drawPoint (Application_State& mh, luxel& p, const colour& newColour) {
             if (p.colour == newColour) return;
             Action::markChangedPixel(mh.ActionState, &p, p.colour);
             p.colour = newColour;
             if (p.colour != mh.DrawState.backgroundColour) mh.DrawState.pixelsDrawn++;
         }
-        void drawPoint (Master_Handler& mh, luxel* p, const colour& colour) {
+        void drawPoint (Application_State& mh, luxel* p, const colour& colour) {
             if (!p) return;
             drawPoint(mh, *p, colour);
         }
-        void drawPoint (Master_Handler& mh, const coordinate& c, const colour& colour) {
+        void drawPoint (Application_State& mh, const coordinate& c, const colour& colour) {
             drawPoint(mh, Canvas::getLuxelFromCoord(mh.CanvasState, c, true), colour);
         }
-        void drawPoint (Master_Handler& mh, const coordinate& c, const colour& colour, const bool useP) {
+        void drawPoint (Application_State& mh, const coordinate& c, const colour& colour, const bool useP) {
             if (useP) drawCircle(mh, c, colour, mh.DrawState.pen, true);
             else drawPoint(mh, c, colour);
             if (mh.DrawState.penMode == Draw_State::PEN_MODE::RAINBOW)
@@ -37,7 +37,7 @@ namespace Draw {
                     mh.DrawState.pixelsDrawn = 0;
                 }
         }
-        void drawLine  (Master_Handler& mh, const coordinate& origin, const coordinate& destination, const colour& col, const bool useP) {
+        void drawLine  (Application_State& mh, const coordinate& origin, const coordinate& destination, const colour& col, const bool useP) {
 
             int x0 = origin.x;
             int y0 = origin.y;
@@ -73,7 +73,7 @@ namespace Draw {
             }
         }
         void drawCircle(
-            Master_Handler& mh, 
+            Application_State& mh, 
             const coordinate& c, 
             const colour& col,
             int radius, 
@@ -116,7 +116,7 @@ namespace Draw {
             }
         }
 
-        void fill(Master_Handler& mh, const coordinate& oc, const colour& nColour) {
+        void fill(Application_State& mh, const coordinate& oc, const colour& nColour) {
 
             luxel* o = Canvas::getLuxelFromCoord(mh.CanvasState, oc, true);
             if (!o) return; // origin could not be on the display, and if so we don't want to fill around it.
@@ -150,11 +150,11 @@ namespace Draw {
 
     }
 
-    void drawLineToNewCursor(Master_Handler& mh) {
+    void drawLineToNewCursor(Application_State& mh) {
         drawLine(mh, mh.CursorState.cursor, mh.CursorState.deltaCursor, *mh.DrawState.activeColour, true);
     }
 
-    void processChangePenWidth(Master_Handler& mh, Command::Cmd& command) {
+    void processChangePenWidth(Application_State& mh, Command::Cmd& command) {
 
         Draw_State& s = mh.DrawState;
 
@@ -179,14 +179,14 @@ namespace Draw {
         command.ID = COMMAND_ID::PEN_SET;
         command.args = { pen };
     }
-    void processCircle(Master_Handler& mh, Command::Cmd& command) {
+    void processCircle(Application_State& mh, Command::Cmd& command) {
         int radius = std::holds_alternative<int>(command.args[0])
             ? std::get<int>(command.args[0])
             : mh.CursorState.drawStep * 10;
 
         drawCircle(mh, mh.CursorState.cursor, *mh.DrawState.activeColour, radius, false);
     }
-    void processFill(Master_Handler& mh, Command::Cmd& command) {
+    void processFill(Application_State& mh, Command::Cmd& command) {
         
         colour c;
         
@@ -204,7 +204,7 @@ namespace Draw {
         fill(mh, mh.CursorState.cursor, c);
 
     }
-    void processPenDown(Master_Handler& mh, Command::Cmd& command) {
+    void processPenDown(Application_State& mh, Command::Cmd& command) {
         
         Draw_State& s = mh.DrawState;
         
@@ -217,7 +217,7 @@ namespace Draw {
 
         if (s.penDown) drawPoint(mh, mh.CursorState.cursor, *s.activeColour);
     }
-    void processChangePenMode(Master_Handler& mh, Command::Cmd& command) {
+    void processChangePenMode(Application_State& mh, Command::Cmd& command) {
         Draw_State& s = mh.DrawState;
 
         switch (command.ID) {
@@ -258,7 +258,7 @@ namespace Draw {
             assert(false);
         }
     }
-    void processChangeColour(Master_Handler& mh, Command::Cmd& command) {
+    void processChangeColour(Application_State& mh, Command::Cmd& command) {
         Draw_State& s = mh.DrawState;
         colour c = {};
         colour* targetColour = s.activeColour;
@@ -295,7 +295,7 @@ namespace Draw {
         command.args = { c };
 
     }
-    void processClearCanvas(Master_Handler& mh, Command::Cmd& command) {
+    void processClearCanvas(Application_State& mh, Command::Cmd& command) {
         for (size_t y = 0; y < mh.CanvasState.height; ++y) {
             const size_t rowStart = y * DEFAULT_CANVAS_WIDTH_MAX;
 

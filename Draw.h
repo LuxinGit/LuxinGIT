@@ -28,14 +28,14 @@ struct Draw_State {
 
 namespace Draw {
 
-    void drawLineToNewCursor(Master_Handler& mh);
+    void drawLineToNewCursor(Application_State& mh);
 
-    void processChangePenWidth(Master_Handler& mh, Command::Cmd& command);
-    void processCircle(Master_Handler& mh, Command::Cmd& command);
-    void processFill(Master_Handler& mh, Command::Cmd& command);
-    void processPenDown(Master_Handler& mh, Command::Cmd& command);
-    void processChangePenMode(Master_Handler& mh, Command::Cmd& command);
-    void processChangeColour(Master_Handler& mh, Command::Cmd& command);
-    void processClearCanvas(Master_Handler& mh, Command::Cmd& command);
+    void processChangePenWidth(Application_State& mh, Command::Cmd& command);
+    void processCircle(Application_State& mh, Command::Cmd& command);
+    void processFill(Application_State& mh, Command::Cmd& command);
+    void processPenDown(Application_State& mh, Command::Cmd& command);
+    void processChangePenMode(Application_State& mh, Command::Cmd& command);
+    void processChangeColour(Application_State& mh, Command::Cmd& command);
+    void processClearCanvas(Application_State& mh, Command::Cmd& command);
 
 }

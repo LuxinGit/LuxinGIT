@@ -4,6 +4,10 @@
 
 //// NEW COMMAND REPO
 
+namespace Definition = Command::Definition;
+namespace Input = Definition::Input;
+namespace GUI = Input::GUI;
+
 New_Command_Repo NEW_COMMAND_REPO = { {
 
         // ============================================================
@@ -22,11 +26,11 @@ New_Command_Repo NEW_COMMAND_REPO = { {
             },
 
             .inputMetadata = {
-                .keyboard = Command::Keyboard_Metadata{
+                .keyboard = Input::Keyboard_Metadata{
                     SDL_SCANCODE_W,
                     true
                 },
-                .cli = Command::CLI_Metadata{
+                .cli = Input::CLI_Metadata{
                     "up",
                     "Move the cursor up."
                 }
@@ -47,11 +51,11 @@ New_Command_Repo NEW_COMMAND_REPO = { {
             },
 
             .inputMetadata = {
-                .keyboard = Command::Keyboard_Metadata{
+                .keyboard = Input::Keyboard_Metadata{
                     SDL_SCANCODE_S,
                     true
                 },
-                .cli = Command::CLI_Metadata{
+                .cli = Input::CLI_Metadata{
                     "down",
                     "Move the cursor down."
                 }
@@ -72,11 +76,11 @@ New_Command_Repo NEW_COMMAND_REPO = { {
             },
 
             .inputMetadata = {
-                .keyboard = Command::Keyboard_Metadata{
+                .keyboard = Input::Keyboard_Metadata{
                     SDL_SCANCODE_A,
                     true
                 },
-                .cli = Command::CLI_Metadata{
+                .cli = Input::CLI_Metadata{
                     "left",
                     "Move the cursor left."
                 }
@@ -97,11 +101,11 @@ New_Command_Repo NEW_COMMAND_REPO = { {
             },
 
             .inputMetadata = {
-                .keyboard = Command::Keyboard_Metadata{
+                .keyboard = Input::Keyboard_Metadata{
                     SDL_SCANCODE_D,
                     true
                 },
-                .cli = Command::CLI_Metadata{
+                .cli = Input::CLI_Metadata{
                     "right",
                     "Move the cursor right."
                 }
@@ -122,11 +126,11 @@ New_Command_Repo NEW_COMMAND_REPO = { {
             },
 
             .inputMetadata = {
-                .keyboard = Command::Keyboard_Metadata{
+                .keyboard = Input::Keyboard_Metadata{
                     SDL_SCANCODE_Q,
                     false
                 },
-                .cli = Command::CLI_Metadata{
+                .cli = Input::CLI_Metadata{
                     "reset",
                     "Reset the cursor to its saved origin."
                 }
@@ -144,7 +148,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
                 .argumentMetadata = {
                     .arguments = {
                         {
-                            Command::ARGTYPE::COORDINATE,
+                            Command::Argument::ARGTYPE::COORDINATE,
                             "position",
                             "Destination coordinate.",
                             std::nullopt
@@ -158,7 +162,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
             },
 
             .inputMetadata = {
-                .cli = Command::CLI_Metadata{
+                .cli = Input::CLI_Metadata{
                     "move",
                     "Move the cursor to a specified coordinate."
                 }
@@ -179,11 +183,11 @@ New_Command_Repo NEW_COMMAND_REPO = { {
             },
 
             .inputMetadata = {
-                .keyboard = Command::Keyboard_Metadata{
+                .keyboard = Input::Keyboard_Metadata{
                     SDL_SCANCODE_2,
                     false
                 },
-                .cli = Command::CLI_Metadata{
+                .cli = Input::CLI_Metadata{
                     "save_origin",
                     "Save the current cursor position as the reset origin."
                 }
@@ -209,11 +213,11 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .keyboard = Command::Keyboard_Metadata{
+            .keyboard = Input::Keyboard_Metadata{
                 SDL_SCANCODE_G,
                 false
             },
-            .cli = Command::CLI_Metadata{
+            .cli = Input::CLI_Metadata{
                 "circle",
                 "Draw a circle using the current drawing settings."
             }
@@ -231,7 +235,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
             .argumentMetadata = {
                 .arguments = {
                     {
-                        Command::ARGTYPE::COLOUR,
+                        Command::Argument::ARGTYPE::COLOUR,
                         "colour",
                         "Colour used for the fill.",
                         std::nullopt
@@ -245,7 +249,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .cli = Command::CLI_Metadata{
+            .cli = Input::CLI_Metadata{
                 "fill",
                 "Flood-fill the region under the cursor using a specified colour."
             }
@@ -266,7 +270,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .keyboard = Command::Keyboard_Metadata{
+            .keyboard = Input::Keyboard_Metadata{
                 SDL_SCANCODE_F,
                 false
             }
@@ -292,7 +296,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .cli = Command::CLI_Metadata{
+            .cli = Input::CLI_Metadata{
                 "default_colour",
                 "Reset the active colour to its default value."
             }
@@ -313,11 +317,11 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .keyboard = Command::Keyboard_Metadata{
+            .keyboard = Input::Keyboard_Metadata{
                 SDL_SCANCODE_J,
                 false
             },
-            .cli = Command::CLI_Metadata{
+            .cli = Input::CLI_Metadata{
                 "random_colour",
                 "Set the active colour to a randomly generated colour."
             }
@@ -335,7 +339,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
             .argumentMetadata = {
                 .arguments = {
                     {
-                        Command::ARGTYPE::COLOUR,
+                        Command::Argument::ARGTYPE::COLOUR,
                         "colour",
                         "New draw colour.",
                         std::nullopt
@@ -349,19 +353,19 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .cli = Command::CLI_Metadata{
+            .cli = Input::CLI_Metadata{
                 "colour_draw",
                 "Set the current draw colour."
             },
 
-            .gui = Command::GUI_Metadata{
-                Command::HEADER::TOOLS,
+            .gui = GUI::GUI_Metadata{
+                GUI::HEADER::TOOLS,
                 "Set draw colour",
-                Command::GUI_FUNCTION_TYPE::COLOUR,
+                GUI::FUNCTION_TYPE::COLOUR,
 
-                Command::COLOUR_METADATA{
-                    &Command::GUI_Resolver::resolveDrawColourChange
-                }
+               GUI::COLOUR_METADATA{
+                    &GUI::Resolver::resolveDrawColourChange
+               }
             }
         },
 
@@ -380,7 +384,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .mouse = Command::Mouse_Metadata{
+            .mouse = Input::Mouse_Metadata{
                 SDL_BUTTON_MIDDLE
             }
         },
@@ -397,7 +401,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
             .argumentMetadata = {
                 .arguments = {
                     {
-                        Command::ARGTYPE::COLOUR,
+                        Command::Argument::ARGTYPE::COLOUR,
                         "colour",
                         "New background colour.",
                         std::nullopt
@@ -411,18 +415,18 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .cli = Command::CLI_Metadata{
+            .cli = Input::CLI_Metadata{
                 "colour_background",
                 "Set the current background colour."
             },
 
-            .gui = Command::GUI_Metadata{
-                Command::HEADER::TOOLS,
+            .gui = GUI::GUI_Metadata{
+                GUI::HEADER::TOOLS,
                 "Set background colour",
-                Command::GUI_FUNCTION_TYPE::COLOUR,
+                GUI::FUNCTION_TYPE::COLOUR,
 
-                Command::COLOUR_METADATA{
-                    Command::GUI_Resolver::resolveBackgroundColourChange
+                GUI::COLOUR_METADATA{
+                    GUI::Resolver::resolveBackgroundColourChange
                 }
             }
         },
@@ -447,20 +451,20 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .keyboard = Command::Keyboard_Metadata{
+            .keyboard = Input::Keyboard_Metadata{
                 SDL_SCANCODE_Y,
                 false
             },
 
-            .cli = Command::CLI_Metadata{
+            .cli = Input::CLI_Metadata{
                 "penmode_draw",
                 "Switch the pen to normal drawing mode."
             },
 
-            .gui = Command::GUI_Metadata{
-                Command::HEADER::TOOLS,
+            .gui = GUI::GUI_Metadata{
+                GUI::HEADER::TOOLS,
                 "Draw",
-                Command::GUI_FUNCTION_TYPE::BINARY,
+                GUI::FUNCTION_TYPE::BINARY,
                 std::monostate{}
             }
         },
@@ -480,20 +484,20 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .keyboard = Command::Keyboard_Metadata{
+            .keyboard = Input::Keyboard_Metadata{
                 SDL_SCANCODE_U,
                 false
             },
 
-            .cli = Command::CLI_Metadata{
+            .cli = Input::CLI_Metadata{
                 "penmode_rubber",
                 "Switch the pen to rubber mode."
             },
 
-            .gui = Command::GUI_Metadata{
-                Command::HEADER::TOOLS,
+            .gui = GUI::GUI_Metadata{
+                GUI::HEADER::TOOLS,
                 "Rubber",
-                Command::GUI_FUNCTION_TYPE::BINARY,
+                GUI::FUNCTION_TYPE::BINARY,
                 std::monostate{}
             }
         },
@@ -513,20 +517,20 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .keyboard = Command::Keyboard_Metadata{
+            .keyboard = Input::Keyboard_Metadata{
                 SDL_SCANCODE_E,
                 false
             },
 
-            .cli = Command::CLI_Metadata{
+            .cli = Input::CLI_Metadata{
                 "penmode_rainbow",
                 "Switch the pen to rainbow drawing mode."
             },
 
-            .gui = Command::GUI_Metadata{
-                Command::HEADER::TOOLS,
+            .gui = GUI::GUI_Metadata{
+                GUI::HEADER::TOOLS,
                 "Rainbow",
-                Command::GUI_FUNCTION_TYPE::BINARY,
+                GUI::FUNCTION_TYPE::BINARY,
                 std::monostate{}
             }
         },
@@ -548,7 +552,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
             .argumentMetadata = {
                 .arguments = {
                     {
-                        Command::ARGTYPE::INT,
+                        Command::Argument::ARGTYPE::INT,
                         "held",
                         "Whether the pen-down input represents a held input.",
                         std::pair<Command::argument, Command::argument>{0, 1}
@@ -562,12 +566,12 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .keyboard = Command::Keyboard_Metadata{
+            .keyboard = Input::Keyboard_Metadata{
                 SDL_SCANCODE_1,
                 false
             },
 
-            .cli = Command::CLI_Metadata{
+            .cli = Input::CLI_Metadata{
                 "pen",
                 "Perform a discrete pen-down action."
             }
@@ -585,7 +589,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
             .argumentMetadata = {
                 .arguments = {
                     {
-                        Command::ARGTYPE::INT,
+                        Command::Argument::ARGTYPE::INT,
                         "held",
                         "Whether the pen-down input represents a held input.",
                         std::pair<Command::argument, Command::argument>{0, 1}
@@ -599,7 +603,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .mouse = Command::Mouse_Metadata{
+            .mouse = Input::Mouse_Metadata{
                 SDL_BUTTON_LMASK
             }
         },
@@ -621,7 +625,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
             .argumentMetadata = {
                 .arguments = {
                     {
-                        Command::ARGTYPE::INT,
+                        Command::Argument::ARGTYPE::INT,
                         "change",
                         "Amount to add to the current draw step.",
                         std::nullopt
@@ -635,12 +639,12 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .keyboard = Command::Keyboard_Metadata{
+            .keyboard = Input::Keyboard_Metadata{
                 SDL_SCANCODE_Z,
                 false
             },
 
-            .cli = Command::CLI_Metadata{
+            .cli = Input::CLI_Metadata{
                 "step_down",
                 "Decrease the current draw step."
             }
@@ -658,7 +662,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
             .argumentMetadata = {
                 .arguments = {
                     {
-                        Command::ARGTYPE::INT,
+                        Command::Argument::ARGTYPE::INT,
                         "change",
                         "Amount to add to the current draw step.",
                         std::nullopt
@@ -672,12 +676,12 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .keyboard = Command::Keyboard_Metadata{
+            .keyboard = Input::Keyboard_Metadata{
                 SDL_SCANCODE_X,
                 false
             },
 
-            .cli = Command::CLI_Metadata{
+            .cli = Input::CLI_Metadata{
                 "step_up",
                 "Increase the current draw step."
             }
@@ -695,7 +699,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
             .argumentMetadata = {
                 .arguments = {
                     {
-                        Command::ARGTYPE::INT,
+                        Command::Argument::ARGTYPE::INT,
                         "step",
                         "New cursor draw step.",
 
@@ -713,20 +717,20 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .cli = Command::CLI_Metadata{
+            .cli = Input::CLI_Metadata{
                 "step_set",
                 "Set the cursor draw step to a specified value."
             },
 
-            .gui = Command::GUI_Metadata{
-                Command::HEADER::TOOLS,
+            .gui = GUI::GUI_Metadata{
+                GUI::HEADER::TOOLS,
                 "Change Drawstep",
-                Command::GUI_FUNCTION_TYPE::SLIDER,
+                GUI::FUNCTION_TYPE::SLIDER,
 
-                Command::SLIDER_METADATA{
+                GUI::SLIDER_METADATA{
                     DEFAULT_DRAWSTEP_MIN,
                     DEFAULT_DRAWSTEP_MAX,
-                    Command::GUI_Resolver::resolveDrawstep
+                    GUI::Resolver::resolveDrawstep
                 }
             }
         },
@@ -748,7 +752,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
             .argumentMetadata = {
                 .arguments = {
                     {
-                        Command::ARGTYPE::INT,
+                        Command::Argument::ARGTYPE::INT,
                         "change",
                         "Amount to add to the current pen width.",
                         std::nullopt
@@ -762,12 +766,12 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .keyboard = Command::Keyboard_Metadata{
+            .keyboard = Input::Keyboard_Metadata{
                 SDL_SCANCODE_V,
                 false
             },
 
-            .cli = Command::CLI_Metadata{
+            .cli = Input::CLI_Metadata{
                 "pen_thinner",
                 "Decrease the current pen width."
             }
@@ -785,7 +789,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
             .argumentMetadata = {
                 .arguments = {
                     {
-                        Command::ARGTYPE::INT,
+                        Command::Argument::ARGTYPE::INT,
                         "change",
                         "Amount to add to the current pen width.",
                         std::nullopt
@@ -799,12 +803,12 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .keyboard = Command::Keyboard_Metadata{
+            .keyboard = Input::Keyboard_Metadata{
                 SDL_SCANCODE_B,
                 false
             },
 
-            .cli = Command::CLI_Metadata{
+            .cli = Input::CLI_Metadata{
                 "pen_thicker",
                 "Increase the current pen width."
             }
@@ -822,7 +826,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
             .argumentMetadata = {
                 .arguments = {
                     {
-                        Command::ARGTYPE::INT,
+                        Command::Argument::ARGTYPE::INT,
                         "width",
                         "New pen width.",
 
@@ -840,20 +844,20 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .cli = Command::CLI_Metadata{
+            .cli = Input::CLI_Metadata{
                 "pen_set",
                 "Set the pen width to a specified value."
             },
 
-            .gui = Command::GUI_Metadata{
-                Command::HEADER::TOOLS,
+            .gui = GUI::GUI_Metadata{
+                GUI::HEADER::TOOLS,
                 "Change Pen Width",
-                Command::GUI_FUNCTION_TYPE::SLIDER,
+                GUI::FUNCTION_TYPE::SLIDER,
 
-                Command::SLIDER_METADATA{
+                GUI::SLIDER_METADATA{
                     DEFAULT_PENWIDTH_MIN,
                     DEFAULT_PENWIDTH_MAX,
-                    Command::GUI_Resolver::resolvePenWidth
+                    GUI::Resolver::resolvePenWidth
                 }
             }
         },
@@ -878,7 +882,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .keyboard = Command::Keyboard_Metadata{
+            .keyboard = Input::Keyboard_Metadata{
                 SDL_SCANCODE_0,
                 false
             }
@@ -899,7 +903,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .keyboard = Command::Keyboard_Metadata{
+            .keyboard = Input::Keyboard_Metadata{
                 SDL_SCANCODE_3,
                 false
             }
@@ -925,20 +929,20 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .keyboard = Command::Keyboard_Metadata{
+            .keyboard = Input::Keyboard_Metadata{
                 SDL_SCANCODE_C,
                 false
             },
 
-            .cli = Command::CLI_Metadata{
+            .cli = Input::CLI_Metadata{
                 "reset_canvas",
                 "Reset the canvas contents."
             },
 
-            .gui = Command::GUI_Metadata{
-                Command::HEADER::FILE,
+            .gui = GUI::GUI_Metadata{
+                GUI::HEADER::FILE,
                 "Reset Canvas",
-                Command::GUI_FUNCTION_TYPE::BINARY,
+                GUI::FUNCTION_TYPE::BINARY,
                 std::monostate{}
             }
         },
@@ -958,7 +962,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .cli = Command::CLI_Metadata{
+            .cli = Input::CLI_Metadata{
                 "reset_action_queue",
                 "Clear all stored undo and redo history."
             }
@@ -979,20 +983,20 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .keyboard = Command::Keyboard_Metadata{
+            .keyboard = Input::Keyboard_Metadata{
                 SDL_SCANCODE_R,
                 false
             },
 
-            .cli = Command::CLI_Metadata{
+            .cli = Input::CLI_Metadata{
                 "reset_all",
                 "Reset all state, including undo and redo history."
             },
 
-            .gui = Command::GUI_Metadata{
-                Command::HEADER::FILE,
+            .gui = GUI::GUI_Metadata{
+                GUI::HEADER::FILE,
                 "Reset All (Includes undo/redo history)",
-                Command::GUI_FUNCTION_TYPE::BINARY,
+                GUI::FUNCTION_TYPE::BINARY,
                 std::monostate{}
             }
         },
@@ -1012,12 +1016,12 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .keyboard = Command::Keyboard_Metadata{
+            .keyboard = Input::Keyboard_Metadata{
                 SDL_SCANCODE_9,
                 false
             },
 
-            .cli = Command::CLI_Metadata{
+            .cli = Input::CLI_Metadata{
                 "reset_cursor",
                 "Reset the cursor position."
             }
@@ -1043,20 +1047,20 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .keyboard = Command::Keyboard_Metadata{
+            .keyboard = Input::Keyboard_Metadata{
                 SDL_SCANCODE_N,
                 false
             },
 
-            .cli = Command::CLI_Metadata{
+            .cli = Input::CLI_Metadata{
                 "undo",
                 "Undo the most recent action."
             },
 
-            .gui = Command::GUI_Metadata{
-                Command::HEADER::EDIT,
+            .gui = GUI::GUI_Metadata{
+                GUI::HEADER::EDIT,
                 "Undo",
-                Command::GUI_FUNCTION_TYPE::BINARY,
+                GUI::FUNCTION_TYPE::BINARY,
                 std::monostate{}
             }
         },
@@ -1076,20 +1080,20 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .keyboard = Command::Keyboard_Metadata{
+            .keyboard = Input::Keyboard_Metadata{
                 SDL_SCANCODE_M,
                 false
             },
 
-            .cli = Command::CLI_Metadata{
+            .cli = Input::CLI_Metadata{
                 "redo",
                 "Redo the most recently undone action."
             },
 
-            .gui = Command::GUI_Metadata{
-                Command::HEADER::EDIT,
+            .gui = GUI::GUI_Metadata{
+                GUI::HEADER::EDIT,
                 "Redo",
-                Command::GUI_FUNCTION_TYPE::BINARY,
+                GUI::FUNCTION_TYPE::BINARY,
                 std::monostate{}
             }
         },
@@ -1111,7 +1115,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
             .argumentMetadata = {
                 .arguments = {
                     {
-                        Command::ARGTYPE::COORDINATE,
+                        Command::Argument::ARGTYPE::COORDINATE,
                         "size",
                         "New canvas width and height.",
                         std::pair<coordinate, coordinate>{
@@ -1128,12 +1132,12 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .keyboard = Command::Keyboard_Metadata{
+            .keyboard = Input::Keyboard_Metadata{
                 SDL_SCANCODE_7,
                 false
             },
 
-            .cli = Command::CLI_Metadata{
+            .cli = Input::CLI_Metadata{
                 "resize",
                 "Resize the canvas to a specified width and height."
             }
@@ -1151,7 +1155,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
             .argumentMetadata = {
                 .arguments = {
                     {
-                        Command::ARGTYPE::INT,
+                        Command::Argument::ARGTYPE::INT,
                         "height",
                         "New canvas height in pixels.",
 
@@ -1169,20 +1173,20 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .cli = Command::CLI_Metadata{
+            .cli = Input::CLI_Metadata{
                 "resize_height",
                 "Set the canvas height."
             },
 
-            .gui = Command::GUI_Metadata{
-                Command::HEADER::FILE,
+            .gui = GUI::GUI_Metadata{
+                GUI::HEADER::FILE,
                 "Adjust canvas height",
-                Command::GUI_FUNCTION_TYPE::SLIDER,
+                GUI::FUNCTION_TYPE::SLIDER,
 
-                Command::SLIDER_METADATA{
+                GUI::SLIDER_METADATA{
                     DEFAULT_CANVAS_HEIGHT_MIN,
                     DEFAULT_CANVAS_HEIGHT_MAX,
-                    Command::GUI_Resolver::resolveCanvasHeight
+                    GUI::Resolver::resolveCanvasHeight
                 }
             }
         },
@@ -1199,7 +1203,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
             .argumentMetadata = {
                 .arguments = {
                     {
-                        Command::ARGTYPE::INT,
+                        Command::Argument::ARGTYPE::INT,
                         "width",
                         "New canvas width in pixels.",
 
@@ -1217,20 +1221,20 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .cli = Command::CLI_Metadata{
+            .cli = Input::CLI_Metadata{
                 "resize_width",
                 "Set the canvas width."
             },
 
-            .gui = Command::GUI_Metadata{
-                Command::HEADER::FILE,
+            .gui = GUI::GUI_Metadata{
+                GUI::HEADER::FILE,
                 "Adjust canvas width",
-                Command::GUI_FUNCTION_TYPE::SLIDER,
+                GUI::FUNCTION_TYPE::SLIDER,
 
-                Command::SLIDER_METADATA{
+                GUI::SLIDER_METADATA{
                     DEFAULT_CANVAS_WIDTH_MIN,
                     DEFAULT_CANVAS_WIDTH_MAX,
-                    Command::GUI_Resolver::resolveCanvasWidth
+                    GUI::Resolver::resolveCanvasWidth
                 }
             }
         },

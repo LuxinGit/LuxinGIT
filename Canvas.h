@@ -10,7 +10,7 @@
 #include "Cursor.h"
 #include "Draw.h"
 
-struct Master_Handler;
+struct Application_State;
 
 struct Canvas_State {
 
@@ -25,7 +25,7 @@ namespace Canvas {
     bool coordCheck(const Canvas_State& s, const coordinate& c, bool onDisplay = false);
     luxel* getLuxelFromCoord(Canvas_State& s, const coordinate& c, bool onDisplay = false);
     
-    void processResetAll(Master_Handler& mh, Command::Cmd& command);
-    void processCanvasSize(Master_Handler& mh, Command::Cmd& command);
+    void processResetAll(Application_State& mh, Command::Cmd& command);
+    void processCanvasSize(Application_State& mh, Command::Cmd& command);
 
 }
