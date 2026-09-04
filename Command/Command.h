@@ -1,16 +1,14 @@
 #pragma once
 
 #include <variant>
-#include <unordered_map>
 #include <array>
 #include <optional>
 #include <string>
 
-#include <SDL3/SDL.h>
+#include <SDL3/SDL_scancode.h>
+#include <SDL3/SDL_mouse.h>
 
-#include "STRUCTS.h"
-
-#include <cassert>
+#include "Application/STRUCTS.h"
 
 
 struct Application_State;
@@ -91,7 +89,6 @@ namespace Command::Argument {
 
 }
 
-
 namespace Command::Definition::Input {
 
     struct Keyboard_Metadata {
@@ -165,7 +162,6 @@ namespace Command::Definition::Input::GUI::Resolver {
     colour& resolveBackgroundColourChange(Application_State&);
 }
 
-
 namespace Command::Definition {
 
     struct Argument_Metadata {
@@ -217,8 +213,6 @@ namespace Command {
     };
 
 }
-
-
 
 struct Input_State;
 

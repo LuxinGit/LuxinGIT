@@ -1,10 +1,11 @@
 #pragma once
 
-#include "Canvas.h"
-#include "SDLWrapper.h"
-#include "CLI Handler.h"
-#include "Action.h"
-#include "Input.h"
+#include "Canvas/Canvas.h"
+#include "Canvas/Cursor.h"
+#include "Canvas/Draw.h"
+#include "Platform/SDLWrapper.h"
+#include "Command/Action.h"
+#include "Command/Input.h"
 
 struct Application_State {
 

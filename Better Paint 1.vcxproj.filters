@@ -15,78 +15,78 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="Application\Application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Command.cpp">
+    <ClCompile Include="Application\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SDLWrapper.cpp">
+    <ClCompile Include="Application\STRUCTS.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CLI Handler.cpp">
+    <ClCompile Include="Canvas\Canvas.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Application.cpp">
+    <ClCompile Include="Canvas\Cursor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CONSTANTS.h">
-      <Filter>Header Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Action.cpp">
+    <ClCompile Include="Canvas\Draw.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="STRUCTS.cpp">
+    <ClCompile Include="Command\Action.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Command Repo.cpp">
+    <ClCompile Include="Command\CLI Handler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Canvas.cpp">
+    <ClCompile Include="Command\Command Repo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Cursor.cpp">
+    <ClCompile Include="Command\Command.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Draw.cpp">
+    <ClCompile Include="Command\Input.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Input.cpp">
+    <ClCompile Include="Platform\SDLWrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Command.h">
+    <ClInclude Include="Application\Application.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SDLWrapper.h">
+    <ClInclude Include="Application\CONSTANTS.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CLI Handler.h">
+    <ClInclude Include="Application\STRUCTS.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Application.h">
+    <ClInclude Include="Canvas\Canvas.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Action.h">
+    <ClInclude Include="Canvas\Cursor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="STRUCTS.h">
+    <ClInclude Include="Canvas\Draw.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Command Repo.h">
+    <ClInclude Include="Command\Action.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Canvas.h">
+    <ClInclude Include="Command\CLI Handler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Cursor.h">
+    <ClInclude Include="Command\Command Repo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Draw.h">
+    <ClInclude Include="Command\Command.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Input.h">
+    <ClInclude Include="Command\Input.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Platform\SDLWrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

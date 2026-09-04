@@ -1,5 +1,5 @@
 #include "Canvas.h"
-#include "Application.h"
+#include "Application/Application.h"
 
 luxel::luxel() { colour = DEFAULT_BACKGROUND_COLOUR; }
 void luxel::resetLuxel() {

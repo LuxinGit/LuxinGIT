@@ -1,5 +1,5 @@
 #include "SDLWrapper.h"
-#include "Application.h"
+#include "Application/Application.h"
 #include "imgui.h"
 
 namespace SDL {

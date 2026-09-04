@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Command.h"
-#include "CONSTANTS.h"
+#include "Command/Command.h"
+#include "Application/STRUCTS.h"
 
 struct Canvas_State;
 

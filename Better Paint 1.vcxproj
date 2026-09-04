@@ -76,6 +76,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -90,6 +91,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -105,6 +107,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -120,6 +123,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -129,35 +133,32 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Action.cpp" />
-    <ClCompile Include="Command Repo.cpp" />
-    <ClCompile Include="Input.cpp" />
-    <ClCompile Include="main.cpp">
-      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdcpp20</LanguageStandard>
-      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Release|x64'">stdcpp20</LanguageStandard>
-    </ClCompile>
-    <ClCompile Include="Canvas.cpp" />
-    <ClCompile Include="CLI Handler.cpp" />
-    <ClCompile Include="Command.cpp" />
-    <ClCompile Include="CONSTANTS.h" />
-    <ClCompile Include="Cursor.cpp" />
-    <ClCompile Include="Draw.cpp" />
-    <ClCompile Include="Application.cpp" />
-    <ClCompile Include="SDLWrapper.cpp" />
-    <ClCompile Include="STRUCTS.cpp" />
+    <ClCompile Include="Application\Application.cpp" />
+    <ClCompile Include="Application\main.cpp" />
+    <ClCompile Include="Application\STRUCTS.cpp" />
+    <ClCompile Include="Canvas\Canvas.cpp" />
+    <ClCompile Include="Canvas\Cursor.cpp" />
+    <ClCompile Include="Canvas\Draw.cpp" />
+    <ClCompile Include="Command\Action.cpp" />
+    <ClCompile Include="Command\CLI Handler.cpp" />
+    <ClCompile Include="Command\Command Repo.cpp" />
+    <ClCompile Include="Command\Command.cpp" />
+    <ClCompile Include="Command\Input.cpp" />
+    <ClCompile Include="Platform\SDLWrapper.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Action.h" />
-    <ClInclude Include="Canvas.h" />
-    <ClInclude Include="CLI Handler.h" />
-    <ClInclude Include="Command Repo.h" />
-    <ClInclude Include="Command.h" />
-    <ClInclude Include="Cursor.h" />
-    <ClInclude Include="Draw.h" />
-    <ClInclude Include="Input.h" />
-    <ClInclude Include="Application.h" />
-    <ClInclude Include="SDLWrapper.h" />
-    <ClInclude Include="STRUCTS.h" />
+    <ClInclude Include="Application\Application.h" />
+    <ClInclude Include="Application\CONSTANTS.h" />
+    <ClInclude Include="Application\STRUCTS.h" />
+    <ClInclude Include="Canvas\Canvas.h" />
+    <ClInclude Include="Canvas\Cursor.h" />
+    <ClInclude Include="Canvas\Draw.h" />
+    <ClInclude Include="Command\Action.h" />
+    <ClInclude Include="Command\CLI Handler.h" />
+    <ClInclude Include="Command\Command Repo.h" />
+    <ClInclude Include="Command\Command.h" />
+    <ClInclude Include="Command\Input.h" />
+    <ClInclude Include="Platform\SDLWrapper.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

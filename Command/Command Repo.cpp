@@ -1,12 +1,11 @@
 #include "COMMAND REPO.h"
-#include "Action.h"
-#include "Canvas.h"
-
+#include "Application/Application.h"
+#include "Command/Command.h"
 //// NEW COMMAND REPO
 
 namespace Definition = Command::Definition;
-namespace Input = Definition::Input;
-namespace GUI = Input::GUI;
+namespace inp = Definition::Input;
+namespace GUI = inp::GUI;
 
 New_Command_Repo NEW_COMMAND_REPO = { {
 
@@ -26,11 +25,11 @@ New_Command_Repo NEW_COMMAND_REPO = { {
             },
 
             .inputMetadata = {
-                .keyboard = Input::Keyboard_Metadata{
+                .keyboard = inp::Keyboard_Metadata{
                     SDL_SCANCODE_W,
                     true
                 },
-                .cli = Input::CLI_Metadata{
+                .cli = inp::CLI_Metadata{
                     "up",
                     "Move the cursor up."
                 }
@@ -51,11 +50,11 @@ New_Command_Repo NEW_COMMAND_REPO = { {
             },
 
             .inputMetadata = {
-                .keyboard = Input::Keyboard_Metadata{
+                .keyboard = inp::Keyboard_Metadata{
                     SDL_SCANCODE_S,
                     true
                 },
-                .cli = Input::CLI_Metadata{
+                .cli = inp::CLI_Metadata{
                     "down",
                     "Move the cursor down."
                 }
@@ -76,11 +75,11 @@ New_Command_Repo NEW_COMMAND_REPO = { {
             },
 
             .inputMetadata = {
-                .keyboard = Input::Keyboard_Metadata{
+                .keyboard = inp::Keyboard_Metadata{
                     SDL_SCANCODE_A,
                     true
                 },
-                .cli = Input::CLI_Metadata{
+                .cli = inp::CLI_Metadata{
                     "left",
                     "Move the cursor left."
                 }
@@ -101,11 +100,11 @@ New_Command_Repo NEW_COMMAND_REPO = { {
             },
 
             .inputMetadata = {
-                .keyboard = Input::Keyboard_Metadata{
+                .keyboard = inp::Keyboard_Metadata{
                     SDL_SCANCODE_D,
                     true
                 },
-                .cli = Input::CLI_Metadata{
+                .cli = inp::CLI_Metadata{
                     "right",
                     "Move the cursor right."
                 }
@@ -126,11 +125,11 @@ New_Command_Repo NEW_COMMAND_REPO = { {
             },
 
             .inputMetadata = {
-                .keyboard = Input::Keyboard_Metadata{
+                .keyboard = inp::Keyboard_Metadata{
                     SDL_SCANCODE_Q,
                     false
                 },
-                .cli = Input::CLI_Metadata{
+                .cli = inp::CLI_Metadata{
                     "reset",
                     "Reset the cursor to its saved origin."
                 }
@@ -162,7 +161,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
             },
 
             .inputMetadata = {
-                .cli = Input::CLI_Metadata{
+                .cli = inp::CLI_Metadata{
                     "move",
                     "Move the cursor to a specified coordinate."
                 }
@@ -183,11 +182,11 @@ New_Command_Repo NEW_COMMAND_REPO = { {
             },
 
             .inputMetadata = {
-                .keyboard = Input::Keyboard_Metadata{
+                .keyboard = inp::Keyboard_Metadata{
                     SDL_SCANCODE_2,
                     false
                 },
-                .cli = Input::CLI_Metadata{
+                .cli = inp::CLI_Metadata{
                     "save_origin",
                     "Save the current cursor position as the reset origin."
                 }
@@ -213,11 +212,11 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .keyboard = Input::Keyboard_Metadata{
+            .keyboard = inp::Keyboard_Metadata{
                 SDL_SCANCODE_G,
                 false
             },
-            .cli = Input::CLI_Metadata{
+            .cli = inp::CLI_Metadata{
                 "circle",
                 "Draw a circle using the current drawing settings."
             }
@@ -249,7 +248,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .cli = Input::CLI_Metadata{
+            .cli = inp::CLI_Metadata{
                 "fill",
                 "Flood-fill the region under the cursor using a specified colour."
             }
@@ -270,7 +269,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .keyboard = Input::Keyboard_Metadata{
+            .keyboard = inp::Keyboard_Metadata{
                 SDL_SCANCODE_F,
                 false
             }
@@ -296,7 +295,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .cli = Input::CLI_Metadata{
+            .cli = inp::CLI_Metadata{
                 "default_colour",
                 "Reset the active colour to its default value."
             }
@@ -317,11 +316,11 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .keyboard = Input::Keyboard_Metadata{
+            .keyboard = inp::Keyboard_Metadata{
                 SDL_SCANCODE_J,
                 false
             },
-            .cli = Input::CLI_Metadata{
+            .cli = inp::CLI_Metadata{
                 "random_colour",
                 "Set the active colour to a randomly generated colour."
             }
@@ -353,7 +352,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .cli = Input::CLI_Metadata{
+            .cli = inp::CLI_Metadata{
                 "colour_draw",
                 "Set the current draw colour."
             },
@@ -384,7 +383,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .mouse = Input::Mouse_Metadata{
+            .mouse = inp::Mouse_Metadata{
                 SDL_BUTTON_MIDDLE
             }
         },
@@ -415,7 +414,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .cli = Input::CLI_Metadata{
+            .cli = inp::CLI_Metadata{
                 "colour_background",
                 "Set the current background colour."
             },
@@ -451,12 +450,12 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .keyboard = Input::Keyboard_Metadata{
+            .keyboard = inp::Keyboard_Metadata{
                 SDL_SCANCODE_Y,
                 false
             },
 
-            .cli = Input::CLI_Metadata{
+            .cli = inp::CLI_Metadata{
                 "penmode_draw",
                 "Switch the pen to normal drawing mode."
             },
@@ -484,12 +483,12 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .keyboard = Input::Keyboard_Metadata{
+            .keyboard = inp::Keyboard_Metadata{
                 SDL_SCANCODE_U,
                 false
             },
 
-            .cli = Input::CLI_Metadata{
+            .cli = inp::CLI_Metadata{
                 "penmode_rubber",
                 "Switch the pen to rubber mode."
             },
@@ -517,12 +516,12 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .keyboard = Input::Keyboard_Metadata{
+            .keyboard = inp::Keyboard_Metadata{
                 SDL_SCANCODE_E,
                 false
             },
 
-            .cli = Input::CLI_Metadata{
+            .cli = inp::CLI_Metadata{
                 "penmode_rainbow",
                 "Switch the pen to rainbow drawing mode."
             },
@@ -566,12 +565,12 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .keyboard = Input::Keyboard_Metadata{
+            .keyboard = inp::Keyboard_Metadata{
                 SDL_SCANCODE_1,
                 false
             },
 
-            .cli = Input::CLI_Metadata{
+            .cli = inp::CLI_Metadata{
                 "pen",
                 "Perform a discrete pen-down action."
             }
@@ -603,7 +602,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .mouse = Input::Mouse_Metadata{
+            .mouse = inp::Mouse_Metadata{
                 SDL_BUTTON_LMASK
             }
         },
@@ -639,12 +638,12 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .keyboard = Input::Keyboard_Metadata{
+            .keyboard = inp::Keyboard_Metadata{
                 SDL_SCANCODE_Z,
                 false
             },
 
-            .cli = Input::CLI_Metadata{
+            .cli = inp::CLI_Metadata{
                 "step_down",
                 "Decrease the current draw step."
             }
@@ -676,12 +675,12 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .keyboard = Input::Keyboard_Metadata{
+            .keyboard = inp::Keyboard_Metadata{
                 SDL_SCANCODE_X,
                 false
             },
 
-            .cli = Input::CLI_Metadata{
+            .cli = inp::CLI_Metadata{
                 "step_up",
                 "Increase the current draw step."
             }
@@ -717,7 +716,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .cli = Input::CLI_Metadata{
+            .cli = inp::CLI_Metadata{
                 "step_set",
                 "Set the cursor draw step to a specified value."
             },
@@ -766,12 +765,12 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .keyboard = Input::Keyboard_Metadata{
+            .keyboard = inp::Keyboard_Metadata{
                 SDL_SCANCODE_V,
                 false
             },
 
-            .cli = Input::CLI_Metadata{
+            .cli = inp::CLI_Metadata{
                 "pen_thinner",
                 "Decrease the current pen width."
             }
@@ -803,12 +802,12 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .keyboard = Input::Keyboard_Metadata{
+            .keyboard = inp::Keyboard_Metadata{
                 SDL_SCANCODE_B,
                 false
             },
 
-            .cli = Input::CLI_Metadata{
+            .cli = inp::CLI_Metadata{
                 "pen_thicker",
                 "Increase the current pen width."
             }
@@ -844,7 +843,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .cli = Input::CLI_Metadata{
+            .cli = inp::CLI_Metadata{
                 "pen_set",
                 "Set the pen width to a specified value."
             },
@@ -882,7 +881,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .keyboard = Input::Keyboard_Metadata{
+            .keyboard = inp::Keyboard_Metadata{
                 SDL_SCANCODE_0,
                 false
             }
@@ -903,7 +902,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .keyboard = Input::Keyboard_Metadata{
+            .keyboard = inp::Keyboard_Metadata{
                 SDL_SCANCODE_3,
                 false
             }
@@ -929,12 +928,12 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .keyboard = Input::Keyboard_Metadata{
+            .keyboard = inp::Keyboard_Metadata{
                 SDL_SCANCODE_C,
                 false
             },
 
-            .cli = Input::CLI_Metadata{
+            .cli = inp::CLI_Metadata{
                 "reset_canvas",
                 "Reset the canvas contents."
             },
@@ -962,7 +961,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .cli = Input::CLI_Metadata{
+            .cli = inp::CLI_Metadata{
                 "reset_action_queue",
                 "Clear all stored undo and redo history."
             }
@@ -983,12 +982,12 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .keyboard = Input::Keyboard_Metadata{
+            .keyboard = inp::Keyboard_Metadata{
                 SDL_SCANCODE_R,
                 false
             },
 
-            .cli = Input::CLI_Metadata{
+            .cli = inp::CLI_Metadata{
                 "reset_all",
                 "Reset all state, including undo and redo history."
             },
@@ -1016,12 +1015,12 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .keyboard = Input::Keyboard_Metadata{
+            .keyboard = inp::Keyboard_Metadata{
                 SDL_SCANCODE_9,
                 false
             },
 
-            .cli = Input::CLI_Metadata{
+            .cli = inp::CLI_Metadata{
                 "reset_cursor",
                 "Reset the cursor position."
             }
@@ -1047,12 +1046,12 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .keyboard = Input::Keyboard_Metadata{
+            .keyboard = inp::Keyboard_Metadata{
                 SDL_SCANCODE_N,
                 false
             },
 
-            .cli = Input::CLI_Metadata{
+            .cli = inp::CLI_Metadata{
                 "undo",
                 "Undo the most recent action."
             },
@@ -1080,12 +1079,12 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .keyboard = Input::Keyboard_Metadata{
+            .keyboard = inp::Keyboard_Metadata{
                 SDL_SCANCODE_M,
                 false
             },
 
-            .cli = Input::CLI_Metadata{
+            .cli = inp::CLI_Metadata{
                 "redo",
                 "Redo the most recently undone action."
             },
@@ -1132,12 +1131,12 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .keyboard = Input::Keyboard_Metadata{
+            .keyboard = inp::Keyboard_Metadata{
                 SDL_SCANCODE_7,
                 false
             },
 
-            .cli = Input::CLI_Metadata{
+            .cli = inp::CLI_Metadata{
                 "resize",
                 "Resize the canvas to a specified width and height."
             }
@@ -1173,7 +1172,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .cli = Input::CLI_Metadata{
+            .cli = inp::CLI_Metadata{
                 "resize_height",
                 "Set the canvas height."
             },
@@ -1221,7 +1220,7 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         },
 
         .inputMetadata = {
-            .cli = Input::CLI_Metadata{
+            .cli = inp::CLI_Metadata{
                 "resize_width",
                 "Set the canvas width."
             },

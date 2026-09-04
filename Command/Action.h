@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Command.h"
+#include "Application/STRUCTS.h"
 #include <unordered_set>
 
 struct Change {

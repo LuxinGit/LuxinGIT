@@ -1,8 +1,9 @@
 #include <algorithm>
 
 #include "Cursor.h"
-#include "Canvas.h"
-#include "Application.h"
+#include "Application/Application.h"
+
+#include <cassert>
 
 namespace Cursor {
 

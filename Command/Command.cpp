@@ -1,5 +1,5 @@
 #include "Command.h"
-#include "Application.h"
+#include "Application/Application.h"
 
 #include <variant>
 #include <unordered_map>

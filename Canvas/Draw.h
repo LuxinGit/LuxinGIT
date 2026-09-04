@@ -1,9 +1,7 @@
 #pragma once
 
-#include <array>
-
-#include "Command.h"
-#include "CONSTANTS.h"
+#include "Command/Command.h"
+#include "Application/STRUCTS.h"
 
 struct Draw_State {
 

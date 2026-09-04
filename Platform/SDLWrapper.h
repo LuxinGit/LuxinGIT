@@ -1,6 +1,6 @@
 #pragma once
 #include <SDL3/SDL.h>
-#include "STRUCTS.h"
+#include "Application/STRUCTS.h"
 #include <vector>
 
 struct Application_State;

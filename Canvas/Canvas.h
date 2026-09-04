@@ -6,9 +6,8 @@
 #include <unordered_map>
 #include <algorithm>
 
-#include "Command.h"
-#include "Cursor.h"
-#include "Draw.h"
+#include "Command/Command.h"
+#include "Application/STRUCTS.h"
 
 struct Application_State;
 

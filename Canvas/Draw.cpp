@@ -1,5 +1,7 @@
 #include "Draw.h"
-#include "Application.h"
+#include "Application/Application.h"
+
+#include <cassert>
 
 namespace Draw {
     namespace {
