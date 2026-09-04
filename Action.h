@@ -18,8 +18,8 @@ struct Change_Set {
 
 struct Action_State {
 	Change_Set currentAction;
-	//using Action = std::variant<Change_Set, Command::Cmd>;
-	std::vector<Change_Set> actionQueue;
+	using Action = std::variant<Change_Set, Command::Cmd>;
+	std::vector<Action> actionQueue;
 	int actionQueueIndex = 0;
 };
 

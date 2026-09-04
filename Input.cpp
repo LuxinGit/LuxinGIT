@@ -48,13 +48,17 @@ namespace Input {
 				if (mS & button) Command::Processor::constructCommand(s, def);
 
 		}
+        void checkShowMouse(Input_State& iS) {
+            if (!iS.MouseState.enableMouse or 
+                ImGui::GetIO().WantCaptureMouse) SDL_ShowCursor();
+            else SDL_HideCursor();
+        }
 		void harvestUserPeripheralInputs(Master_Handler& s)
 		{
-
 			harvestKeyboardState(s.InputState);
 			if (!ImGui::GetIO().WantCaptureMouse)
 				harvestMouseState(s.InputState, s.CursorState);
-
+            checkShowMouse(s.InputState);
 		}
 
 	}
@@ -340,12 +344,12 @@ namespace Input::GUI {
         ImGui::StyleColorsDark();
 
         ImGui_ImplSDL3_InitForSDLRenderer(
-            s.SDLHandler.Window,
-            s.SDLHandler.Renderer
+            s.SDLState.Window,
+            s.SDLState.Renderer
         );
 
         ImGui_ImplSDLRenderer3_Init(
-            s.SDLHandler.Renderer
+            s.SDLState.Renderer
         );
 
         ImGuiIO& io = ImGui::GetIO();
@@ -381,7 +385,7 @@ namespace Input::GUI {
 
         ImGui_ImplSDLRenderer3_RenderDrawData(
             ImGui::GetDrawData(),
-            s.SDLHandler.Renderer
+            s.SDLState.Renderer
         );
     }
 

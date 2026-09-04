@@ -13,12 +13,12 @@ namespace Canvas {
         size_t indexFromCoord(const coordinate& c) {
             return size_t(c.y) * DEFAULT_CANVAS_WIDTH_MAX + size_t(c.x);
         }
-        void updateCanvasSize(Canvas_State& s, coordinate c)
+        void updateCanvasSize(Canvas_State& cS, SDL_State& sS, coordinate& c)
         {
-            if (!coordCheck(s, c, false)) return;
-            if(c.x) s.width = c.x;
-            if(c.y) s.height = c.y;
-            SDL_SetWindowSize(SDL_Handler::Window, s.width, s.height);
+            if (!coordCheck(cS, c, false)) return;
+            if (c.x) std::swap(cS.width, c.x);
+            if (c.y) std::swap(cS.height, c.y);
+            SDL_SetWindowSize(sS.Window, cS.width, cS.height);
         }
 
     }
@@ -50,7 +50,10 @@ namespace Canvas {
         else if (command.ID == COMMAND_ID::CANVAS_RESIZE_SET_WIDTH)
             c = { std::get<int>(command.args[0]), 0 };
         
-        updateCanvasSize(mh.CanvasState, c);
+        updateCanvasSize(mh.CanvasState, mh.SDLState, c);
+
+        command.args = { c };
+        command.ID = COMMAND_ID::CANVAS_RESIZE_SET_PAYLOAD;
 
     }
 

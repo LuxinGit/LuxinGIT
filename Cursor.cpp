@@ -53,7 +53,7 @@ namespace Cursor {
 
         std::swap(s.deltaCursor, c);
         command.ID = COMMAND_ID::MOVE_SET_POINT;
-        command.args.emplace_back(c);
+        command.args = { c };
 
     }
     void processChangeDrawstep(Master_Handler& mh, Command::Cmd& command) {
@@ -62,23 +62,15 @@ namespace Cursor {
         int d = s.drawStep;
         int p = std::get<int>(command.args[0]);
 
-        switch (command.ID) {
-        case COMMAND_ID::DRAWSTEP_INCREASE:
-            d += p;
-            break;
-        case COMMAND_ID::DRAWSTEP_DECREASE:
-            d -= p;
-            break;
-        case COMMAND_ID::DRAWSTEP_SET:
+        if (command.ID == COMMAND_ID::DRAWSTEP_SET)
             d = p;
-            break;
-        default:
-            return;
+        else { // DRAWSTEP_INCREASE OR DRAWSTEP_DECREASE
+            d = std::clamp(d + p, DEFAULT_DRAWSTEP_MIN, DEFAULT_DRAWSTEP_MAX);
         }
 
         std::swap(d, s.drawStep);
         command.ID = COMMAND_ID::DRAWSTEP_SET;
-        command.args[0] = d;
+        command.args = { d };
 
     }
     void processChangeOrigin(Master_Handler& mh, Command::Cmd& command) { 

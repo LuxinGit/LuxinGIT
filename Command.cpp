@@ -106,7 +106,9 @@ namespace Command::Processor {
 
         if (args.empty()) {
 
+            command.args = aMD.defaultArgs;
             addCommand(s, command);
+
             return { 0, returnCode::SUCCESS };
         }
 
@@ -115,8 +117,8 @@ namespace Command::Processor {
         for (int i = 0; i < args.size(); i++) {
 
             const Argument_Definition& adef = aMD.arguments[i];
-            int a = args[i].index();
-            if (args[i].index() != static_cast<int>(adef.type))
+            size_t a = args[i].index();
+            if (args[i].index() != static_cast<size_t>(adef.type))
                 return { i, returnCode::ARG_TYPE_INVALID };
 
             if (adef.constraints &&

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Canvas.h"
-#include "SDL Handler.h"
+#include "SDLWrapper.h"
 #include "CLI Handler.h"
 #include "Action.h"
 #include "Input.h"
@@ -16,19 +16,12 @@ public:
     Cursor_State        CursorState;
     Draw_State          DrawState;
     Input_State         InputState;
-
-    // OLD
-    SDL_Handler         SDLHandler;
-  /*  Command_Handler     CommandHandler;
-    Keyboard_Handler    KeyboardHandler;
-    CLI_Handler         CLIHandler;
-    Mouse_Handler       MouseHandler;
-    GUI_Handler         GUIHandler;*/
+    SDL_State           SDLState;
 
     Master_Handler();
 
     bool runFrame();
 
-    void cleanup() const;
+    void cleanup();
 
 };

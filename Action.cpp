@@ -16,22 +16,26 @@ namespace Action {
             s.actionQueue.emplace_back(std::move(s.currentAction));
             s.currentAction = {};
         }
-        void processAction(Action_State& s) {
+        void processAction(Master_Handler& mh, Action_State& s) {
 
-            for (auto& change : s.actionQueue[s.actionQueueIndex].changeSet) {
+            if (auto* cmd = std::get_if<Command::Cmd>(&s.actionQueue[s.actionQueueIndex])) 
+            {
+                cmd->processor(mh, *cmd);
+            }
+            else for (auto& change : std::get<Change_Set>(s.actionQueue[s.actionQueueIndex]).changeSet) {
                 std::swap(change.originalColour, change.l->colour);
             }
 
         }
-        void undoAction(Action_State& s) {
+        void undoAction(Master_Handler& mh, Action_State& s) {
             if (s.actionQueueIndex < 1) return;
-            processAction(s);
+            processAction(mh, s);
             s.actionQueueIndex--;
         }
-        void redoAction(Action_State& s) {
+        void redoAction(Master_Handler& mh, Action_State& s) {
             if (s.actionQueueIndex + 1 >= static_cast<int>(s.actionQueue.size())) return;
             s.actionQueueIndex++;
-            processAction(s);
+            processAction(mh, s);
         }
     }
 
@@ -43,10 +47,10 @@ namespace Action {
         if (!s.currentAction.changeSet.empty()) addNewAction(s);
     }
     void processUndo(Master_Handler& mh, Command::Cmd&) {
-        undoAction(mh.ActionState);
+        undoAction(mh, mh.ActionState);
     }
     void processRedo(Master_Handler& mh, Command::Cmd&) {
-        redoAction(mh.ActionState);
+        redoAction(mh, mh.ActionState);
     }
     void processClearActionQueue(Master_Handler& mh, Command::Cmd&)
     {

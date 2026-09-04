@@ -95,7 +95,8 @@ namespace Command {
     struct Command_Metadata {
 
         std::string_view                commandDescription;
-        Argument_Metadata               argumentMetadata;
+        Argument_Metadata                 argumentMetadata;
+        bool                              undoable = false;
 
     };
 

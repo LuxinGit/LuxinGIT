@@ -21,7 +21,7 @@
     <ClCompile Include="Command.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SDL Handler.cpp">
+    <ClCompile Include="SDLWrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CLI Handler.cpp">
@@ -59,7 +59,7 @@
     <ClInclude Include="Command.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SDL Handler.h">
+    <ClInclude Include="SDLWrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CLI Handler.h">
