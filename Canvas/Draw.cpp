@@ -217,7 +217,7 @@ namespace Draw {
         else if (command.ID == COMMAND_ID::PEN_DOWN) 
             s.penDown = !s.penDown;
 
-        if (s.penDown) drawPoint(mh, mh.CursorState.cursor, *s.activeColour);
+        if (s.penDown) drawPoint(mh, mh.CursorState.cursor, *s.activeColour, true);
     }
     void processChangePenMode(Application_State& mh, Command::Cmd& command) {
         Draw_State& s = mh.DrawState;
