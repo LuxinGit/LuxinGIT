@@ -132,7 +132,7 @@
     <ClCompile Include="Action.cpp" />
     <ClCompile Include="Command Repo.cpp" />
     <ClCompile Include="Input.cpp" />
-    <ClCompile Include="Luxin Paint.cpp">
+    <ClCompile Include="main.cpp">
       <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdcpp20</LanguageStandard>
       <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Release|x64'">stdcpp20</LanguageStandard>
     </ClCompile>

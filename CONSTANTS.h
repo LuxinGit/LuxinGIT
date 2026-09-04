@@ -15,7 +15,7 @@ static constexpr int                            DEFAULT_DRAWSTEP_MAX = 50;
 
 static constexpr std::array<uint8_t, 4>			DEFAULT_DRAW_COLOUR = { 200, 200, 200, 255 };
 static constexpr std::array<uint8_t, 4>			DEFAULT_BACKGROUND_COLOUR = { 255, 255, 255, 255 };
-static constexpr int                            DEFAULT_PENWIDTH_MIN = 1;
+static constexpr int                            DEFAULT_PENWIDTH_MIN = 0;
 static constexpr int							DEFAULT_PENWIDTH_CUR = 2;
 static constexpr int                            DEFAULT_PENWIDTH_MAX = 50;
 static constexpr int							DEFAULT_PEN_MODE = 0; // DRAW
