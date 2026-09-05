@@ -206,8 +206,42 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         .commandMetadata = {
             .commandDescription = "Draw a circle.",
             .argumentMetadata = {
-                .arguments = {},
-                .defaultArgs = {}
+                .arguments = {
+                    {
+                        Command::Argument::ARGTYPE::INT,
+                        "radius",
+                        "Radius of the circle",
+                        std::nullopt,
+                        false
+                    },
+                    {
+                        Command::Argument::ARGTYPE::COORDINATE,
+                        "centre coordinate",
+                        "Coordinate used for the circle's centre.",
+                        std::nullopt,
+                        false
+                    },
+                    {
+                        Command::Argument::ARGTYPE::COLOUR,
+                        "colour",
+                        "Colour used to draw the circle",
+                        std::nullopt,
+                        false
+                    },
+                    {
+                        Command::Argument::ARGTYPE::INT,
+                        "fill [bool]",
+                        "Whether or not we're filling the circle.  Int -> bool (so any non-zero value = true)",
+                        std::nullopt,
+                        false
+                    }
+                },
+                .defaultArgs = {
+                    std::monostate(),
+                    std::monostate(),
+                    std::monostate(),
+                    std::monostate()
+                }   
             }
         },
 

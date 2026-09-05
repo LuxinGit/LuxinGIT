@@ -181,12 +181,25 @@ namespace Draw {
         command.ID = COMMAND_ID::PEN_SET;
         command.args = { pen };
     }
-    void processCircle(Application_State& mh, Command::Cmd& command) {
-        int radius = !command.args.empty()
-            ? std::get<int>(command.args[0])
-            : mh.CursorState.drawStep * 10;
+    void processCircle(Application_State& s, Command::Cmd& command) {
+        //0:RADIUS 1:CENTRE_POINT 2:OUTLINE_COLOUR 3:FILL [INT]
 
-        drawCircle(mh, mh.CursorState.cursor, *mh.DrawState.activeColour, radius, false);
+        int radius =    10 * s.CursorState.drawStep;
+        coordinate centre =    s.CursorState.cursor;
+        colour c =        *s.DrawState.activeColour;
+        bool f = false;
+
+        if (int* rad = std::get_if<int>(&command.args[0])) 
+            radius = *rad;
+        if (coordinate* coor = std::get_if<coordinate>(&command.args[1]))
+            centre = *coor;
+        if (colour* outC = std::get_if<colour>(&command.args[2]))
+            c = *outC;
+        if (int* fill = std::get_if<int>(&command.args[3]))
+            f = static_cast<bool>(*fill);
+
+        drawCircle(s, centre, c, radius, f);
+
     }
     void processFill(Application_State& s, Command::Cmd& command) {
         

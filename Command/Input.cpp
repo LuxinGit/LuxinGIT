@@ -433,10 +433,10 @@ namespace Input::CLI {
 
         }
 
-        bool harvestArgumentInput(std::vector<int>& ret) {
+        bool harvestArgumentInput(std::vector<int>& ret, const std::string& tname) {
             
             for (size_t i = 0; i < ret.size(); i++) {
-                if (!harvestIntegerInput("Enter value " + std::to_string(i + 1) + ":", ret[i]))
+                if (!harvestIntegerInput("[" + tname + "] Enter value " + std::to_string(i + 1) + ":", ret[i]))
                     return false;
             }
             return true;
@@ -461,21 +461,21 @@ namespace Input::CLI {
             case Command::Argument::ARGTYPE::INT:
 
                 ret = std::vector<int>(1);
-                if (!harvestArgumentInput(ret)) return false;
+                if (!harvestArgumentInput(ret, "INT")) return false;
                 arg = ret[0];
                 return true;
 
             case Command::Argument::ARGTYPE::COORDINATE:
                 
                 ret = std::vector<int>(2);
-                if (!harvestArgumentInput(ret)) return false;
+                if (!harvestArgumentInput(ret, "COORDINATE")) return false;
                 arg = coordinate{ ret[0], ret[1] };
                 return true;
 
             case Command::Argument::ARGTYPE::COLOUR:
                 
                 ret = std::vector<int>(4);
-                if (!harvestArgumentInput(ret)) return false;
+                if (!harvestArgumentInput(ret, "COLOUR")) return false;
                 arg = convertVecToColour(ret);
                 return true;
 
@@ -506,7 +506,7 @@ namespace Input::CLI {
                 if (!defArgs[i].required)
                     if (harvestInput("This argument (" + std::string(defArgs[i].name) + ") is not required.  Input anyway? [Y]") != "Y")
                         continue;
-
+                std::cout << "Entering argument " << std::string(defArgs[i].name) << std::endl;
                 if (!harvestArgument(defArgs[i].type, args[i]))
                     return false;
 

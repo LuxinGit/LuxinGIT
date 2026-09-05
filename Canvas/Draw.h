@@ -29,7 +29,7 @@ namespace Draw {
     void drawLineToNewCursor(Application_State& mh);
 
     void processChangePenWidth(Application_State& mh, Command::Cmd& command);
-    void processCircle(Application_State& mh, Command::Cmd& command);
+    void processCircle(Application_State&, Command::Cmd& command);
     void processFill(Application_State& mh, Command::Cmd& command);
     void processPenDown(Application_State& mh, Command::Cmd& command);
     void processChangePenMode(Application_State& mh, Command::Cmd& command);
