@@ -203,20 +203,11 @@ namespace Draw {
     }
     void processFill(Application_State& s, Command::Cmd& command) {
         
-        colour c;
+        colour c = *s.DrawState.activeColour;
         coordinate coor = s.CursorState.cursor;
-        
-        switch (command.ID) {
-        case(COMMAND_ID::DRAW_FILL_PAYLOAD):
-            if (auto* arg = std::get_if<colour>(&command.args[0]))
-                c = *arg;
-            else c = *s.DrawState.activeColour;
-            break;
-        default:
-            assert(false);
-            return;
-        }
 
+        if (auto* arg = std::get_if<colour>(&command.args[0]))
+            c = *arg;
         if (auto* arg = std::get_if<coordinate>(&command.args[1]))
             coor = *arg;
 
