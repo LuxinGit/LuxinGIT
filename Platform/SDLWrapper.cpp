@@ -29,8 +29,13 @@ namespace SDL {
 	{
 		ss.Window = SDL_CreateWindow(DEFAULT_APPLICATION_NAME, cs.width, cs.height, 0);
 		ss.Renderer = SDL_CreateRenderer(ss.Window, nullptr);
-		ss.Texture = SDL_CreateTexture(ss.Renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, DEFAULT_CANVAS_WIDTH_MAX, DEFAULT_CANVAS_HEIGHT_MAX);
+		ss.Texture = createTexture(ss);
 		SDL_SetWindowRelativeMouseMode(ss.Window, false);
+	}
+
+	SDL_Texture* createTexture(SDL_State& ss, int w, int h)
+	{
+		return SDL_CreateTexture(ss.Renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, w, h);
 	}
 
 	void renderFrame(Application_State& s) {

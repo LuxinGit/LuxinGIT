@@ -252,7 +252,12 @@ New_Command_Repo NEW_COMMAND_REPO = { {
             },
             .cli = inp::CLI_Metadata{
                 "circle",
-                "Draw a circle using the current drawing settings."
+                R"(Draw a circle.
+Arguments are:
+    [0] {Optional} Radius. Uses 10* the drawstep as default.
+    [1] {Optional} Centre coordinate. Uses the cursor as default.
+    [2] {Optional} Colour. Uses the active colour as default.
+    [3] {Optional} Fill? Any non-zero input == true.)"
             }
         },
 
@@ -300,7 +305,10 @@ New_Command_Repo NEW_COMMAND_REPO = { {
             },
             .cli = inp::CLI_Metadata{
                 "fill",
-                "Flood-fill the region under the cursor using a specified colour."
+                R"(Flood-fill a region.
+Argumments are:
+    [0] {Optional} Colour. Uses the active colour by default.
+    [1] {Optional} Coordinate. Uses the cursor by default.)"
             }
         },
 

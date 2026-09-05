@@ -139,6 +139,7 @@
     <ClCompile Include="Canvas\Canvas.cpp" />
     <ClCompile Include="Canvas\Cursor.cpp" />
     <ClCompile Include="Canvas\Draw.cpp" />
+    <ClCompile Include="Canvas\Object.cpp" />
     <ClCompile Include="Command\Action.cpp" />
     <ClCompile Include="Command\Command Repo.cpp" />
     <ClCompile Include="Command\Command.cpp" />
@@ -152,6 +153,7 @@
     <ClInclude Include="Canvas\Canvas.h" />
     <ClInclude Include="Canvas\Cursor.h" />
     <ClInclude Include="Canvas\Draw.h" />
+    <ClInclude Include="Canvas\Object.h" />
     <ClInclude Include="Command\Action.h" />
     <ClInclude Include="Command\Command Repo.h" />
     <ClInclude Include="Command\Command.h" />

@@ -9,9 +9,6 @@
 
 struct Application_State {
 
-public:
-
-    // NEW
     Action_State        ActionState;
     Canvas_State        CanvasState;
     Cursor_State        CursorState;
