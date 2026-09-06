@@ -12,13 +12,13 @@ struct Input_State {
 
 	struct Keyboard_State {
 		bool enableKeyboard = ENABLE_KEYBOARD;
-		std::unordered_map<SDL_Scancode, const Command::Command_Definition*> keyBindings;
+		std::unordered_map<SDL_Scancode, Command::Definition::Input::Binding> keyBindings;
 		std::array<bool, SDL_SCANCODE_COUNT> previousKeyboardState{};
 	};
 
 	struct Mouse_State {
 		bool enableMouse = ENABLE_MOUSE;
-		std::unordered_map<SDL_MouseButtonFlags, const Command::Command_Definition*> mouseBindings;
+		std::unordered_map<SDL_MouseButtonFlags, const Command::Definition::Input::Binding> mouseBindings;
 	};
 
 	struct CLI_State {

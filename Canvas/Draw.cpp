@@ -156,30 +156,21 @@ namespace Draw {
         drawLine(mh, mh.CursorState.cursor, mh.CursorState.deltaCursor, *mh.DrawState.activeColour, true);
     }
 
-    void processChangePenWidth(Application_State& mh, Command::Cmd& command) {
+    void processChangePenWidth(Application_State& aS, Command::Cmd& command) {
+        // 0:INT Setting {ADD,SET}, 1:INT Delta
 
-        Draw_State& s = mh.DrawState;
+        Draw_State& s = aS.DrawState;
+        int& p = std::get<int>(command.args[1]);
 
-        int pen = s.pen;
-        int payload = std::get<int>(command.args[0]);
+        if (std::get<int>(command.args[0]) == 0) {
+            p += s.pen;
+            command.args[0] = 1;
+        }
 
-        if (command.ID == COMMAND_ID::PEN_WIDTH_INCREASE)
-            pen += payload;
-        else if (command.ID == COMMAND_ID::PEN_WIDTH_DECREASE)
-            pen -= payload;
-        else if (command.ID == COMMAND_ID::PEN_SET)
-            pen = payload;
+        p = std::clamp(p, DEFAULT_PENWIDTH_MIN, DEFAULT_PENWIDTH_MAX);
+        
+        std::swap(p, s.pen);
 
-        pen = std::clamp(
-            pen,
-            DEFAULT_PENWIDTH_MIN,
-            DEFAULT_PENWIDTH_MAX
-        );
-
-        std::swap(s.pen, pen);
-
-        command.ID = COMMAND_ID::PEN_SET;
-        command.args = { pen };
     }
     void processCircle(Application_State& s, Command::Cmd& command) {
         //0:RADIUS 1:CENTRE_POINT 2:OUTLINE_COLOUR 3:FILL [INT]
@@ -215,96 +206,102 @@ namespace Draw {
 
     }
     void processPenDown(Application_State& mh, Command::Cmd& command) {
-        
+        // 0 INT: Type {DISCRETE,CONTINUOUS}
+
         Draw_State& s = mh.DrawState;
-        
-        if (command.ID == COMMAND_ID::PEN_HELD_DOWN) {
-            s.penDown = true;
+        if (std::get<int>(command.args[0]))
             s.penContinuous = true;
-        }
-        else if (command.ID == COMMAND_ID::PEN_DOWN) 
-            s.penDown = !s.penDown;
+        s.penDown = !s.penDown;
 
         if (s.penDown) drawPoint(mh, mh.CursorState.cursor, *s.activeColour, true);
     }
     void processChangePenMode(Application_State& mh, Command::Cmd& command) {
+        //0 INT: Penmode to set to {DRAW,RUBBER,RAINBOW}.
+        //1 INT: Additional optional parameter.
+
         Draw_State& s = mh.DrawState;
+        using mode = Draw_State::PEN_MODE;
+        mode p = static_cast<mode>(std::get<int>(command.args[0]));
 
-        switch (command.ID) {
-        case(COMMAND_ID::PENMODE_DRAW):
-            s.activeColour = &s.drawColour;
-            s.penMode = Draw_State::PEN_MODE::DRAW;
-            command.ID = COMMAND_ID::PENMODE_RUBBER;
-            break;
-        case(COMMAND_ID::PENMODE_RUBBER):
-            s.activeColour = &s.backgroundColour;
-            s.penMode = Draw_State::PEN_MODE::RUBBER;
-            command.ID = COMMAND_ID::PENMODE_DRAW;
-            break;
-        case(COMMAND_ID::PENMODE_RAINBOW):
-            // if payload has anything in it, check if thats different from what we have right now [for pixelsToRainbow].
-            // and if so, set the pixels to rainbow == payload, and make sure we're in rainbow mode.
-            // otherwise just make sure we flip between draw and rainbow.  all other penmodes disregarded.
-            // this isn't a great implementation but when I come to revisit drawing modes we can figure it out then.
-            s.activeColour = &s.drawColour;
+        if (p == mode::RAINBOW) {
+            if (int* i = std::get_if<int>(&command.args[1]);
+                i && *i != s.pixelsToRainbow)
+                    s.pixelsToRainbow = *i;
+                //// This isn't perfect, as technically the command loses its invariance principle by dropping the previous state of pixelsToRainbow.
+                //// The easiest solution is to separate the penmode commands but given that the primary state change is the same I don't love that.
+                //// The best solution is one we have implemented commands with commands as arguments, construct two commands encoding the state change.
+                        //// The reality is that the odds of needing good undo/redo functionality for this is low. 
+            else p = (p == s.penMode) ? mode::DRAW : mode::RAINBOW;
+        }
 
-            if (!command.args.empty()) {
-                int payload = std::get<int>(command.args[0]);
-                if (payload != s.pixelsToRainbow) 
-                {
-                    std::swap(payload, s.pixelsToRainbow);
-                    s.penMode = Draw_State::PEN_MODE::RAINBOW;
-                    return;
-                }
+        std::swap(p, s.penMode);
+
+    }
+
+    namespace {
+        colour* resolveActiveColourFromArg(Draw_State& s, int& target) 
+        {
+            switch (target)
+            {
+            case 0:
+                if (s.activeColour == &s.drawColour) target = 1;
+                else target = 2;
+                return s.activeColour;
+            case 1:
+                return &s.drawColour;
+            case 2:
+                return &s.backgroundColour;
             }
-            if (s.penMode == Draw_State::PEN_MODE::RAINBOW)
-                s.penMode = Draw_State::PEN_MODE::DRAW;
-            else
-                s.penMode = Draw_State::PEN_MODE::RAINBOW;
-
-            return;
-
-        default:
-            assert(false);
+        }
+        colour resolveReplacementColourFromArg(Canvas_State& cS, Cursor_State& curS, int setting, int target, const Command::argument* ARG_2) 
+        {
+            switch (setting)
+            {
+            case 0:
+            {            
+                if (const colour* c = std::get_if<colour>(ARG_2))
+                    return *c;
+                else
+                {
+                    assert(false);
+                    return { 255, 0, 0, 255 };
+                }       
+            }
+            case 1:
+                return getRandomColour();
+            case 2:
+                return Canvas::getLuxelFromCoord(cS, curS.cursor)->colour;
+            default:
+                return target == 1 ? DEFAULT_DRAW_COLOUR : DEFAULT_BACKGROUND_COLOUR;
+            }
         }
     }
     void processChangeColour(Application_State& mh, Command::Cmd& command) {
+        
+        //0 INT: targetColour { activeColour, drawColour, backgroundColour }
+        //1 INT: colourSource    { ARG_2, random, underCursor, default }
+        //2 COLOUR: colour - only required if newColour == 0, as then implied that commmand carries replacement.
+
         Draw_State& s = mh.DrawState;
-        colour c = {};
-        colour* targetColour = s.activeColour;
 
-        switch (command.ID) {
-        case COMMAND_ID::COLOUR_SET_DEFAULT: 
-            if (s.activeColour == &s.drawColour)  c = DEFAULT_DRAW_COLOUR;        
-            else c = DEFAULT_BACKGROUND_COLOUR;  
-            break;
-        case COMMAND_ID::COLOUR_SET_DRAW:
-            c = std::get<colour>(command.args[0]);
-            targetColour = &s.drawColour;
-            break;
-        case COMMAND_ID::COLOUR_SET_BACKGROUND:
-            c = std::get<colour>(command.args[0]);
-            targetColour = &s.backgroundColour;
-            break;
-        case COMMAND_ID::COLOUR_SET_PICK:
-            c = Canvas::getLuxelFromCoord(mh.CanvasState, mh.CursorState.cursor)->colour;
-            break;
-        case COMMAND_ID::COLOUR_SET_RANDOM:
-            c = getRandomColour();
-            break;
-        default:
-            assert(false); //stupidass
-        }
+        
+        
+        int& target = std::get<int>(command.args[0]);
+        colour* targetC = resolveActiveColourFromArg(s, target);
+        colour replacementC = resolveReplacementColourFromArg
+            (
+                mh.CanvasState,
+                mh.CursorState,
+                std::get<int>(command.args[1]),
+                target,
+                &command.args[2]
+            );
 
-        if (targetColour == &s.drawColour)
-            command.ID = COMMAND_ID::COLOUR_SET_DRAW;
-        else
-            command.ID = COMMAND_ID::COLOUR_SET_BACKGROUND;
-
-        std::swap(c, *targetColour);
-        command.args = { c };
+        std::swap(replacementC, *targetC);
+        command.args = { target, 0, replacementC };
 
     }
+
     void processClearCanvas(Application_State& mh, Command::Cmd& command) {
         for (size_t y = 0; y < mh.CanvasState.height; ++y) {
             const size_t rowStart = y * DEFAULT_CANVAS_WIDTH_MAX;

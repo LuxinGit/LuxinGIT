@@ -43,34 +43,39 @@ namespace Cursor {
 
     void processMoveCursor(Application_State& mh, Command::Cmd& command) {
         
-        Cursor_State& s = mh.CursorState;
-        std::pair<float, float> c = s.deltaCursor;
-
-        if (command.ID == COMMAND_ID::MOVE_SET_POINT)
-            c = std::get<coordinate>(command.args[0]);
-        else if (command.ID == COMMAND_ID::RESET_CURSOR)
-            c = s.origin;
-        else c = convertDirectionToSet(s, command);
-
-        std::swap(s.deltaCursor, c);
-        command.ID = COMMAND_ID::MOVE_SET_POINT;
-        command.args = { c };
-
-    }
-    void processChangeDrawstep(Application_State& mh, Command::Cmd& command) {
+        // 0:SETTING [DIR/SET/ORI], 1:COORDINATE [DRAWSTEP_USAGE/DESTINATION]
         
         Cursor_State& s = mh.CursorState;
-        int d = s.drawStep;
-        int p = std::get<int>(command.args[0]);
+        int setting = std::get<int>(command.args[0]);
+        std::pair<float, float> c = std::get<coordinate>(command.args[1]);
 
-        if (command.ID == COMMAND_ID::DRAWSTEP_SET)
-            d = p;
-        else { // DRAWSTEP_INCREASE OR DRAWSTEP_DECREASE
-            d = std::clamp(d + p, DEFAULT_DRAWSTEP_MIN, DEFAULT_DRAWSTEP_MAX);
+        if (setting == 0) {
+            c = convertDirectionToSet(s, command);
+        }
+        else if (setting == 2) {
+            c = s.origin;
         }
 
+        std::swap(s.deltaCursor, c);
+        command.ID = COMMAND_ID::CURSOR_MOVE;
+        command.args = { 1, c };
+
+    }
+
+    void processChangeDrawstep(Application_State& aS, Command::Cmd& command) {
+        // 0:INT Setting {ADD,SET}, 1:INT Delta
+
+        Cursor_State& s = aS.CursorState;
+        int& d = std::get<int>(command.args[1]);
+
+        if (std::get<int>(command.args[0]) == 0) {
+            command.args[0] = 1;
+            d += s.drawStep;
+        }
+
+        d = std::clamp(d, DEFAULT_DRAWSTEP_MIN, DEFAULT_DRAWSTEP_MAX);
+        
         std::swap(d, s.drawStep);
-        command.ID = COMMAND_ID::DRAWSTEP_SET;
         command.args = { d };
 
     }

@@ -94,25 +94,9 @@ namespace Command::Processor {
     std::pair<int, returnCode> constructCommand(Command_State& s, const Command_Definition* def, std::vector<argument> args)
     {
 
-        const Definition::Argument_Metadata& aMD = def->commandMetadata.argumentMetadata;
+        const Definition::Argument_Metadata& aMD = def->commandMetadata;
 
         Cmd command = { def->ID, {} , def->processor};
-
-        if (aMD.arguments.empty()) {
-            if (!args.empty())
-                return { 0, returnCode::ARG_COUNT_INVALID };
-
-            addCommand(s, command);
-            return { 0, returnCode::SUCCESS };
-        }
-
-        if (args.empty()) {
-
-            command.args = aMD.defaultArgs;
-            addCommand(s, command);
-
-            return { 0, returnCode::SUCCESS };
-        }
 
         if (args.size() > aMD.arguments.size()) return { 0 , returnCode::ARG_COUNT_INVALID };
         if (args.size() < aMD.arguments.size()) args.resize(aMD.arguments.size());
@@ -129,7 +113,6 @@ namespace Command::Processor {
                 continue;
             }
 
-            size_t a = args[i].index();
             if (args[i].index() != static_cast<size_t>(adef.type))
                 return { i, returnCode::ARG_TYPE_INVALID };
 

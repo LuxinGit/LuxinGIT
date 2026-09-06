@@ -16,47 +16,25 @@ struct Application_State;
 
 
 enum class COMMAND_ID {
-    MOVE_UP,
-    MOVE_DOWN,
-    MOVE_LEFT,
-    MOVE_RIGHT,
-    MOVE_RESET,
-    MOVE_SET_POINT,
-    MOVE_SAVE_ORIGIN,
-
+    
+    CURSOR_MOVE,
+    CURSOR_ORIGIN,
+    CURSOR_DRAWSTEP,
     DRAW_CIRCLE,
-
-    DRAW_FILL_PAYLOAD,
+    DRAW_FILL,
+    COLOUR,
+    PENMODE,
+    PEN_DOWN,
+    PEN_WIDTH,
+    INPUT_CLI_ENABLE,
+    INPUT_MOUSE_ENABLE,
 
     CANVAS_RESIZE_SET_PAYLOAD,
     CANVAS_RESIZE_SET_WIDTH,
     CANVAS_RESIZE_SET_HEIGHT,
-
-    COLOUR_SET_DEFAULT,
-    COLOUR_SET_RANDOM,
-    COLOUR_SET_DRAW,
-    COLOUR_SET_BACKGROUND,
-    COLOUR_SET_PICK,
-
-    PENMODE_DRAW,
-    PENMODE_RUBBER,
-    PENMODE_RAINBOW,
-
-    DRAWSTEP_DECREASE,
-    DRAWSTEP_INCREASE,
-    DRAWSTEP_SET,
-
+    
     UNDO,
     REDO,
-
-    PEN_DOWN,
-    PEN_HELD_DOWN,
-    PEN_WIDTH_DECREASE,
-    PEN_WIDTH_INCREASE,
-    PEN_SET,
-
-    INPUT_CLI_ENABLE,
-    INPUT_MOUSE_ENABLE,
 
     RESET_CANVAS,
     RESET_ACTION_QUEUE,
@@ -100,14 +78,28 @@ namespace Command::Argument {
         bool required = true;
     };
 
+    struct Argument_Preset {
+        std::string_view        name;
+        std::vector<argument>   args;
+    };
+
 }
 
 namespace Command::Definition::Input {
 
+    struct Binding {
+        
+        std::size_t callerIndex;
+        std::vector<argument> args;
+        const Command_Definition& def;
+
+    };
+
     struct Keyboard_Metadata {
 
-        SDL_Scancode    SCANCODE;
-        bool            repeatable;
+        SDL_Scancode   defaultScancode;
+        std::size_t    presetIndex;
+        bool           repeatable = false;
 
     };
 
@@ -119,7 +111,8 @@ namespace Command::Definition::Input {
 
     struct Mouse_Metadata {
 
-        SDL_MouseButtonFlags    MOUSECODE;
+        SDL_MouseButtonFlags    defaultMousecode;
+        std::size_t             presetIndex;
 
     };
 
@@ -177,25 +170,21 @@ namespace Command::Definition::Input::GUI::Resolver {
 
 namespace Command::Definition {
 
-    struct Argument_Metadata {
-        std::vector<::Command::Argument::Argument_Definition> arguments;
-        std::vector<argument>                               defaultArgs;
-    };
-
     struct Command_Metadata {
 
-        std::string_view                commandDescription;
-        Argument_Metadata                 argumentMetadata;
-        bool                              undoable = false;
+        std::string_view                             commandDescription;
+        std::vector<::Command::Argument::Argument_Definition> arguments;
+        std::vector<Argument::Argument_Preset>              presets ={};
+        bool                                           undoable = false;
 
     };
 
     struct Input_Metadata {
 
-        std::optional<Input::Keyboard_Metadata>    keyboard;
-        std::optional<Input::Mouse_Metadata>          mouse;
-        std::optional<Input::CLI_Metadata>              cli;
-        std::optional<Input::GUI::GUI_Metadata>         gui;
+        std::optional<std::vector<Input::Keyboard_Metadata>>    keyboard;
+        std::optional<std::vector<Input::Mouse_Metadata>>          mouse;
+        std::optional<Input::CLI_Metadata>                           cli;
+        std::optional<Input::GUI::GUI_Metadata>                      gui;
 
     };
 

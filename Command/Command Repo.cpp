@@ -14,177 +14,67 @@ New_Command_Repo NEW_COMMAND_REPO = { {
         // ============================================================
 
         {
-            .ID = COMMAND_ID::MOVE_UP,
+            .ID = COMMAND_ID::CURSOR_MOVE,
 
             .commandMetadata = {
-                .commandDescription = "Move the cursor up.",
-                .argumentMetadata = {
-                    .arguments = {},
-                    .defaultArgs = {}
-                }
-            },
-
-            .inputMetadata = {
-                .keyboard = inp::Keyboard_Metadata{
-                    SDL_SCANCODE_W,
-                    true
-                },
-                .cli = inp::CLI_Metadata{
-                    "up",
-                    "Move the cursor up."
-                }
-            },
-
-            .processor = &Cursor::processMoveCursor
-        },
-
-        {
-            .ID = COMMAND_ID::MOVE_DOWN,
-
-            .commandMetadata = {
-                .commandDescription = "Move the cursor down.",
-                .argumentMetadata = {
-                    .arguments = {},
-                    .defaultArgs = {}
-                }
-            },
-
-            .inputMetadata = {
-                .keyboard = inp::Keyboard_Metadata{
-                    SDL_SCANCODE_S,
-                    true
-                },
-                .cli = inp::CLI_Metadata{
-                    "down",
-                    "Move the cursor down."
-                }
-            },
-
-            .processor = &Cursor::processMoveCursor
-        },
-
-        {
-            .ID = COMMAND_ID::MOVE_LEFT,
-
-            .commandMetadata = {
-                .commandDescription = "Move the cursor left.",
-                .argumentMetadata = {
-                    .arguments = {},
-                    .defaultArgs = {}
-                }
-            },
-
-            .inputMetadata = {
-                .keyboard = inp::Keyboard_Metadata{
-                    SDL_SCANCODE_A,
-                    true
-                },
-                .cli = inp::CLI_Metadata{
-                    "left",
-                    "Move the cursor left."
-                }
-            },
-
-            .processor = &Cursor::processMoveCursor
-        },
-
-        {
-            .ID = COMMAND_ID::MOVE_RIGHT,
-
-            .commandMetadata = {
-                .commandDescription = "Move the cursor right.",
-                .argumentMetadata = {
-                    .arguments = {},
-                    .defaultArgs = {}
-                }
-            },
-
-            .inputMetadata = {
-                .keyboard = inp::Keyboard_Metadata{
-                    SDL_SCANCODE_D,
-                    true
-                },
-                .cli = inp::CLI_Metadata{
-                    "right",
-                    "Move the cursor right."
-                }
-            },
-
-            .processor = &Cursor::processMoveCursor
-        },
-
-        {
-            .ID = COMMAND_ID::MOVE_RESET,
-
-            .commandMetadata = {
-                .commandDescription = "Reset the cursor to its origin.",
-                .argumentMetadata = {
-                    .arguments = {},
-                    .defaultArgs = {}
-                }
-            },
-
-            .inputMetadata = {
-                .keyboard = inp::Keyboard_Metadata{
-                    SDL_SCANCODE_Q,
-                    false
-                },
-                .cli = inp::CLI_Metadata{
-                    "reset",
-                    "Reset the cursor to its saved origin."
-                }
-            },
-
-            .processor = &Cursor::processMoveCursor
-        },
-
-        {
-            .ID = COMMAND_ID::MOVE_SET_POINT,
-
-            .commandMetadata = {
-                .commandDescription = "Move the cursor to a specified coordinate.",
-
-                .argumentMetadata = {
-                    .arguments = {
-                        {
-                            Command::Argument::ARGTYPE::COORDINATE,
-                            "position",
-                            "Destination coordinate.",
-                            std::nullopt
-                        }
+                .commandDescription = "Move the cursor",
+                .arguments = {
+                    {
+                        Command::Argument::ARGTYPE::INT,
+                        "setting (DIR/SET/ORIGIN)",
+                        "Determines usage of coordinate. If 0, command interpreted as directional command.",
+                        std::nullopt
                     },
-
-                    .defaultArgs = {
-                        DEFAULT_CURSOR_POINT
+                    {
+                        Command::Argument::ARGTYPE::COORDINATE,
+                        "position",
+                        "Destination coordinate, OR drawstep usage if setting == 0",
+                        std::nullopt
                     }
+                },
+                .presets = {
+                    {"up",          { 0, coordinate{0, -1}}},
+                    {"right",       { 0, coordinate{1,  0}}},
+                    {"down",        { 0, coordinate{0,  1}}},
+                    {"left",        { 0, coordinate{-1, 0}}},
+                    {"set_origin",  { 2, coordinate{-1, -1}}} //slightly hacky
                 }
             },
 
             .inputMetadata = {
+                .keyboard = {               
+                    {
+                        inp::Keyboard_Metadata{ SDL_SCANCODE_W, 0, true  },
+                        inp::Keyboard_Metadata{ SDL_SCANCODE_D, 1, true  },
+                        inp::Keyboard_Metadata{ SDL_SCANCODE_S, 2, true  },
+                        inp::Keyboard_Metadata{ SDL_SCANCODE_A, 3, true  },
+                        inp::Keyboard_Metadata{ SDL_SCANCODE_9, 4, false }
+                    }
+                },
                 .cli = inp::CLI_Metadata{
-                    "move",
-                    "Move the cursor to a specified coordinate."
+                    "Move",
+                    "Move the cursor."
                 }
             },
 
             .processor = &Cursor::processMoveCursor
         },
-
         {
-            .ID = COMMAND_ID::MOVE_SAVE_ORIGIN,
+            .ID = COMMAND_ID::CURSOR_ORIGIN,
 
             .commandMetadata = {
                 .commandDescription = "Save the current cursor position as its origin.",
-                .argumentMetadata = {
-                    .arguments = {},
-                    .defaultArgs = {}
+                .arguments = {},
+                .presets = {
+                    {"save_position", {}},
                 }
             },
 
             .inputMetadata = {
-                .keyboard = inp::Keyboard_Metadata{
-                    SDL_SCANCODE_2,
-                    false
+                .keyboard = {
+                    {
+                        inp::Keyboard_Metadata{ SDL_SCANCODE_2, 0, false  }
+                    }
                 },
                 .cli = inp::CLI_Metadata{
                     "save_origin",
@@ -205,50 +95,46 @@ New_Command_Repo NEW_COMMAND_REPO = { {
 
         .commandMetadata = {
             .commandDescription = "Draw a circle.",
-            .argumentMetadata = {
-                .arguments = {
-                    {
-                        Command::Argument::ARGTYPE::INT,
-                        "radius",
-                        "Radius of the circle",
-                        std::nullopt,
-                        false
-                    },
-                    {
-                        Command::Argument::ARGTYPE::COORDINATE,
-                        "centre coordinate",
-                        "Coordinate used for the circle's centre.",
-                        std::nullopt,
-                        false
-                    },
-                    {
-                        Command::Argument::ARGTYPE::COLOUR,
-                        "colour",
-                        "Colour used to draw the circle",
-                        std::nullopt,
-                        false
-                    },
-                    {
-                        Command::Argument::ARGTYPE::INT,
-                        "fill [bool]",
-                        "Whether or not we're filling the circle.  Int -> bool (so any non-zero value = true)",
-                        std::nullopt,
-                        false
-                    }
+            .arguments = {
+                {
+                    Command::Argument::ARGTYPE::INT,
+                    "radius",
+                    "Radius of the circle",
+                    std::nullopt,
+                    false
                 },
-                .defaultArgs = {
-                    std::monostate(),
-                    std::monostate(),
-                    std::monostate(),
-                    std::monostate()
-                }   
+                {
+                    Command::Argument::ARGTYPE::COORDINATE,
+                    "centre coordinate",
+                    "Coordinate used for the circle's centre.",
+                    std::nullopt,
+                    false
+                },
+                {
+                    Command::Argument::ARGTYPE::COLOUR,
+                    "colour",
+                    "Colour used to draw the circle",
+                    std::nullopt,
+                    false
+                },
+                {
+                    Command::Argument::ARGTYPE::INT,
+                    "fill [bool]",
+                    "Whether or not we're filling the circle.  Int -> bool (so any non-zero value = true)",
+                    std::nullopt,
+                    false
+                }
+            },
+            .presets = {
+                { "defaultCircle" , {} }
             }
         },
 
         .inputMetadata = {
-            .keyboard = inp::Keyboard_Metadata{
-                SDL_SCANCODE_G,
-                false
+            .keyboard = {
+                {
+                    inp::Keyboard_Metadata{SDL_SCANCODE_G, 0, false}
+                } 
             },
             .cli = inp::CLI_Metadata{
                 "circle",
@@ -265,43 +151,39 @@ Arguments are:
     },
 
     {
-        .ID = COMMAND_ID::DRAW_FILL_PAYLOAD,
+        .ID = COMMAND_ID::DRAW_FILL,
 
         .commandMetadata = {
             .commandDescription = "Flood-fill using a specified colour.",
-
-            .argumentMetadata = {
-                .arguments = {
-                    {
-                        Command::Argument::ARGTYPE::COLOUR,
-                        "colour",
-                        "Colour used for the fill.",
-                        std::nullopt,
-                        false
-                    },
-                    {
-                        Command::Argument::ARGTYPE::COORDINATE,
-                        "coordinate",
-                        "Colour used for the fill location.",
-                        std::pair<coordinate, coordinate>{
-                            { DEFAULT_CANVAS_WIDTH_MIN, DEFAULT_CANVAS_HEIGHT_MIN },
-                            { DEFAULT_CANVAS_WIDTH_MAX, DEFAULT_CANVAS_HEIGHT_MAX }
-                        },
-                        false
-                    }
+            .arguments = {
+                {
+                    Command::Argument::ARGTYPE::COLOUR,
+                    "colour",
+                    "Colour used for the fill.",
+                    std::nullopt,
+                    false
                 },
-
-                .defaultArgs = {
-                    std::monostate(),
-                    std::monostate()
-                }
+                {
+                    Command::Argument::ARGTYPE::COORDINATE,
+                    "coordinate",
+                    "Colour used for the fill location.",
+                    std::pair<coordinate, coordinate>{
+                        { DEFAULT_CANVAS_WIDTH_MIN, DEFAULT_CANVAS_HEIGHT_MIN },
+                        { DEFAULT_CANVAS_WIDTH_MAX, DEFAULT_CANVAS_HEIGHT_MAX }
+                    },
+                    false
+                }          
+            },
+            .presets = {
+                { "fill at cursor", {}}
             }
         },
 
         .inputMetadata = {
-            .keyboard = inp::Keyboard_Metadata{
-                SDL_SCANCODE_F,
-                false
+            .keyboard = {
+                {
+                    inp::Keyboard_Metadata{SDL_SCANCODE_F, 0, false}
+                }
             },
             .cli = inp::CLI_Metadata{
                 "fill",
@@ -318,81 +200,58 @@ Argumments are:
     // ============================================================
     // COLOUR
     // ============================================================
-
     {
-        .ID = COMMAND_ID::COLOUR_SET_DEFAULT,
+        .ID = COMMAND_ID::COLOUR,
 
-        .commandMetadata = {
-            .commandDescription = "Reset the active colour to its default.",
-            .argumentMetadata = {
-                .arguments = {},
-                .defaultArgs = {}
-            }
-        },
-
-        .inputMetadata = {
-            .cli = inp::CLI_Metadata{
-                "default_colour",
-                "Reset the active colour to its default value."
-            }
-        },
-
-        .processor = &Draw::processChangeColour
-    },
-
-    {
-        .ID = COMMAND_ID::COLOUR_SET_RANDOM,
-
-        .commandMetadata = {
-            .commandDescription = "Set the active colour to a random colour.",
-            .argumentMetadata = {
-                .arguments = {},
-                .defaultArgs = {}
-            }
-        },
-
-        .inputMetadata = {
-            .keyboard = inp::Keyboard_Metadata{
-                SDL_SCANCODE_J,
-                false
-            },
-            .cli = inp::CLI_Metadata{
-                "random_colour",
-                "Set the active colour to a randomly generated colour."
-            }
-        },
-
-        .processor = &Draw::processChangeColour
-    },
-
-    {
-        .ID = COMMAND_ID::COLOUR_SET_DRAW,
-
-        .commandMetadata = {
-            .commandDescription = "Set the draw colour.",
-
-            .argumentMetadata = {
+            .commandMetadata = {
+                .commandDescription = "Change a colour.",
                 .arguments = {
-                    {
+                     {
+                        Command::Argument::ARGTYPE::INT,
+                        "target colour",
+                        "Which colour is changed. [0]activeColour, [1]drawColour, [2]backgroundColour",
+                        std::pair<int,int>{ 0 , 2 }
+                     },
+                     {
+                        Command::Argument::ARGTYPE::INT,
+                        "setting",
+                        "Control path for colour retrieval. [0]new colour, [1]getRandomColour, [2]cursorColour, [3]default",
+                        std::pair<int,int>{ 0 , 3 }
+                     },
+                     {
                         Command::Argument::ARGTYPE::COLOUR,
-                        "colour",
-                        "New draw colour.",
-                        std::nullopt
+                        "new colour",
+                        "The colour that we're changing to.",
+                        std::nullopt,
+                        false
+                     }
+
+                },
+                .presets = {
+                    { "Random Colour", { 0, 1 }},
+                    { "Pick cursor Colour", { 0, 2 }}
+                }
+        },
+
+            .inputMetadata = {
+                .keyboard = {
+                    {
+                        inp::Keyboard_Metadata{ SDL_SCANCODE_J, 0 }
                     }
                 },
-
-                .defaultArgs = {
-                    DEFAULT_DRAW_COLOUR
-                }
-            }
-        },
-
-        .inputMetadata = {
-            .cli = inp::CLI_Metadata{
-                "colour_draw",
-                "Set the current draw colour."
+                .mouse = {
+                    {
+                        inp::Mouse_Metadata{ SDL_BUTTON_MIDDLE, 1 }
+                    }
+                },
+                .cli = inp::CLI_Metadata{
+        "colour",
+        R"(Change a colour.
+Arguments are:
+    [0] Target colour. [0] activeColour, [1] drawColour, [2] backgroundColour.
+    [1] Setting controlling colour retrieval. [0] use provided colour, [1] random colour, [2] cursor colour, [3] default colour.
+    [2] {Optional} New colour. Used only when setting == 0.)"
             },
-
             .gui = GUI::GUI_Metadata{
                 GUI::HEADER::TOOLS,
                 "Set draw colour",
@@ -401,59 +260,7 @@ Argumments are:
                GUI::COLOUR_METADATA{
                     &GUI::Resolver::resolveDrawColourChange
                }
-            }
-        },
-
-        .processor = &Draw::processChangeColour
-    },
-
-    {
-        .ID = COMMAND_ID::COLOUR_SET_PICK,
-
-        .commandMetadata = {
-            .commandDescription = "Pick the colour under the cursor.",
-            .argumentMetadata = {
-                .arguments = {},
-                .defaultArgs = {}
-            }
-        },
-
-        .inputMetadata = {
-            .mouse = inp::Mouse_Metadata{
-                SDL_BUTTON_MIDDLE
-            }
-        },
-
-        .processor = &Draw::processChangeColour
-    },
-
-    {
-        .ID = COMMAND_ID::COLOUR_SET_BACKGROUND,
-
-        .commandMetadata = {
-            .commandDescription = "Set the background colour.",
-
-            .argumentMetadata = {
-                .arguments = {
-                    {
-                        Command::Argument::ARGTYPE::COLOUR,
-                        "colour",
-                        "New background colour.",
-                        std::nullopt
-                    }
-                },
-
-                .defaultArgs = {
-                    DEFAULT_DRAW_COLOUR
-                }
-            }
-        },
-
-        .inputMetadata = {
-            .cli = inp::CLI_Metadata{
-                "colour_background",
-                "Set the current background colour."
-            },
+            }/*,
 
             .gui = GUI::GUI_Metadata{
                 GUI::HEADER::TOOLS,
@@ -464,37 +271,60 @@ Argumments are:
                     GUI::Resolver::resolveBackgroundColourChange
                 }
             }
+            */
         },
 
-        .processor = &Draw::processChangeColour
-    },
+            .processor = &Draw::processChangeColour
+      },
 
-
-    // ============================================================
-    // PEN MODE
-    // ============================================================
-
-    {
-        .ID = COMMAND_ID::PENMODE_DRAW,
+        // ============================================================
+        // PEN MODE
+        // ============================================================
+     {
+        .ID = COMMAND_ID::PENMODE,
 
         .commandMetadata = {
-            .commandDescription = "Switch the pen to normal drawing mode.",
-            .argumentMetadata = {
-                .arguments = {},
-                .defaultArgs = {}
+            .commandDescription = "Switch the pen mode.",
+            .arguments = {
+                {
+                    Command::Argument::ARGTYPE::INT,
+                    "pen mode",
+                    "Which pen mode to set to. [0]Draw, [1]Rubber, [2]Rainbow",
+                    std::pair<int,int>{ 0 , 2 }
+                },
+                {
+                    Command::Argument::ARGTYPE::INT,
+                    "setting",
+                    "Optional parameter for selected pen mode",
+                    std::nullopt,
+                    false
+                },
+            },
+            .presets = {
+                { "Draw",    { 0 } },
+                { "Rubber",  { 1 } },
+                { "Rainbow", { 2 } }
             }
+            
         },
 
         .inputMetadata = {
-            .keyboard = inp::Keyboard_Metadata{
-                SDL_SCANCODE_Y,
-                false
+            .keyboard = {
+                {
+                    inp::Keyboard_Metadata{ SDL_SCANCODE_Y, 0},
+                    inp::Keyboard_Metadata{ SDL_SCANCODE_U, 1},
+                    inp::Keyboard_Metadata{ SDL_SCANCODE_E, 2}
+                }
             },
 
-            .cli = inp::CLI_Metadata{
-                "penmode_draw",
-                "Switch the pen to normal drawing mode."
-            },
+            .cli = inp::CLI_Metadata
+                { 
+                "penmode",
+    R"(Switch the pen mode.
+Arguments are:
+    [0] Pen mode. [0] Draw, [1] Rubber, [2] Rainbow.
+    [1] {Optional} Setting. Additional parameter interpreted by the selected pen mode.)"
+                },
 
             .gui = GUI::GUI_Metadata{
                 GUI::HEADER::TOOLS,
@@ -505,75 +335,7 @@ Argumments are:
         },
 
         .processor = &Draw::processChangePenMode
-    },
-
-    {
-        .ID = COMMAND_ID::PENMODE_RUBBER,
-
-        .commandMetadata = {
-            .commandDescription = "Switch the pen to rubber mode.",
-            .argumentMetadata = {
-                .arguments = {},
-                .defaultArgs = {}
-            }
-        },
-
-        .inputMetadata = {
-            .keyboard = inp::Keyboard_Metadata{
-                SDL_SCANCODE_U,
-                false
-            },
-
-            .cli = inp::CLI_Metadata{
-                "penmode_rubber",
-                "Switch the pen to rubber mode."
-            },
-
-            .gui = GUI::GUI_Metadata{
-                GUI::HEADER::TOOLS,
-                "Rubber",
-                GUI::FUNCTION_TYPE::BINARY,
-                std::monostate{}
-            }
-        },
-
-        .processor = &Draw::processChangePenMode
-    },
-
-    {
-        .ID = COMMAND_ID::PENMODE_RAINBOW,
-
-        .commandMetadata = {
-            .commandDescription = "Switch the pen to rainbow mode.",
-            .argumentMetadata = {
-                .arguments = {},
-                .defaultArgs = {}
-            }
-        },
-
-        .inputMetadata = {
-            .keyboard = inp::Keyboard_Metadata{
-                SDL_SCANCODE_E,
-                false
-            },
-
-            .cli = inp::CLI_Metadata{
-                "penmode_rainbow",
-                "Switch the pen to rainbow drawing mode."
-            },
-
-            .gui = GUI::GUI_Metadata{
-                GUI::HEADER::TOOLS,
-                "Rainbow",
-                GUI::FUNCTION_TYPE::BINARY,
-                std::monostate{}
-            }
-        },
-
-        .processor = &Draw::processChangePenMode
-    },
-
-
+     },
     // ============================================================
     // PEN
     // ============================================================
@@ -582,324 +344,147 @@ Argumments are:
         .ID = COMMAND_ID::PEN_DOWN,
 
         .commandMetadata = {
-            .commandDescription = "Perform a discrete pen-down action.",
+            .commandDescription = "Enables cursor-based drawing",
 
-            .argumentMetadata = {
-                .arguments = {
-                    {
-                        Command::Argument::ARGTYPE::INT,
-                        "held",
-                        "Whether the pen-down input represents a held input.",
-                        std::pair<Command::argument, Command::argument>{0, 1}
-                    }
-                },
-
-                .defaultArgs = {
-                    0
+            .arguments = {
+                {   
+                    Command::Argument::ARGTYPE::INT,
+                    "type",
+                    "Whether the command needs discrete[0] or continuous[1] input",
+                    std::pair<int, int >{0, 1},
                 }
+            },
+            .presets = {
+                { "Discrete",   { 0 }},
+                { "Continuous", { 1 }}
             }
         },
 
         .inputMetadata = {
-            .keyboard = inp::Keyboard_Metadata{
-                SDL_SCANCODE_1,
-                false
+            .keyboard = {
+                {
+                    {   SDL_SCANCODE_1, 0   }
+                }
+            },
+            .mouse = {
+                {
+                    {   SDL_BUTTON_LMASK, 1   }
+                }
             },
 
             .cli = inp::CLI_Metadata{
                 "pen",
-                "Perform a discrete pen-down action."
+                R"(Begin drawing as the cursor moves.
+Arguments are:
+    [0] Input mode. [0] Discrete, [1] Continuous.
+Continuous input is not supported through the CLI.)"
             }
         },
 
         .processor = &Draw::processPenDown
     },
-
-    {
-        .ID = COMMAND_ID::PEN_HELD_DOWN,
-
-        .commandMetadata = {
-            .commandDescription = "Perform a continuous held pen-down action.",
-
-            .argumentMetadata = {
-                .arguments = {
-                    {
-                        Command::Argument::ARGTYPE::INT,
-                        "held",
-                        "Whether the pen-down input represents a held input.",
-                        std::pair<Command::argument, Command::argument>{0, 1}
-                    }
-                },
-
-                .defaultArgs = {
-                    1
-                }
-            }
-        },
-
-        .inputMetadata = {
-            .mouse = inp::Mouse_Metadata{
-                SDL_BUTTON_LMASK
-            }
-        },
-
-        .processor = &Draw::processPenDown
-    },
-
 
     // ============================================================
     // DRAW STEP
     // ============================================================
 
     {
-        .ID = COMMAND_ID::DRAWSTEP_DECREASE,
+        .ID = COMMAND_ID::CURSOR_DRAWSTEP,
 
         .commandMetadata = {
-            .commandDescription = "Decrease the cursor draw step.",
-
-            .argumentMetadata = {
-                .arguments = {
-                    {
-                        Command::Argument::ARGTYPE::INT,
-                        "change",
-                        "Amount to add to the current draw step.",
-                        std::nullopt
-                    }
+            .commandDescription = "Change the difference travelled by the cursor (per input)",
+            .arguments = {
+                {
+                    Command::Argument::ARGTYPE::INT,
+                    "setting (ADD/SET)",
+                    "Setting to define interpretation of ARG_2",
+                    std::pair<int,int>{ 0,1 }
                 },
-
-                .defaultArgs = {
-                    -1
+                {
+                    Command::Argument::ARGTYPE::INT,
+                    "Delta",
+                    "Amount to be added to, or have drawstep set to",
+                    std::pair<int, int>{ DEFAULT_DRAWSTEP_MIN,DEFAULT_DRAWSTEP_MAX }
                 }
+            },
+            .presets = {
+                {   "Increment",    { 0, 1 }  },
+                {   "Decrement",    { 0,-1 }  },
+                {   "Reset",        { 1, DEFAULT_DRAWSTEP_CUR}  }
             }
         },
 
         .inputMetadata = {
-            .keyboard = inp::Keyboard_Metadata{
-                SDL_SCANCODE_Z,
-                false
+            .keyboard = {
+                {
+                    inp::Keyboard_Metadata{ SDL_SCANCODE_X, 0 },
+                    inp::Keyboard_Metadata{ SDL_SCANCODE_Z, 1 }
+                }
             },
 
             .cli = inp::CLI_Metadata{
-                "step_down",
-                "Decrease the current draw step."
-            }
+    "drawstep",
+    R"(Change the distance travelled by the cursor per input.
+Arguments are:
+    [0] Setting. [0] Add to the current draw step, [1] Set the draw step directly.
+    [1] Delta. Amount to add, or value to set the draw step to.)"
+}
         },
 
         .processor = &Cursor::processChangeDrawstep
     },
-
-    {
-        .ID = COMMAND_ID::DRAWSTEP_INCREASE,
-
-        .commandMetadata = {
-            .commandDescription = "Increase the cursor draw step.",
-
-            .argumentMetadata = {
-                .arguments = {
-                    {
-                        Command::Argument::ARGTYPE::INT,
-                        "change",
-                        "Amount to add to the current draw step.",
-                        std::nullopt
-                    }
-                },
-
-                .defaultArgs = {
-                    1
-                }
-            }
-        },
-
-        .inputMetadata = {
-            .keyboard = inp::Keyboard_Metadata{
-                SDL_SCANCODE_X,
-                false
-            },
-
-            .cli = inp::CLI_Metadata{
-                "step_up",
-                "Increase the current draw step."
-            }
-        },
-
-        .processor = &Cursor::processChangeDrawstep
-    },
-
-    {
-        .ID = COMMAND_ID::DRAWSTEP_SET,
-
-        .commandMetadata = {
-            .commandDescription = "Set the cursor draw step.",
-
-            .argumentMetadata = {
-                .arguments = {
-                    {
-                        Command::Argument::ARGTYPE::INT,
-                        "step",
-                        "New cursor draw step.",
-
-                        std::pair<Command::argument, Command::argument>{
-                            DEFAULT_DRAWSTEP_MIN,
-                            DEFAULT_DRAWSTEP_MAX
-                        }
-                    }
-                },
-
-                .defaultArgs = {
-                    DEFAULT_DRAWSTEP_CUR
-                }
-            }
-        },
-
-        .inputMetadata = {
-            .cli = inp::CLI_Metadata{
-                "step_set",
-                "Set the cursor draw step to a specified value."
-            },
-
-            .gui = GUI::GUI_Metadata{
-                GUI::HEADER::TOOLS,
-                "Change Drawstep",
-                GUI::FUNCTION_TYPE::SLIDER,
-
-                GUI::SLIDER_METADATA{
-                    DEFAULT_DRAWSTEP_MIN,
-                    DEFAULT_DRAWSTEP_MAX,
-                    GUI::Resolver::resolveDrawstep
-                }
-            }
-        },
-
-        .processor = &Cursor::processChangeDrawstep
-    },
-
 
     // ============================================================
     // PEN WIDTH
     // ============================================================
 
-    {
-        .ID = COMMAND_ID::PEN_WIDTH_DECREASE,
+{
+    .ID = COMMAND_ID::PEN_WIDTH,
 
-        .commandMetadata = {
-            .commandDescription = "Decrease the pen width.",
+    .commandMetadata = {
+        .commandDescription = "Change the pen width.",
 
-            .argumentMetadata = {
-                .arguments = {
-                    {
-                        Command::Argument::ARGTYPE::INT,
-                        "change",
-                        "Amount to add to the current pen width.",
-                        std::nullopt
-                    }
-                },
-
-                .defaultArgs = {
-                    -1
-                }
-            }
-        },
-
-        .inputMetadata = {
-            .keyboard = inp::Keyboard_Metadata{
-                SDL_SCANCODE_V,
-                false
+        .arguments = {
+            {
+                Command::Argument::ARGTYPE::INT,
+                "setting (ADD/SET)",
+                "Setting to define interpretation of ARG_2.",
+                std::pair<int, int>{ 0, 1 }
             },
-
-            .cli = inp::CLI_Metadata{
-                "pen_thinner",
-                "Decrease the current pen width."
+            {
+                Command::Argument::ARGTYPE::INT,
+                "Delta",
+                "Amount to add to, or value to set the pen width to.",
+                std::pair<int, int>{ DEFAULT_PENWIDTH_MIN, DEFAULT_PENWIDTH_MAX }
             }
         },
 
-        .processor = &Draw::processChangePenWidth
+        .presets = {
+            { "Increment", { 0,  1 } },
+            { "Decrement", { 0, -1 } },
+            { "Reset",     { 1, DEFAULT_PENWIDTH_CUR } }
+        }
     },
 
-    {
-        .ID = COMMAND_ID::PEN_WIDTH_INCREASE,
-
-        .commandMetadata = {
-            .commandDescription = "Increase the pen width.",
-
-            .argumentMetadata = {
-                .arguments = {
-                    {
-                        Command::Argument::ARGTYPE::INT,
-                        "change",
-                        "Amount to add to the current pen width.",
-                        std::nullopt
-                    }
-                },
-
-                .defaultArgs = {
-                    1
-                }
+    .inputMetadata = {
+        .keyboard = {
+            {
+                inp::Keyboard_Metadata{ SDL_SCANCODE_B, 0 },
+                inp::Keyboard_Metadata{ SDL_SCANCODE_V, 1 }
             }
         },
 
-        .inputMetadata = {
-            .keyboard = inp::Keyboard_Metadata{
-                SDL_SCANCODE_B,
-                false
-            },
-
-            .cli = inp::CLI_Metadata{
-                "pen_thicker",
-                "Increase the current pen width."
-            }
-        },
-
-        .processor = &Draw::processChangePenWidth
+        .cli = inp::CLI_Metadata{
+            "penwidth",
+            R"(Change the pen width.
+Arguments are:
+    [0] Setting. [0] Add to the current pen width, [1] Set the pen width directly.
+    [1] Delta. Amount to add, or value to set the pen width to.)"
+        }
     },
 
-    {
-        .ID = COMMAND_ID::PEN_SET,
-
-        .commandMetadata = {
-            .commandDescription = "Set the pen width.",
-
-            .argumentMetadata = {
-                .arguments = {
-                    {
-                        Command::Argument::ARGTYPE::INT,
-                        "width",
-                        "New pen width.",
-
-                        std::pair<Command::argument, Command::argument>{
-                            DEFAULT_PENWIDTH_MIN,
-                            DEFAULT_PENWIDTH_MAX
-                        }
-                    }
-                },
-
-                .defaultArgs = {
-                    DEFAULT_PENWIDTH_CUR
-                }
-            }
-        },
-
-        .inputMetadata = {
-            .cli = inp::CLI_Metadata{
-                "pen_set",
-                "Set the pen width to a specified value."
-            },
-
-            .gui = GUI::GUI_Metadata{
-                GUI::HEADER::TOOLS,
-                "Change Pen Width",
-                GUI::FUNCTION_TYPE::SLIDER,
-
-                GUI::SLIDER_METADATA{
-                    DEFAULT_PENWIDTH_MIN,
-                    DEFAULT_PENWIDTH_MAX,
-                    GUI::Resolver::resolvePenWidth
-                }
-            }
-        },
-
-        .processor = &Draw::processChangePenWidth
-    },
-
+    .processor = &Draw::processChangePenWidth
+},
 
     // ============================================================
     // INPUT
@@ -910,16 +495,17 @@ Argumments are:
 
         .commandMetadata = {
             .commandDescription = "Enable CLI input mode.",
-            .argumentMetadata = {
-                .arguments = {},
-                .defaultArgs = {}
+            .arguments = {},
+            .presets = {
+                { "Enable CLI", {} }
             }
         },
 
         .inputMetadata = {
-            .keyboard = inp::Keyboard_Metadata{
-                SDL_SCANCODE_0,
-                false
+            .keyboard = {
+                {
+                    inp::Keyboard_Metadata{ SDL_SCANCODE_0, 0}
+                }
             }
         },
 
@@ -931,16 +517,17 @@ Argumments are:
 
         .commandMetadata = {
             .commandDescription = "Enable mouse input mode.",
-            .argumentMetadata = {
-                .arguments = {},
-                .defaultArgs = {}
+            .arguments = {},
+            .presets = {
+                { "Enable Mouse", {} }
             }
         },
 
         .inputMetadata = {
-            .keyboard = inp::Keyboard_Metadata{
-                SDL_SCANCODE_3,
-                false
+            .keyboard = {
+                {
+                    inp::Keyboard_Metadata{ SDL_SCANCODE_3, 0 }
+                }
             }
         },
 
@@ -957,7 +544,7 @@ Argumments are:
 
         .commandMetadata = {
             .commandDescription = "Reset the canvas.",
-            .argumentMetadata = {
+             = {
                 .arguments = {},
                 .defaultArgs = {}
             }
@@ -990,7 +577,7 @@ Argumments are:
 
         .commandMetadata = {
             .commandDescription = "Clear the undo and redo history.",
-            .argumentMetadata = {
+             = {
                 .arguments = {},
                 .defaultArgs = {}
             }
@@ -1011,7 +598,7 @@ Argumments are:
 
         .commandMetadata = {
             .commandDescription = "Reset the complete application state.",
-            .argumentMetadata = {
+             = {
                 .arguments = {},
                 .defaultArgs = {}
             }
@@ -1039,33 +626,6 @@ Argumments are:
         .processor = &Canvas::processResetAll
     },
 
-    {
-        .ID = COMMAND_ID::RESET_CURSOR,
-
-        .commandMetadata = {
-            .commandDescription = "Reset the cursor.",
-            .argumentMetadata = {
-                .arguments = {},
-                .defaultArgs = {}
-            }
-        },
-
-        .inputMetadata = {
-            .keyboard = inp::Keyboard_Metadata{
-                SDL_SCANCODE_9,
-                false
-            },
-
-            .cli = inp::CLI_Metadata{
-                "reset_cursor",
-                "Reset the cursor position."
-            }
-        },
-
-        .processor = &Cursor::processMoveCursor
-    },
-
-
     // ============================================================
     // UNDO / REDO
     // ============================================================
@@ -1075,7 +635,7 @@ Argumments are:
 
         .commandMetadata = {
             .commandDescription = "Undo the most recent action.",
-            .argumentMetadata = {
+             = {
                 .arguments = {},
                 .defaultArgs = {}
             }
@@ -1108,7 +668,7 @@ Argumments are:
 
         .commandMetadata = {
             .commandDescription = "Redo the most recently undone action.",
-            .argumentMetadata = {
+             = {
                 .arguments = {},
                 .defaultArgs = {}
             }
@@ -1147,7 +707,7 @@ Argumments are:
         .commandMetadata = {
             .commandDescription = "Resize the canvas.",
 
-            .argumentMetadata = {
+             = {
                 .arguments = {
                     {
                         Command::Argument::ARGTYPE::COORDINATE,
@@ -1187,7 +747,7 @@ Argumments are:
         .commandMetadata = {
             .commandDescription = "Set the canvas height.",
 
-            .argumentMetadata = {
+             = {
                 .arguments = {
                     {
                         Command::Argument::ARGTYPE::INT,
@@ -1235,7 +795,7 @@ Argumments are:
         .commandMetadata = {
             .commandDescription = "Set the canvas width.",
 
-            .argumentMetadata = {
+             = {
                 .arguments = {
                     {
                         Command::Argument::ARGTYPE::INT,

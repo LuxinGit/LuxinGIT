@@ -5,6 +5,7 @@
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_sdlrenderer3.h>
 #include <iostream>
+#include <cassert>
 
 namespace Input {
 	
@@ -32,23 +33,24 @@ namespace Input {
 			if (ImGui::GetIO().WantCaptureKeyboard) return;
 
 			const bool* kS = SDL_GetKeyboardState(nullptr);
-			for (const auto& [scancode, def] : s.KeyboardState.keyBindings) {
+			for (const auto& [scancode, binding] : s.KeyboardState.keyBindings) {
+
 				if (kS[scancode] &&
-					(def->inputMetadata.keyboard->repeatable || !s.KeyboardState.previousKeyboardState[scancode]))
-					Command::Processor::constructCommand(cS, def);
+                    (binding.def.inputMetadata.keyboard.value()[binding.callerIndex].repeatable || !s.KeyboardState.previousKeyboardState[scancode]))
+					Command::Processor::constructCommand(cS, &binding.def, binding.args);
 
 				s.KeyboardState.previousKeyboardState[scancode] = kS[scancode];
 			}
+
 		}
 		void harvestMouseState(Input_State& s, Cursor_State& sC, Command_State& cS) {
 
 			if (!s.MouseState.enableMouse) return;
 
 			SDL_MouseButtonFlags mS = SDL_GetMouseState(&sC.deltaCursor.first, &sC.deltaCursor.second);
-
-			for (const auto& [button, def] : s.MouseState.mouseBindings) 
-				if (mS & button) Command::Processor::constructCommand(cS, def);
-
+            for (const auto& [button, binding] : s.MouseState.mouseBindings)
+                if (mS & button)
+                    Command::Processor::constructCommand(cS, &binding.def, binding.args);
 		}
         void checkShowMouse(Input_State& iS) {
             if (!iS.MouseState.enableMouse or 
@@ -63,14 +65,32 @@ namespace Input {
             checkShowMouse(s.InputState);
 		}
 
+        void initialiseKeyboardBinding(const Command::Command_Definition& def, Input_State& s) {
+            
+            const auto& kmds = def.inputMetadata.keyboard.value();
+            
+            for (size_t i = 0; i < kmds.size(); i++) {
+                s.KeyboardState.keyBindings.emplace(kmds[i].defaultScancode, Command::Definition::Input::Binding{i, def.commandMetadata.presets[kmds[i].presetIndex].args, def});
+            }
+
+        }
+        void initialiseMouseBinding(const Command::Command_Definition& def, Input_State& s) {
+
+            const auto& mmds = def.inputMetadata.mouse.value();
+
+            for (size_t i = 0; i < mmds.size(); i++) {
+                s.MouseState.mouseBindings.emplace(mmds[i].defaultMousecode, Command::Definition::Input::Binding{ i, def.commandMetadata.presets[mmds[i].presetIndex].args, def });
+            }
+        }
+
 	}
 
 	void initialiseBindings(Input_State& s)
 	{
 		for (const auto& def : NEW_COMMAND_REPO) {
 			
-			if (def.inputMetadata.keyboard) s.KeyboardState.keyBindings		[def.inputMetadata.keyboard->SCANCODE]	= &def;
-			if (def.inputMetadata.mouse)	s.MouseState.mouseBindings		[def.inputMetadata.mouse->MOUSECODE]	= &def;
+			if (def.inputMetadata.keyboard) initialiseKeyboardBinding(def, s);
+			if (def.inputMetadata.mouse)	initialiseMouseBinding   (def, s);
 			if (def.inputMetadata.cli)		s.CLIState.commandLineBindings	[def.inputMetadata.cli->commandName]	= &def;
 			if (def.inputMetadata.gui) {
 				const Command::Definition::Input::GUI::GUI_Metadata& gui = *def.inputMetadata.gui;
@@ -490,7 +510,7 @@ namespace Input::CLI {
 
             auto def = CLIS.commandLineBindings.at(input);
 
-            const auto& defArgs = def->commandMetadata.argumentMetadata.arguments;
+            const auto& defArgs = def->commandMetadata.arguments;
                 // std::vector<argument_definition>
 
             if (defArgs.empty()
@@ -523,12 +543,12 @@ namespace Input::CLI {
                     if (harvestInput("Argument[" + std::to_string(retVal.first) + "] not within range.  Replace?\n [Y] (or quits otherwise)") != "Y")
                         return false;
                     if (defArgs[retVal.first].type == Command::Argument::ARGTYPE::INT) {
-                        std::cout << "Expected range:\nMin: " + std::to_string(std::get<int>(def->commandMetadata.argumentMetadata.arguments[retVal.first].constraints->first));
-                        std::cout << "\nMax: " + std::to_string(std::get<int>(def->commandMetadata.argumentMetadata.arguments[retVal.first].constraints->second));
+                        std::cout << "Expected range:\nMin: " + std::to_string(std::get<int>(def->commandMetadata.arguments[retVal.first].constraints->first));
+                        std::cout << "\nMax: " + std::to_string(std::get<int>(def->commandMetadata.arguments[retVal.first].constraints->second));
                     }
                     else {
-                        std::cout << "Expected range:\nMin: " + static_cast<std::string>(std::get<coordinate>(def->commandMetadata.argumentMetadata.arguments[retVal.first].constraints->first));
-                        std::cout << "\nMax: " + static_cast<std::string>(std::get<coordinate>(def->commandMetadata.argumentMetadata.arguments[retVal.first].constraints->second));
+                        std::cout << "Expected range:\nMin: " + static_cast<std::string>(std::get<coordinate>(def->commandMetadata.arguments[retVal.first].constraints->first));
+                        std::cout << "\nMax: " + static_cast<std::string>(std::get<coordinate>(def->commandMetadata.arguments[retVal.first].constraints->second));
                     }
                     std::cout << std::endl;
                     harvestArgument(defArgs[retVal.first].type, args[retVal.first]);
