@@ -36,8 +36,8 @@ namespace Input {
 			for (const auto& [scancode, binding] : s.KeyboardState.keyBindings) {
 
 				if (kS[scancode] &&
-                    (binding.def.inputMetadata.keyboard.value()[binding.callerIndex].repeatable || !s.KeyboardState.previousKeyboardState[scancode]))
-					Command::Processor::constructCommand(cS, &binding.def, binding.args);
+                    (binding.def->inputMetadata.keyboard.value()[binding.callerIndex].repeatable || !s.KeyboardState.previousKeyboardState[scancode]))
+					Command::Processor::constructCommand(cS, binding.def, binding.args);
 
 				s.KeyboardState.previousKeyboardState[scancode] = kS[scancode];
 			}
@@ -50,7 +50,7 @@ namespace Input {
 			SDL_MouseButtonFlags mS = SDL_GetMouseState(&sC.deltaCursor.first, &sC.deltaCursor.second);
             for (const auto& [button, binding] : s.MouseState.mouseBindings)
                 if (mS & button)
-                    Command::Processor::constructCommand(cS, &binding.def, binding.args);
+                    Command::Processor::constructCommand(cS, binding.def, binding.args);
 		}
         void checkShowMouse(Input_State& iS) {
             if (!iS.MouseState.enableMouse or 
@@ -70,7 +70,7 @@ namespace Input {
             const auto& kmds = def.inputMetadata.keyboard.value();
             
             for (size_t i = 0; i < kmds.size(); i++) {
-                s.KeyboardState.keyBindings.emplace(kmds[i].defaultScancode, Command::Definition::Input::Binding{i, def.commandMetadata.presets[kmds[i].presetIndex].args, def});
+                s.KeyboardState.keyBindings.emplace(kmds[i].defaultScancode, Command::Definition::Input::Binding{i, def.commandMetadata.presets[kmds[i].presetIndex].args, &def});
             }
 
         }
@@ -79,10 +79,31 @@ namespace Input {
             const auto& mmds = def.inputMetadata.mouse.value();
 
             for (size_t i = 0; i < mmds.size(); i++) {
-                s.MouseState.mouseBindings.emplace(mmds[i].defaultMousecode, Command::Definition::Input::Binding{ i, def.commandMetadata.presets[mmds[i].presetIndex].args, def });
+                s.MouseState.mouseBindings.emplace(mmds[i].defaultMousecode, Command::Definition::Input::Binding{ i, def.commandMetadata.presets[mmds[i].presetIndex].args, &def });
             }
         }
+        void iniitaliseGUIBindings(const Command::Command_Definition& def, Input_State& s) 
+        {
+            const auto& guis = *def.inputMetadata.gui;
 
+            for (size_t i = 0; i < guis.size(); i++) {
+
+                const auto& gui = guis[i];
+
+                const auto& [presetName, presetArgs] =
+                    def.commandMetadata.presets[gui.presetIndex];
+
+                s.GUIState.headers[
+                    static_cast<size_t>(gui.header)
+                ].emplace_back(
+                    Input_State::GUI_State::GUI_Binding{
+                        &def,
+                        i,
+                        presetArgs
+                    }
+                );
+            }
+        }
 	}
 
 	void initialiseBindings(Input_State& s)
@@ -92,10 +113,7 @@ namespace Input {
 			if (def.inputMetadata.keyboard) initialiseKeyboardBinding(def, s);
 			if (def.inputMetadata.mouse)	initialiseMouseBinding   (def, s);
 			if (def.inputMetadata.cli)		s.CLIState.commandLineBindings	[def.inputMetadata.cli->commandName]	= &def;
-			if (def.inputMetadata.gui) {
-				const Command::Definition::Input::GUI::GUI_Metadata& gui = *def.inputMetadata.gui;
-				s.GUIState.headers[static_cast<size_t>(gui.header)].emplace_back(&def);
-			}
+            if (def.inputMetadata.gui)      iniitaliseGUIBindings    (def, s);
 
 		}
 	}
@@ -120,29 +138,49 @@ namespace Input::GUI {
 
     namespace {
 
-        using commandDefinition = const Command::Command_Definition*;
+        using GUIBinding =
+            Input_State::GUI_State::GUI_Binding;
+
+        using GUIMetadata =
+            Command::Definition::Input::GUI::GUI_Metadata;
+
+        using FunctionType =
+            Command::Definition::Input::GUI::FUNCTION_TYPE;
+
+
+        const GUIMetadata& getMetadata(
+            const GUIBinding& binding)
+        {
+            return binding.definition
+                ->inputMetadata.gui.value()
+                [binding.guiIndex];
+        }
+
 
         void binaryMenuItem(
             Application_State& s,
-            commandDefinition def)
+            const GUIBinding& binding)
         {
-            const Command::Definition::Input::GUI::GUI_Metadata& md =
-                *def->inputMetadata.gui;
+            const GUIMetadata& md =
+                getMetadata(binding);
 
-            if (ImGui::MenuItem(md.label.data())) {
-                Command::Processor::constructCommand(
-                    s.CommandState,
-                    def
-                );
-            }
+            if (!ImGui::MenuItem(md.label.data()))
+                return;
+
+            Command::Processor::constructCommand(
+                s.CommandState,
+                binding.definition,
+                binding.args
+            );
         }
+
 
         void nonbinaryMenuItem(
             Application_State& s,
-            commandDefinition def)
+            const GUIBinding& binding)
         {
-            const Command::Definition::Input::GUI::GUI_Metadata& md =
-                *def->inputMetadata.gui;
+            const GUIMetadata& md =
+                getMetadata(binding);
 
             auto& openPopouts =
                 s.InputState.GUIState.openPopouts;
@@ -150,87 +188,120 @@ namespace Input::GUI {
             if (!ImGui::MenuItem(md.label.data()))
                 return;
 
-            if (openPopouts.contains(def))
-                openPopouts.erase(def);
+            if (openPopouts.contains(binding))
+                openPopouts.erase(binding);
             else
-                openPopouts.insert(def);
+                openPopouts.insert(binding);
         }
+
 
         void menuItem(
             Application_State& s,
-            commandDefinition def)
+            const GUIBinding& binding)
         {
-            const Command::Definition::Input::GUI::GUI_Metadata& md =
-                *def->inputMetadata.gui;
+            const GUIMetadata& md =
+                getMetadata(binding);
 
-            switch (md.TYPE) {
+            switch (md.functionType) {
 
-            case Command::Definition::Input::GUI::FUNCTION_TYPE::BINARY:
-                binaryMenuItem(s, def);
+            case FunctionType::BINARY:
+                binaryMenuItem(s, binding);
                 break;
 
             default:
-                nonbinaryMenuItem(s, def);
+                nonbinaryMenuItem(s, binding);
                 break;
             }
         }
+
 
         void menu(
             Application_State& s,
             const char* name,
-            const std::vector<commandDefinition>& commands)
+            const std::vector<GUIBinding>& bindings)
         {
             if (!ImGui::BeginMenu(name))
                 return;
 
-            for (commandDefinition def : commands)
-                menuItem(s, def);
+            for (const GUIBinding& binding : bindings)
+                menuItem(s, binding);
 
             ImGui::EndMenu();
         }
 
+
         void sliderPopout(
             Application_State& s,
-            commandDefinition def)
+            const GUIBinding& binding)
         {
-            const Command::Definition::Input::GUI::GUI_Metadata& md =
-                *def->inputMetadata.gui;
+            const GUIMetadata& md =
+                getMetadata(binding);
 
-            const Command::Definition::Input::GUI::SLIDER_METADATA& sMD =
-                std::get<Command::Definition::Input::GUI::SLIDER_METADATA>(
-                    md.typeMetadata
-                );
+            const auto& sMD =
+                std::get<
+                Command::Definition::Input::GUI::SLIDER_METADATA
+                >(md.metadata);
 
-            int& underlying = sMD.resolve(s);
-            int payload = underlying;
+            int payload = sMD.resolve(s);
 
-            if (ImGui::SliderInt(
+            if (!ImGui::SliderInt(
                 md.label.data(),
                 &payload,
                 sMD.minimum,
                 sMD.maximum))
-            {
-                Command::Processor::constructCommand(
-                    s.CommandState,
-                    def,
-                    { payload }
-                );
-            }
+                return;
+
+            auto args = binding.args;
+
+            args.resize(
+                binding.definition
+                ->commandMetadata.arguments.size()
+            );
+
+            args[sMD.argumentIndex] = payload;
+
+            Command::Processor::constructCommand(
+                s.CommandState,
+                binding.definition,
+                std::move(args)
+            );
         }
 
         void colourPopout(
             Application_State& s,
-            commandDefinition def)
+            const GUIBinding& binding)
         {
-            const Command::Definition::Input::GUI::GUI_Metadata& md =
-                *def->inputMetadata.gui;
+            const GUIMetadata& md =
+                getMetadata(binding);
 
-            const Command::Definition::Input::GUI::COLOUR_METADATA& cMD =
-                std::get<Command::Definition::Input::GUI::COLOUR_METADATA>(
-                    md.typeMetadata
-                );
+            const auto& cMD =
+                std::get<
+                Command::Definition::Input::GUI::COLOUR_METADATA
+                >(md.metadata);
 
-            colour& underlying = cMD.resolve(s);
+            colour& underlying =
+                cMD.resolve(s);
+
+            auto submitColour =
+                [&](const colour& value)
+                {
+                    std::vector<Command::argument> args =
+                        binding.args;
+
+                    args.resize(
+                        binding.definition
+                        ->commandMetadata.arguments.size()
+                    );
+
+                    args[2] = value;
+
+                    Command::Processor::constructCommand(
+                        s.CommandState,
+                        binding.definition,
+                        std::move(args)
+                    );
+                };
+
 
             std::array<float, 4> displayload =
                 luxel::coloursToFloat(underlying);
@@ -239,14 +310,11 @@ namespace Input::GUI {
                 md.label.data(),
                 displayload.data()))
             {
-                Command::Processor::constructCommand(
-                    s.CommandState,
-                    def,
-                    {
-                        luxel::floatsToColour(displayload)
-                    }
+                submitColour(
+                    luxel::floatsToColour(displayload)
                 );
             }
+
 
             int rgba[4] = {
                 static_cast<int>(underlying[0]),
@@ -255,30 +323,35 @@ namespace Input::GUI {
                 static_cast<int>(underlying[3])
             };
 
-            if (ImGui::InputInt4("RGBA", rgba)) {
-
+            if (ImGui::InputInt4(
+                "RGBA",
+                rgba))
+            {
                 colour value = {};
 
                 for (size_t i = 0; i < value.size(); i++) {
-                    value[i] = static_cast<uint8_t>(
-                        std::clamp(rgba[i], 0, 255)
-                        );
+
+                    value[i] =
+                        static_cast<uint8_t>(
+                            std::clamp(
+                                rgba[i],
+                                0,
+                                255
+                            )
+                            );
                 }
 
-                Command::Processor::constructCommand(
-                    s.CommandState,
-                    def,
-                    { value }
-                );
+                submitColour(value);
             }
         }
 
+
         bool renderPopout(
             Application_State& s,
-            commandDefinition def)
+            const GUIBinding& binding)
         {
-            const Command::Definition::Input::GUI::GUI_Metadata& md =
-                *def->inputMetadata.gui;
+            const GUIMetadata& md =
+                getMetadata(binding);
 
             bool open = true;
 
@@ -290,14 +363,20 @@ namespace Input::GUI {
                 return open;
             }
 
-            switch (md.TYPE) {
+            switch (md.functionType) {
 
-            case Command::Definition::Input::GUI::FUNCTION_TYPE::SLIDER:
-                sliderPopout(s, def);
+            case FunctionType::SLIDER:
+                sliderPopout(
+                    s,
+                    binding
+                );
                 break;
 
-            case Command::Definition::Input::GUI::FUNCTION_TYPE::COLOUR:
-                colourPopout(s, def);
+            case FunctionType::COLOUR:
+                colourPopout(
+                    s,
+                    binding
+                );
                 break;
 
             default:
@@ -309,23 +388,34 @@ namespace Input::GUI {
             return open;
         }
 
-        void checkForPopouts(Application_State& s)
+
+        void checkForPopouts(
+            Application_State& s)
         {
             auto& openPopouts =
                 s.InputState.GUIState.openPopouts;
 
-            std::vector<commandDefinition> clearList;
+            std::vector<GUIBinding> clearList;
 
-            for (commandDefinition def : openPopouts) {
-                if (!renderPopout(s, def))
-                    clearList.emplace_back(def);
+            for (const GUIBinding& binding : openPopouts) {
+
+                if (!renderPopout(
+                    s,
+                    binding))
+                {
+                    clearList.emplace_back(
+                        binding
+                    );
+                }
             }
 
-            for (commandDefinition def : clearList)
-                openPopouts.erase(def);
+            for (const GUIBinding& binding : clearList)
+                openPopouts.erase(binding);
         }
 
-        void renderMenuBar(Application_State& s)
+
+        void renderMenuBar(
+            Application_State& s)
         {
             auto& headers =
                 s.InputState.GUIState.headers;
@@ -337,7 +427,9 @@ namespace Input::GUI {
                 s,
                 "File",
                 headers[
-                    static_cast<size_t>(Command::Definition::Input::GUI::HEADER::FILE)
+                    static_cast<size_t>(
+                        Command::Definition::Input::GUI::HEADER::FILE
+                        )
                 ]
             );
 
@@ -345,7 +437,9 @@ namespace Input::GUI {
                 s,
                 "Edit",
                 headers[
-                    static_cast<size_t>(Command::Definition::Input::GUI::HEADER::EDIT)
+                    static_cast<size_t>(
+                        Command::Definition::Input::GUI::HEADER::EDIT
+                        )
                 ]
             );
 
@@ -353,7 +447,9 @@ namespace Input::GUI {
                 s,
                 "Tools",
                 headers[
-                    static_cast<size_t>(Command::Definition::Input::GUI::HEADER::TOOLS)
+                    static_cast<size_t>(
+                        Command::Definition::Input::GUI::HEADER::TOOLS
+                        )
                 ]
             );
 
@@ -362,7 +458,9 @@ namespace Input::GUI {
 
     }
 
-    void initialiseGUI(Application_State& s)
+
+    void initialiseGUI(
+        Application_State& s)
     {
         IMGUI_CHECKVERSION();
 
@@ -378,11 +476,13 @@ namespace Input::GUI {
             s.SDLState.Renderer
         );
 
-        ImGuiIO& io = ImGui::GetIO();
+        ImGuiIO& io =
+            ImGui::GetIO();
 
         io.ConfigFlags |=
             ImGuiConfigFlags_NoMouseCursorChange;
     }
+
 
     void beginFrame()
     {
@@ -390,6 +490,7 @@ namespace Input::GUI {
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
     }
+
 
     void cleanupGUI()
     {
@@ -399,7 +500,8 @@ namespace Input::GUI {
     }
 
 
-    void renderGUI(Application_State& s)
+    void renderGUI(
+        Application_State& s)
     {
         if (!s.InputState.GUIState.enableGUI)
             return;
@@ -416,7 +518,6 @@ namespace Input::GUI {
     }
 
 }
-
 namespace Input::CLI {
 
     namespace {

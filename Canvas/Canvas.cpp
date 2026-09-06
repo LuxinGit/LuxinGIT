@@ -35,26 +35,26 @@ namespace Canvas {
         return &s.canvas[indexFromCoord(c)];
     }
     
-    void processResetAll(Application_State& mh, Command::Cmd& command) {
-        for (auto& l : mh.CanvasState.canvas) l.resetLuxel();
-        mh.ActionState.actionQueue = {};
-    }
     void processCanvasSize(Application_State& mh, Command::Cmd& command) {
-        
-        coordinate c = { 0, 0 };
-        
-        if (command.ID == COMMAND_ID::CANVAS_RESIZE_SET_PAYLOAD) 
-            c = std::get<coordinate>(command.args[0]);
-        else if (command.ID == COMMAND_ID::CANVAS_RESIZE_SET_HEIGHT)
-            c = { 0 , std::get<int>(command.args[0]) };
-        else if (command.ID == COMMAND_ID::CANVAS_RESIZE_SET_WIDTH)
-            c = { std::get<int>(command.args[0]), 0 };
-        
-        updateCanvasSize(mh.CanvasState, mh.SDLState, c);
 
-        command.args = { c };
-        command.ID = COMMAND_ID::CANVAS_RESIZE_SET_PAYLOAD;
+        coordinate c{
+            mh.CanvasState.width,
+            mh.CanvasState.height
+        };
 
+        if (int* width = std::get_if<int>(&command.args[0]))
+            c.x = *width;
+
+        if (int* height = std::get_if<int>(&command.args[1]))
+            c.y = *height;
+
+        updateCanvasSize(
+            mh.CanvasState,
+            mh.SDLState,
+            c
+        );
+
+        command.args = { c.x, c.y };
     }
 
 }

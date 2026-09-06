@@ -4,6 +4,7 @@
 #include <array>
 #include <optional>
 #include <string>
+#include <vector>
 
 #include <SDL3/SDL_scancode.h>
 #include <SDL3/SDL_mouse.h>
@@ -28,18 +29,9 @@ enum class COMMAND_ID {
     PEN_WIDTH,
     INPUT_CLI_ENABLE,
     INPUT_MOUSE_ENABLE,
-
-    CANVAS_RESIZE_SET_PAYLOAD,
-    CANVAS_RESIZE_SET_WIDTH,
-    CANVAS_RESIZE_SET_HEIGHT,
-    
-    UNDO,
-    REDO,
-
-    RESET_CANVAS,
-    RESET_ACTION_QUEUE,
-    RESET_CURSOR,
-    RESET_ALL,
+    RESET,
+    CANVAS_RESIZE,    
+    ACTION_HISTORY,
 
     INVALID
 };
@@ -53,6 +45,7 @@ namespace Command {
         coordinate>;
 
     struct Cmd;
+    struct Command_Definition;
 
 }
 
@@ -91,7 +84,7 @@ namespace Command::Definition::Input {
         
         std::size_t callerIndex;
         std::vector<argument> args;
-        const Command_Definition& def;
+        const Command_Definition* def;
 
     };
 
@@ -128,8 +121,10 @@ namespace Command::Definition::Input::GUI {
     };
 
     struct SLIDER_METADATA {
+
         int minimum;
         int maximum;
+        size_t argumentIndex;
 
         using Resolver = int& (*)(Application_State&);
         Resolver resolve;
@@ -146,14 +141,19 @@ namespace Command::Definition::Input::GUI {
         COLOUR
     };
 
-    using GUI_TYPE_METADATA = std::variant<std::monostate, SLIDER_METADATA, COLOUR_METADATA>;
+    using GUI_FUNCTION_METADATA = std::variant<std::monostate, SLIDER_METADATA, COLOUR_METADATA>;
 
     struct GUI_Metadata {
 
-        HEADER            header;
-        std::string_view  label;
-        FUNCTION_TYPE TYPE;
-        GUI_TYPE_METADATA typeMetadata;
+        HEADER header;
+
+        std::string_view label;
+
+        FUNCTION_TYPE functionType;
+
+        size_t presetIndex;
+
+        GUI_FUNCTION_METADATA metadata;
 
     };
 
@@ -163,7 +163,9 @@ namespace Command::Definition::Input::GUI::Resolver {
     int& resolvePenWidth(Application_State&);
     int& resolveDrawstep(Application_State&);
     int& resolveCanvasHeight(Application_State&);
+    Command::argument resolveCanvasWidthArgument(int value);
     int& resolveCanvasWidth(Application_State&);
+    Command::argument resolveCanvasHeightArgument(int value);
     colour& resolveDrawColourChange(Application_State&);
     colour& resolveBackgroundColourChange(Application_State&);
 }
@@ -184,7 +186,7 @@ namespace Command::Definition {
         std::optional<std::vector<Input::Keyboard_Metadata>>    keyboard;
         std::optional<std::vector<Input::Mouse_Metadata>>          mouse;
         std::optional<Input::CLI_Metadata>                           cli;
-        std::optional<Input::GUI::GUI_Metadata>                      gui;
+        std::optional<std::vector<Input::GUI::GUI_Metadata>>         gui;
 
     };
 

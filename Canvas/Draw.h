@@ -34,6 +34,6 @@ namespace Draw {
     void processPenDown(Application_State& mh, Command::Cmd& command);
     void processChangePenMode(Application_State& mh, Command::Cmd& command);
     void processChangeColour(Application_State& mh, Command::Cmd& command);
-    void processClearCanvas(Application_State& mh, Command::Cmd& command);
+    void processClearCanvas(Application_State& mh, bool full);
 
 }

@@ -22,6 +22,15 @@ namespace Command::Definition::Input::GUI::Resolver {
     {
         return varMH.CanvasState.height;
     }
+    Command::argument resolveCanvasWidthArgument(int value)
+    {
+        return coordinate{ value, 0 };
+    }
+
+    Command::argument resolveCanvasHeightArgument(int value)
+    {
+        return coordinate{ 0, value };
+    }
     colour& resolveDrawColourChange(Application_State& varMH)
     {
         return varMH.DrawState.drawColour;
@@ -32,6 +41,7 @@ namespace Command::Definition::Input::GUI::Resolver {
     }
 
 }
+
 
 namespace Command::Processor {
 
@@ -94,16 +104,16 @@ namespace Command::Processor {
     std::pair<int, returnCode> constructCommand(Command_State& s, const Command_Definition* def, std::vector<argument> args)
     {
 
-        const Definition::Argument_Metadata& aMD = def->commandMetadata;
+        const std::vector<Command::Argument::Argument_Definition>& defArguments = def->commandMetadata.arguments;
 
         Cmd command = { def->ID, {} , def->processor};
 
-        if (args.size() > aMD.arguments.size()) return { 0 , returnCode::ARG_COUNT_INVALID };
-        if (args.size() < aMD.arguments.size()) args.resize(aMD.arguments.size());
+        if (args.size() > defArguments.size()) return { 0 , returnCode::ARG_COUNT_INVALID };
+        if (args.size() < defArguments.size()) args.resize(defArguments.size());
 
         for (int i = 0; i < args.size(); i++) {
 
-            const Argument::Argument_Definition& adef = aMD.arguments[i];
+            const Argument::Argument_Definition& adef = defArguments[i];
             
             if (std::holds_alternative<std::monostate>(args[i])) {
                 if (adef.required)

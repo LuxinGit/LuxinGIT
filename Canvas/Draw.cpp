@@ -302,7 +302,13 @@ namespace Draw {
 
     }
 
-    void processClearCanvas(Application_State& mh, Command::Cmd& command) {
+    void processClearCanvas(Application_State& mh, bool full) {
+        
+        if (full) {
+            mh.CanvasState.canvas = {};
+            return;
+        }
+
         for (size_t y = 0; y < mh.CanvasState.height; ++y) {
             const size_t rowStart = y * DEFAULT_CANVAS_WIDTH_MAX;
 

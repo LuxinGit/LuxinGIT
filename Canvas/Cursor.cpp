@@ -8,27 +8,18 @@
 namespace Cursor {
 
     namespace {
-        std::pair<float,float> convertDirectionToSet(Cursor_State& s, Command::Cmd& command) {
+        void convertDirectionToSet(Cursor_State& s, std::pair<float, float>& c) {
             
-            float d = static_cast<float>(s.drawStep);
-            
-            switch (command.ID) {
-            case COMMAND_ID::MOVE_UP:
-                return { s.deltaCursor.first, s.deltaCursor.second - d };
-            case COMMAND_ID::MOVE_RIGHT:
-                return { s.deltaCursor.first + d, s.deltaCursor.second };
-            case COMMAND_ID::MOVE_DOWN:
-                return { s.deltaCursor.first, s.deltaCursor.second + d };
-            case COMMAND_ID::MOVE_LEFT:
-                return { s.deltaCursor.first - d, s.deltaCursor.second };
-            }
-            assert(false); // stupidass
-            return { 0.0f, 0.0f };
+            float d = static_cast<float>(s.drawStep);        
+            c.first *= d;
+            c.second *= d;
+
+            return;
         }
         void resetCursors(Cursor_State& s, Canvas_State& canvS) {
             if (!Canvas::coordCheck(canvS, s.deltaCursor, true)) {
                 s.deltaCursor.first = std::clamp(s.deltaCursor.first, 0.0f, static_cast<float>(canvS.width - 1));
-                s.deltaCursor.second = std::clamp(s.deltaCursor.second, 0.0f, static_cast<float>(canvS.width - 1));
+                s.deltaCursor.second = std::clamp(s.deltaCursor.second, 0.0f, static_cast<float>(canvS.height - 1));
             }
             s.cursor = s.deltaCursor;
         }
@@ -50,7 +41,7 @@ namespace Cursor {
         std::pair<float, float> c = std::get<coordinate>(command.args[1]);
 
         if (setting == 0) {
-            c = convertDirectionToSet(s, command);
+            convertDirectionToSet(s, c);
         }
         else if (setting == 2) {
             c = s.origin;

@@ -27,7 +27,6 @@ struct Action_State {
 namespace Action {
 	void markChangedPixel(Action_State&, luxel*, const colour& originalColour);
 	void commitCurrentAction(Action_State&);
-	void processUndo(Application_State&, Command::Cmd&);
-	void processRedo(Application_State&, Command::Cmd&);
+	void processHistory(Application_State& s, Command::Cmd& command);
 	void processClearActionQueue(Application_State& mh, Command::Cmd&); 
 }

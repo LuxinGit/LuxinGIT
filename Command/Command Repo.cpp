@@ -201,141 +201,172 @@ Argumments are:
     // COLOUR
     // ============================================================
     {
-        .ID = COMMAND_ID::COLOUR,
+    .ID = COMMAND_ID::COLOUR,
 
-            .commandMetadata = {
-                .commandDescription = "Change a colour.",
-                .arguments = {
-                     {
-                        Command::Argument::ARGTYPE::INT,
-                        "target colour",
-                        "Which colour is changed. [0]activeColour, [1]drawColour, [2]backgroundColour",
-                        std::pair<int,int>{ 0 , 2 }
-                     },
-                     {
-                        Command::Argument::ARGTYPE::INT,
-                        "setting",
-                        "Control path for colour retrieval. [0]new colour, [1]getRandomColour, [2]cursorColour, [3]default",
-                        std::pair<int,int>{ 0 , 3 }
-                     },
-                     {
-                        Command::Argument::ARGTYPE::COLOUR,
-                        "new colour",
-                        "The colour that we're changing to.",
-                        std::nullopt,
-                        false
-                     }
+    .commandMetadata = {
+        .commandDescription = "Change a colour.",
 
-                },
-                .presets = {
-                    { "Random Colour", { 0, 1 }},
-                    { "Pick cursor Colour", { 0, 2 }}
-                }
+        .arguments = {
+            {
+                Command::Argument::ARGTYPE::INT,
+                "target colour",
+                "Which colour is changed. [0]activeColour, [1]drawColour, [2]backgroundColour",
+                std::pair<int, int>{ 0, 2 }
+            },
+            {
+                Command::Argument::ARGTYPE::INT,
+                "setting",
+                "Control path for colour retrieval. [0]new colour, [1]getRandomColour, [2]cursorColour, [3]default",
+                std::pair<int, int>{ 0, 3 }
+            },
+            {
+                Command::Argument::ARGTYPE::COLOUR,
+                "new colour",
+                "The colour that we're changing to.",
+                std::nullopt,
+                false
+            }
         },
 
-            .inputMetadata = {
-                .keyboard = {
-                    {
-                        inp::Keyboard_Metadata{ SDL_SCANCODE_J, 0 }
-                    }
-                },
-                .mouse = {
-                    {
-                        inp::Mouse_Metadata{ SDL_BUTTON_MIDDLE, 1 }
-                    }
-                },
-                .cli = inp::CLI_Metadata{
-        "colour",
-        R"(Change a colour.
+        .presets = {
+            { "Random Colour",          { 0, 1 } },
+            { "Pick cursor Colour",     { 0, 2 } },
+            { "Set Draw Colour",        { 1, 0 } },
+            { "Set Background Colour",  { 2, 0 } }
+        }
+    },
+
+    .inputMetadata = {
+        .keyboard = {
+            {
+                inp::Keyboard_Metadata{ SDL_SCANCODE_J, 0 }
+            }
+        },
+
+        .mouse = {
+            {
+                inp::Mouse_Metadata{ SDL_BUTTON_MIDDLE, 1 }
+            }
+        },
+
+        .cli = inp::CLI_Metadata{
+            "colour",
+            R"(Change a colour.
 Arguments are:
     [0] Target colour. [0] activeColour, [1] drawColour, [2] backgroundColour.
     [1] Setting controlling colour retrieval. [0] use provided colour, [1] random colour, [2] cursor colour, [3] default colour.
     [2] {Optional} New colour. Used only when setting == 0.)"
-            },
-            .gui = GUI::GUI_Metadata{
-                GUI::HEADER::TOOLS,
-                "Set draw colour",
-                GUI::FUNCTION_TYPE::COLOUR,
-
-               GUI::COLOUR_METADATA{
-                    &GUI::Resolver::resolveDrawColourChange
-               }
-            }/*,
-
-            .gui = GUI::GUI_Metadata{
-                GUI::HEADER::TOOLS,
-                "Set background colour",
-                GUI::FUNCTION_TYPE::COLOUR,
-
-                GUI::COLOUR_METADATA{
-                    GUI::Resolver::resolveBackgroundColourChange
-                }
-            }
-            */
         },
 
-            .processor = &Draw::processChangeColour
-      },
+        .gui = {
+            {
+                GUI::GUI_Metadata{
+                    GUI::HEADER::TOOLS,
+                    "Set draw colour",
+                    GUI::FUNCTION_TYPE::COLOUR,
+                    2,
 
-        // ============================================================
-        // PEN MODE
-        // ============================================================
-     {
-        .ID = COMMAND_ID::PENMODE,
+                    GUI::COLOUR_METADATA{
+                        &GUI::Resolver::resolveDrawColourChange
+                    }
+                },
 
-        .commandMetadata = {
-            .commandDescription = "Switch the pen mode.",
-            .arguments = {
-                {
-                    Command::Argument::ARGTYPE::INT,
-                    "pen mode",
-                    "Which pen mode to set to. [0]Draw, [1]Rubber, [2]Rainbow",
-                    std::pair<int,int>{ 0 , 2 }
-                },
-                {
-                    Command::Argument::ARGTYPE::INT,
-                    "setting",
-                    "Optional parameter for selected pen mode",
-                    std::nullopt,
-                    false
-                },
-            },
-            .presets = {
-                { "Draw",    { 0 } },
-                { "Rubber",  { 1 } },
-                { "Rainbow", { 2 } }
+                GUI::GUI_Metadata{
+                    GUI::HEADER::TOOLS,
+                    "Set background colour",
+                    GUI::FUNCTION_TYPE::COLOUR,
+                    3,
+
+                    GUI::COLOUR_METADATA{
+                        &GUI::Resolver::resolveBackgroundColourChange
+                    }
+                }
             }
-            
+        }
+    },
+
+    .processor = &Draw::processChangeColour
+},
+    // ============================================================
+    // PEN MODE
+    // ============================================================
+    {
+    .ID = COMMAND_ID::PENMODE,
+
+    .commandMetadata = {
+        .commandDescription = "Switch the pen mode.",
+
+        .arguments = {
+            {
+                Command::Argument::ARGTYPE::INT,
+                "pen mode",
+                "Which pen mode to set to. [0]Draw, [1]Rubber, [2]Rainbow",
+                std::pair<int, int>{ 0, 2 }
+            },
+            {
+                Command::Argument::ARGTYPE::INT,
+                "setting",
+                "Optional parameter for selected pen mode",
+                std::nullopt,
+                false
+            }
         },
 
-        .inputMetadata = {
-            .keyboard = {
-                {
-                    inp::Keyboard_Metadata{ SDL_SCANCODE_Y, 0},
-                    inp::Keyboard_Metadata{ SDL_SCANCODE_U, 1},
-                    inp::Keyboard_Metadata{ SDL_SCANCODE_E, 2}
-                }
-            },
+        .presets = {
+            { "Draw",    { 0 } },
+            { "Rubber",  { 1 } },
+            { "Rainbow", { 2 } }
+        }
+    },
 
-            .cli = inp::CLI_Metadata
-                { 
-                "penmode",
-    R"(Switch the pen mode.
+    .inputMetadata = {
+        .keyboard = {
+            {
+                inp::Keyboard_Metadata{ SDL_SCANCODE_Y, 0 },
+                inp::Keyboard_Metadata{ SDL_SCANCODE_U, 1 },
+                inp::Keyboard_Metadata{ SDL_SCANCODE_E, 2 }
+            }
+        },
+
+        .cli = inp::CLI_Metadata{
+            "penmode",
+            R"(Switch the pen mode.
 Arguments are:
     [0] Pen mode. [0] Draw, [1] Rubber, [2] Rainbow.
     [1] {Optional} Setting. Additional parameter interpreted by the selected pen mode.)"
-                },
-
-            .gui = GUI::GUI_Metadata{
-                GUI::HEADER::TOOLS,
-                "Draw",
-                GUI::FUNCTION_TYPE::BINARY,
-                std::monostate{}
-            }
         },
 
-        .processor = &Draw::processChangePenMode
-     },
+        .gui = {
+            {
+                GUI::GUI_Metadata{
+                    GUI::HEADER::TOOLS,
+                    "Draw",
+                    GUI::FUNCTION_TYPE::BINARY,
+                    0,
+                    std::monostate{}
+                },
+
+                GUI::GUI_Metadata{
+                    GUI::HEADER::TOOLS,
+                    "Rubber",
+                    GUI::FUNCTION_TYPE::BINARY,
+                    1,
+                    std::monostate{}
+                },
+
+                GUI::GUI_Metadata{
+                    GUI::HEADER::TOOLS,
+                    "Rainbow",
+                    GUI::FUNCTION_TYPE::BINARY,
+                    2,
+                    std::monostate{}
+                }
+            }
+        }
+    },
+
+    .processor = &Draw::processChangePenMode
+    }, 
     // ============================================================
     // PEN
     // ============================================================
@@ -389,49 +420,68 @@ Continuous input is not supported through the CLI.)"
     // ============================================================
 
     {
-        .ID = COMMAND_ID::CURSOR_DRAWSTEP,
+    .ID = COMMAND_ID::CURSOR_DRAWSTEP,
 
-        .commandMetadata = {
-            .commandDescription = "Change the difference travelled by the cursor (per input)",
-            .arguments = {
-                {
-                    Command::Argument::ARGTYPE::INT,
-                    "setting (ADD/SET)",
-                    "Setting to define interpretation of ARG_2",
-                    std::pair<int,int>{ 0,1 }
-                },
-                {
-                    Command::Argument::ARGTYPE::INT,
-                    "Delta",
-                    "Amount to be added to, or have drawstep set to",
-                    std::pair<int, int>{ DEFAULT_DRAWSTEP_MIN,DEFAULT_DRAWSTEP_MAX }
-                }
+    .commandMetadata = {
+        .commandDescription = "Change the difference travelled by the cursor (per input)",
+
+        .arguments = {
+            {
+                Command::Argument::ARGTYPE::INT,
+                "setting (ADD/SET)",
+                "Setting to define interpretation of ARG_2",
+                std::pair<int, int>{ 0, 1 }
             },
-            .presets = {
-                {   "Increment",    { 0, 1 }  },
-                {   "Decrement",    { 0,-1 }  },
-                {   "Reset",        { 1, DEFAULT_DRAWSTEP_CUR}  }
+            {
+                Command::Argument::ARGTYPE::INT,
+                "Delta",
+                "Amount to be added to, or have drawstep set to",
+                std::pair<int, int>{ DEFAULT_DRAWSTEP_MIN, DEFAULT_DRAWSTEP_MAX }
             }
         },
 
-        .inputMetadata = {
-            .keyboard = {
-                {
-                    inp::Keyboard_Metadata{ SDL_SCANCODE_X, 0 },
-                    inp::Keyboard_Metadata{ SDL_SCANCODE_Z, 1 }
-                }
-            },
+        .presets = {
+            { "Increment", { 0,  1 } },
+            { "Decrement", { 0, -1 } },
+            { "Reset",     { 1, DEFAULT_DRAWSTEP_CUR } }
+        }
+    },
 
-            .cli = inp::CLI_Metadata{
-    "drawstep",
-    R"(Change the distance travelled by the cursor per input.
+    .inputMetadata = {
+        .keyboard = {
+            {
+                inp::Keyboard_Metadata{ SDL_SCANCODE_X, 0 },
+                inp::Keyboard_Metadata{ SDL_SCANCODE_Z, 1 }
+            }
+        },
+
+        .cli = inp::CLI_Metadata{
+            "drawstep",
+            R"(Change the distance travelled by the cursor per input.
 Arguments are:
     [0] Setting. [0] Add to the current draw step, [1] Set the draw step directly.
     [1] Delta. Amount to add, or value to set the draw step to.)"
-}
         },
 
-        .processor = &Cursor::processChangeDrawstep
+        .gui = {
+    {
+        GUI::GUI_Metadata{
+            GUI::HEADER::TOOLS,
+            "Draw step",
+            GUI::FUNCTION_TYPE::SLIDER,
+            2,
+            GUI::SLIDER_METADATA{
+                DEFAULT_DRAWSTEP_MIN,
+                DEFAULT_DRAWSTEP_MAX,
+                1,
+                GUI::Resolver::resolveDrawstep
+            }
+        }
+    }
+}
+    },
+
+    .processor = &Cursor::processChangeDrawstep
     },
 
     // ============================================================
@@ -480,7 +530,24 @@ Arguments are:
 Arguments are:
     [0] Setting. [0] Add to the current pen width, [1] Set the pen width directly.
     [1] Delta. Amount to add, or value to set the pen width to.)"
+        },
+
+        .gui = {
+    {
+        GUI::GUI_Metadata{
+            GUI::HEADER::TOOLS,
+            "Pen width",
+            GUI::FUNCTION_TYPE::SLIDER,
+            2,
+            GUI::SLIDER_METADATA{
+                DEFAULT_PENWIDTH_MIN,
+                DEFAULT_PENWIDTH_MAX,
+                1,
+                GUI::Resolver::resolvePenWidth
+            }
         }
+    }
+}
     },
 
     .processor = &Draw::processChangePenWidth
@@ -490,351 +557,333 @@ Arguments are:
     // INPUT
     // ============================================================
 
-    {
-        .ID = COMMAND_ID::INPUT_CLI_ENABLE,
+{
+    .ID = COMMAND_ID::INPUT_CLI_ENABLE,
 
-        .commandMetadata = {
-            .commandDescription = "Enable CLI input mode.",
-            .arguments = {},
-            .presets = {
-                { "Enable CLI", {} }
-            }
-        },
-
-        .inputMetadata = {
-            .keyboard = {
-                {
-                    inp::Keyboard_Metadata{ SDL_SCANCODE_0, 0}
-                }
-            }
-        },
-
-        .processor = &Input::CLI::openCLI
+    .commandMetadata = {
+        .commandDescription = "Enable CLI input mode.",
+        .arguments = {},
+        .presets = {
+            { "Enable CLI", {} }
+        }
     },
 
-    {
-        .ID = COMMAND_ID::INPUT_MOUSE_ENABLE,
-
-        .commandMetadata = {
-            .commandDescription = "Enable mouse input mode.",
-            .arguments = {},
-            .presets = {
-                { "Enable Mouse", {} }
+    .inputMetadata = {
+        .keyboard = {
+            {
+                inp::Keyboard_Metadata{ SDL_SCANCODE_0, 0 }
             }
         },
 
-        .inputMetadata = {
-            .keyboard = {
-                {
-                    inp::Keyboard_Metadata{ SDL_SCANCODE_3, 0 }
+        .gui = {
+            {
+                GUI::GUI_Metadata{
+                    GUI::HEADER::FILE,
+                    "Enable CLI",
+                    GUI::FUNCTION_TYPE::BINARY,
+                    0,
+                    std::monostate{}
                 }
             }
+        }
+    },
+
+    .processor = &Input::CLI::openCLI
+},
+
+{
+    .ID = COMMAND_ID::INPUT_MOUSE_ENABLE,
+
+    .commandMetadata = {
+        .commandDescription = "Enable mouse input mode.",
+        .arguments = {},
+        .presets = {
+            { "Enable Mouse", {} }
+        }
+    },
+
+    .inputMetadata = {
+        .keyboard = {
+            {
+                inp::Keyboard_Metadata{ SDL_SCANCODE_3, 0 }
+            }
         },
 
-        .processor = &Input::enableMouse
+        .gui = {
+            {
+                GUI::GUI_Metadata{
+                    GUI::HEADER::FILE,
+                    "Enable Mouse",
+                    GUI::FUNCTION_TYPE::BINARY,
+                    0,
+                    std::monostate{}
+                }
+            }
+        }
     },
+
+    .processor = &Input::enableMouse
+},
 
 
     // ============================================================
     // RESET
     // ============================================================
 
-    {
-        .ID = COMMAND_ID::RESET_CANVAS,
+{
+    .ID = COMMAND_ID::RESET,
 
-        .commandMetadata = {
-            .commandDescription = "Reset the canvas.",
-             = {
-                .arguments = {},
-                .defaultArgs = {}
+    .commandMetadata = {
+        .commandDescription = "Reset application state.",
+
+        .arguments = {
+            {
+                Command::Argument::ARGTYPE::INT,
+                "action queue",
+                "Whether to reset the undo/redo action queue. [0] No, [1] Yes.",
+                std::pair<int, int>{ 0, 1 }
+            },
+            {
+                Command::Argument::ARGTYPE::INT,
+                "canvas",
+                "Whether to reset the canvas contents. [0] No, [1] Yes.",
+                std::pair<int, int>{ 0, 1 }
+            },
+            {
+                Command::Argument::ARGTYPE::INT,
+                "cursor",
+                "Whether to reset the cursor position. [0] No, [1] Yes.",
+                std::pair<int, int>{ 0, 1 }
+            },
+            {
+                Command::Argument::ARGTYPE::INT,
+                "colours",
+                "Whether to reset the draw and background colours. [0] No, [1] Yes.",
+                std::pair<int, int>{ 0, 1 }
             }
         },
 
-        .inputMetadata = {
-            .keyboard = inp::Keyboard_Metadata{
-                SDL_SCANCODE_C,
-                false
-            },
-
-            .cli = inp::CLI_Metadata{
-                "reset_canvas",
-                "Reset the canvas contents."
-            },
-
-            .gui = GUI::GUI_Metadata{
-                GUI::HEADER::FILE,
-                "Reset Canvas",
-                GUI::FUNCTION_TYPE::BINARY,
-                std::monostate{}
-            }
-        },
-
-        .processor = &Draw::processClearCanvas
+        .presets = {
+            { "Reset Canvas", { 0, 1, 0, 0 } },
+            { "Reset All",    { 1, 1, 1, 1 } }
+        }
     },
 
-    {
-        .ID = COMMAND_ID::RESET_ACTION_QUEUE,
-
-        .commandMetadata = {
-            .commandDescription = "Clear the undo and redo history.",
-             = {
-                .arguments = {},
-                .defaultArgs = {}
+    .inputMetadata = {
+        .keyboard = {
+            {
+                inp::Keyboard_Metadata{ SDL_SCANCODE_C, 0 },
+                inp::Keyboard_Metadata{ SDL_SCANCODE_R, 1 }
             }
         },
 
-        .inputMetadata = {
-            .cli = inp::CLI_Metadata{
-                "reset_action_queue",
-                "Clear all stored undo and redo history."
-            }
+        .cli = inp::CLI_Metadata{
+            "reset",
+            R"(Reset application state.
+Arguments are:
+    [0] Action queue. [0] Keep, [1] Reset.
+    [1] Canvas. [0] Keep, [1] Reset.
+    [2] Cursor. [0] Keep, [1] Reset.
+    [3] Colours. [0] Keep, [1] Reset.)"
         },
 
-        .processor = &Action::processClearActionQueue
+        .gui = {
+            {
+                GUI::GUI_Metadata{
+                    GUI::HEADER::FILE,
+                    "Reset Canvas",
+                    GUI::FUNCTION_TYPE::BINARY,
+                    0,
+                    std::monostate{}
+                },
+
+                GUI::GUI_Metadata{
+                    GUI::HEADER::FILE,
+                    "Reset All (Includes undo/redo history)",
+                    GUI::FUNCTION_TYPE::BINARY,
+                    1,
+                    std::monostate{}
+                }
+            }
+        }
     },
 
-    {
-        .ID = COMMAND_ID::RESET_ALL,
-
-        .commandMetadata = {
-            .commandDescription = "Reset the complete application state.",
-             = {
-                .arguments = {},
-                .defaultArgs = {}
-            }
-        },
-
-        .inputMetadata = {
-            .keyboard = inp::Keyboard_Metadata{
-                SDL_SCANCODE_R,
-                false
-            },
-
-            .cli = inp::CLI_Metadata{
-                "reset_all",
-                "Reset all state, including undo and redo history."
-            },
-
-            .gui = GUI::GUI_Metadata{
-                GUI::HEADER::FILE,
-                "Reset All (Includes undo/redo history)",
-                GUI::FUNCTION_TYPE::BINARY,
-                std::monostate{}
-            }
-        },
-
-        .processor = &Canvas::processResetAll
-    },
+    .processor = &LuxinPaint::processReset
+},
 
     // ============================================================
     // UNDO / REDO
     // ============================================================
 
-    {
-        .ID = COMMAND_ID::UNDO,
+{
+    .ID = COMMAND_ID::ACTION_HISTORY,
 
-        .commandMetadata = {
-            .commandDescription = "Undo the most recent action.",
-             = {
-                .arguments = {},
-                .defaultArgs = {}
+    .commandMetadata = {
+        .commandDescription = "Navigate the action history.",
+
+        .arguments = {
+            {
+                Command::Argument::ARGTYPE::INT,
+                "direction",
+                "History direction. [0] Undo, [1] Redo.",
+                std::pair<int, int>{ 0, 1 }
             }
         },
 
-        .inputMetadata = {
-            .keyboard = inp::Keyboard_Metadata{
-                SDL_SCANCODE_N,
-                false
-            },
-
-            .cli = inp::CLI_Metadata{
-                "undo",
-                "Undo the most recent action."
-            },
-
-            .gui = GUI::GUI_Metadata{
-                GUI::HEADER::EDIT,
-                "Undo",
-                GUI::FUNCTION_TYPE::BINARY,
-                std::monostate{}
-            }
-        },
-
-        .processor = &Action::processUndo
+        .presets = {
+            { "Undo", { 0 } },
+            { "Redo", { 1 } }
+        }
     },
 
-    {
-        .ID = COMMAND_ID::REDO,
-
-        .commandMetadata = {
-            .commandDescription = "Redo the most recently undone action.",
-             = {
-                .arguments = {},
-                .defaultArgs = {}
+    .inputMetadata = {
+        .keyboard = {
+            {
+                inp::Keyboard_Metadata{ SDL_SCANCODE_N, 0 },
+                inp::Keyboard_Metadata{ SDL_SCANCODE_M, 1 }
             }
         },
 
-        .inputMetadata = {
-            .keyboard = inp::Keyboard_Metadata{
-                SDL_SCANCODE_M,
-                false
-            },
-
-            .cli = inp::CLI_Metadata{
-                "redo",
-                "Redo the most recently undone action."
-            },
-
-            .gui = GUI::GUI_Metadata{
-                GUI::HEADER::EDIT,
-                "Redo",
-                GUI::FUNCTION_TYPE::BINARY,
-                std::monostate{}
-            }
+        .cli = inp::CLI_Metadata{
+            "history",
+            R"(Navigate the action history.
+Arguments are:
+    [0] Direction. [0] Undo, [1] Redo.)"
         },
 
-        .processor = &Action::processRedo
+        .gui = {
+            {
+                GUI::GUI_Metadata{
+                    GUI::HEADER::EDIT,
+                    "Undo",
+                    GUI::FUNCTION_TYPE::BINARY,
+                    0,
+                    std::monostate{}
+                },
+
+                GUI::GUI_Metadata{
+                    GUI::HEADER::EDIT,
+                    "Redo",
+                    GUI::FUNCTION_TYPE::BINARY,
+                    1,
+                    std::monostate{}
+                }
+            }
+        }
     },
 
+    .processor = &Action::processHistory
+},
 
     // ============================================================
     // CANVAS SIZE
     // ============================================================
 
-    {
-        .ID = COMMAND_ID::CANVAS_RESIZE_SET_PAYLOAD,
+{
+    .ID = COMMAND_ID::CANVAS_RESIZE,
 
-        .commandMetadata = {
-            .commandDescription = "Resize the canvas.",
+    .commandMetadata = {
+        .commandDescription = "Resize the canvas.",
 
-             = {
-                .arguments = {
-                    {
-                        Command::Argument::ARGTYPE::COORDINATE,
-                        "size",
-                        "New canvas width and height.",
-                        std::pair<coordinate, coordinate>{
-                            { DEFAULT_CANVAS_WIDTH_MIN, DEFAULT_CANVAS_HEIGHT_MIN },
-                            { DEFAULT_CANVAS_WIDTH_MAX, DEFAULT_CANVAS_HEIGHT_MAX }
-                        }
-                    }
+        .arguments = {
+            {
+                Command::Argument::ARGTYPE::INT,
+                "width",
+                "New canvas width.",
+                std::pair<int, int>{
+                    DEFAULT_CANVAS_WIDTH_MIN,
+                    DEFAULT_CANVAS_WIDTH_MAX
                 },
-
-                .defaultArgs = {
-                    coordinate{400, 400}
-                }
-            }
-        },
-
-        .inputMetadata = {
-            .keyboard = inp::Keyboard_Metadata{
-                SDL_SCANCODE_7,
                 false
             },
-
-            .cli = inp::CLI_Metadata{
-                "resize",
-                "Resize the canvas to a specified width and height."
+            {
+                Command::Argument::ARGTYPE::INT,
+                "height",
+                "New canvas height.",
+                std::pair<int, int>{
+                    DEFAULT_CANVAS_HEIGHT_MIN,
+                    DEFAULT_CANVAS_HEIGHT_MAX
+                },
+                false
             }
         },
 
-        .processor = &Canvas::processCanvasSize
-    },
-
-    {
-        .ID = COMMAND_ID::CANVAS_RESIZE_SET_HEIGHT,
-
-        .commandMetadata = {
-            .commandDescription = "Set the canvas height.",
-
-             = {
-                .arguments = {
-                    {
-                        Command::Argument::ARGTYPE::INT,
-                        "height",
-                        "New canvas height in pixels.",
-
-                        std::pair<Command::argument, Command::argument>{
-                            DEFAULT_CANVAS_HEIGHT_MIN,
-                            DEFAULT_CANVAS_HEIGHT_MAX
-                        }
-                    }
-                },
-
-                .defaultArgs = {
+        .presets = {
+            {
+                "Reset Size",
+                {
+                    DEFAULT_CANVAS_WIDTH_CUR,
+                    DEFAULT_CANVAS_HEIGHT_CUR
+                }
+            },
+            {
+                "Set Width",
+                {
+                    DEFAULT_CANVAS_WIDTH_CUR,
+                    std::monostate{}
+                }
+            },
+            {
+                "Set Height",
+                {
+                    std::monostate{},
                     DEFAULT_CANVAS_HEIGHT_CUR
                 }
             }
-        },
+        }
+    },
 
-        .inputMetadata = {
-            .cli = inp::CLI_Metadata{
-                "resize_height",
-                "Set the canvas height."
-            },
-
-            .gui = GUI::GUI_Metadata{
-                GUI::HEADER::FILE,
-                "Adjust canvas height",
-                GUI::FUNCTION_TYPE::SLIDER,
-
-                GUI::SLIDER_METADATA{
-                    DEFAULT_CANVAS_HEIGHT_MIN,
-                    DEFAULT_CANVAS_HEIGHT_MAX,
-                    GUI::Resolver::resolveCanvasHeight
+    .inputMetadata = {
+        .keyboard = {
+            {
+                inp::Keyboard_Metadata{
+                    SDL_SCANCODE_7,
+                    0
                 }
             }
         },
 
-        .processor = &Canvas::processCanvasSize
-    },
+        .cli = inp::CLI_Metadata{
+            "resize",
+            R"(Resize the canvas.
+Arguments are:
+    [0] {Optional} Width. Omit to leave unchanged.
+    [1] {Optional} Height. Omit to leave unchanged.)"
+        },
 
-    {
-        .ID = COMMAND_ID::CANVAS_RESIZE_SET_WIDTH,
+        .gui = {
+            {
+                GUI::GUI_Metadata{
+                    GUI::HEADER::FILE,
+                    "Adjust canvas width",
+                    GUI::FUNCTION_TYPE::SLIDER,
+                    1,
 
-        .commandMetadata = {
-            .commandDescription = "Set the canvas width.",
-
-             = {
-                .arguments = {
-                    {
-                        Command::Argument::ARGTYPE::INT,
-                        "width",
-                        "New canvas width in pixels.",
-
-                        std::pair<Command::argument, Command::argument>{
-                            DEFAULT_CANVAS_WIDTH_MIN,
-                            DEFAULT_CANVAS_WIDTH_MAX
-                        }
+                    GUI::SLIDER_METADATA{
+                        DEFAULT_CANVAS_WIDTH_MIN,
+                        DEFAULT_CANVAS_WIDTH_MAX,
+                        0,
+                        GUI::Resolver::resolveCanvasWidth
                     }
                 },
 
-                .defaultArgs = {
-                    DEFAULT_CANVAS_WIDTH_CUR
+                GUI::GUI_Metadata{
+                    GUI::HEADER::FILE,
+                    "Adjust canvas height",
+                    GUI::FUNCTION_TYPE::SLIDER,
+                    2,
+
+                    GUI::SLIDER_METADATA{
+                        DEFAULT_CANVAS_HEIGHT_MIN,
+                        DEFAULT_CANVAS_HEIGHT_MAX,
+                        1,
+                        GUI::Resolver::resolveCanvasHeight
+                    }
                 }
             }
-        },
+        }
+    },
 
-        .inputMetadata = {
-            .cli = inp::CLI_Metadata{
-                "resize_width",
-                "Set the canvas width."
-            },
-
-            .gui = GUI::GUI_Metadata{
-                GUI::HEADER::FILE,
-                "Adjust canvas width",
-                GUI::FUNCTION_TYPE::SLIDER,
-
-                GUI::SLIDER_METADATA{
-                    DEFAULT_CANVAS_WIDTH_MIN,
-                    DEFAULT_CANVAS_WIDTH_MAX,
-                    GUI::Resolver::resolveCanvasWidth
-                }
-            }
-        },
-
-        .processor = &Canvas::processCanvasSize
-    }
-
+    .processor = &Canvas::processCanvasSize
+}
 } };

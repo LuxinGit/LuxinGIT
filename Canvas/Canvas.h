@@ -23,8 +23,7 @@ namespace Canvas {
 
     bool coordCheck(const Canvas_State& s, const coordinate& c, bool onDisplay = false);
     luxel* getLuxelFromCoord(Canvas_State& s, const coordinate& c, bool onDisplay = false);
-    
-    void processResetAll(Application_State& mh, Command::Cmd& command);
+
     void processCanvasSize(Application_State& mh, Command::Cmd& command);
 
 }

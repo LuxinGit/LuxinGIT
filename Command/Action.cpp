@@ -45,11 +45,11 @@ namespace Action {
     void commitCurrentAction(Action_State& s) {
         if (!s.currentAction.changeSet.empty()) addNewAction(s);
     }
-    void processUndo(Application_State& mh, Command::Cmd&) {
-        undoAction(mh, mh.ActionState);
-    }
-    void processRedo(Application_State& mh, Command::Cmd&) {
-        redoAction(mh, mh.ActionState);
+    void processHistory(Application_State& s, Command::Cmd& command) {
+        if (std::get<int>(command.args[0]) == 0)
+            undoAction(s, s.ActionState);
+        else
+            redoAction(s, s.ActionState);
     }
     void processClearActionQueue(Application_State& mh, Command::Cmd&)
     {

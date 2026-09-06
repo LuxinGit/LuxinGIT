@@ -26,18 +26,48 @@ struct Input_State {
 		std::unordered_map<std::string_view, const Command::Command_Definition*> commandLineBindings;
 	};
 
-	struct GUI_State {
+    struct GUI_State {
 
-		bool enableGUI = ENABLE_GUI;
-		using def = const Command::Command_Definition*;
+        using def = const Command::Command_Definition*;
 
-		std::array<
-			std::vector<def>,
-			static_cast<size_t>(Command::Definition::Input::GUI::HEADER::COUNT)
-		> headers;
+        struct GUI_Binding {
 
-		std::unordered_set<def> openPopouts;
-	};
+            def definition;
+            size_t guiIndex;
+            std::vector<Command::argument> args;
+
+            bool operator==(const GUI_Binding& other) const noexcept {
+                return
+                    definition == other.definition &&
+                    guiIndex == other.guiIndex;
+            }
+        };
+
+        struct GUI_Binding_Hash {
+
+            size_t operator()(const GUI_Binding& b) const noexcept {
+
+                size_t h1 = std::hash<def>{}(b.definition);
+                size_t h2 = std::hash<size_t>{}(b.guiIndex);
+
+                return h1 ^ (h2 << 1);
+            }
+        };
+
+        bool enableGUI = ENABLE_GUI;
+
+        std::array<
+            std::vector<GUI_Binding>,
+            static_cast<size_t>(
+                Command::Definition::Input::GUI::HEADER::COUNT
+                )
+        > headers;
+
+        std::unordered_set<
+            GUI_Binding,
+            GUI_Binding_Hash
+        > openPopouts;
+    };
 
 	Keyboard_State	 KeyboardState;
 	Mouse_State			MouseState;
@@ -59,6 +89,7 @@ namespace Input {
 namespace Input::GUI {
 
 	void initialiseGUI(Application_State& s);
+
 	void cleanupGUI();
 
 	void beginFrame();

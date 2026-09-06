@@ -27,4 +27,6 @@ namespace LuxinPaint {
 
     void cleanup(Application_State&);
 
+    void processReset(Application_State& s, Command::Cmd& command);
+
 }
