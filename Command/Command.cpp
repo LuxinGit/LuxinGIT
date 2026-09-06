@@ -22,15 +22,6 @@ namespace Command::Definition::Input::GUI::Resolver {
     {
         return varMH.CanvasState.height;
     }
-    Command::argument resolveCanvasWidthArgument(int value)
-    {
-        return coordinate{ value, 0 };
-    }
-
-    Command::argument resolveCanvasHeightArgument(int value)
-    {
-        return coordinate{ 0, value };
-    }
     colour& resolveDrawColourChange(Application_State& varMH)
     {
         return varMH.DrawState.drawColour;
