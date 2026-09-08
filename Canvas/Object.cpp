@@ -31,7 +31,7 @@ namespace Object {
 			}
 		}
 
-		void  createObjectFromEdit(Canvas_State& cS, Object_Edit& oE) 
+		void createObjectFromEdit(Canvas_State& cS, Object_Edit& oE) 
 		{
 			object& o = *oE.activeObject;
 			o.width = oE.max.x - oE.min.x + 1;
@@ -127,5 +127,76 @@ namespace Object {
 		}
 	}
 
+	namespace 
+	{
+		object* retrieveObjectFromIdentifier(Object_State& oS, const Command::argument& a)
+		{
+			if (const int* id = std::get_if<int>(&a)) {
+				auto it = oS.objects.find(*id);
+				return it != oS.objects.end() ? &it->second : nullptr;
+			}
+
+			if (const std::string* name = std::get_if<std::string>(&a)) {
+				auto nameIt = oS.nameMap.find(*name);
+				if (nameIt == oS.nameMap.end()) return nullptr;
+
+				auto objectIt = oS.objects.find(nameIt->second);
+				return objectIt != oS.objects.end() ? &objectIt->second : nullptr;
+			}
+
+			return nullptr;
+		}
+	}
+	/*void selectObject(Application_State& s, Command::Cmd& cmd)
+	{
+
+	}*/
+	void moveObject(Application_State& s, Command::Cmd& cmd)
+	{
+		//0:INT setting {coord,setToCursor,stickToCursor}
+		//1:Coordinate					<optional> destination
+		//2:UNFIXED_TYPE<int,string>	<optional> objectIdentifier;
+
+		object* o = s.ObjectState.selectedObject;
+		if (!o) o = retrieveObjectFromIdentifier(s.ObjectState, cmd.args[2]);
+		if (!o) 
+		{
+			cmd.ID = COMMAND_ID::INVALID;
+			cmd.args = { "moveObject", "No selected object, and no alternative identifier provided" };
+			return;
+		}
+
+		int setting = std::get<int>(cmd.args[0]);
+		coordinate dest = { -1, -1 };
+		switch (setting)
+		{
+		case 0:
+			dest = std::get<coordinate>(cmd.args[1]);
+			break;
+		case 1:
+			dest = s.CursorState.cursor;
+			break;
+		case 2:
+			s.CursorState.carryingObject = !s.CursorState.carryingObject;
+			if (s.CursorState.carryingObject)
+				s.ObjectState.selectedObject = o;
+			else
+				s.ObjectState.selectedObject = nullptr;
+			return;
+		default:
+			cmd.ID = COMMAND_ID::INVALID;
+			cmd.args = { "moveObject", "Setting out of range (max expected == 2)" };
+			return;
+		}
+
+		o->topLeft = dest;
+
+	}
+
+
+	object::~object()
+	{
+		if (texture) SDL_DestroyTexture(texture);
+	}
 
 }

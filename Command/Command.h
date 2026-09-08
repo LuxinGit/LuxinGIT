@@ -41,6 +41,7 @@ enum class COMMAND_ID {
     ACTION_HISTORY,
 
     OBJECT_EDITOR,
+    OBJECT_MOVE,
 
     INVALID
 };

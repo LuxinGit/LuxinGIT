@@ -12,6 +12,7 @@ struct Cursor_State {
     std::pair<float, float> deltaCursor =   DEFAULT_CURSOR_POINT;
     int                     drawStep =      DEFAULT_DRAWSTEP_CUR;
     bool enableCrosshair = true;
+    bool carryingObject = false;
 };
 
 namespace Cursor {

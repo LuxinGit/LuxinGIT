@@ -666,7 +666,7 @@ This argument accepts multiple types.
                 Command::Argument::ARGTYPE argType = defArgs[i].type;
                 if (argType == Command::Argument::ARGTYPE::UNFIXED_TYPE)
                     argType = inferTypeFromInput(defArgs[i].desc.data());
-                if (!harvestArgument(defArgs[i].type, args[i]))
+                if (!harvestArgument(argType, args[i]))
                     return false;
 
             }
@@ -691,6 +691,9 @@ This argument accepts multiple types.
                     }
                     std::cout << std::endl;
                     harvestArgument(defArgs[retVal.first].type, args[retVal.first]);
+                    break;
+                case Command::Processor::returnCode::ARG_TYPE_INVALID:
+                    std::cout << "Possible bug in type interpretaion. No command constructed." << std::endl;
                     break;
                 default:
                     return true;
@@ -748,12 +751,12 @@ Options:
                     }
                     break;
                 case 5:
-                    Canvas::swapActiveCanvas(s.CanvasState);
+                    for (auto& it : s.ObjectState.objects) {
+                        std::cout << it.second.name + " " + std::to_string(it.first) << std::endl;
+                    }
                     break;
                 case 6:
-					if (cS.commandQueue.size()) if (harvestInput("You have unexecuted commands.  Continue? [Y]") != "Y") break;
-                    cS.commandQueue = {};
-					return;
+                    return;
                 
 				default:
 					continue;

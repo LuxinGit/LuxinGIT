@@ -14,7 +14,7 @@ namespace Object {
 
 		// object metadata
 
-		int objectID;
+		int objectID = 0;
 		std::string name = "Unnamed Object";
 
 		// data
@@ -33,6 +33,8 @@ namespace Object {
 
 		*/
 
+		~object();
+
 	};
 
 	struct Object_Edit 
@@ -42,9 +44,9 @@ namespace Object {
 		object* activeObject = nullptr;
 	};
 
-
-
 	void toggleObjectEditMode(Application_State& s, Command::Cmd& cmd);
+
+	void moveObject(Application_State& s, Command::Cmd& cmd);
 
 }
 
@@ -56,5 +58,7 @@ struct Object_State {
 
 	Object::Object_Edit  objectEditBuffer;
 	Object::Object_Edit* activeObjectEdit = nullptr;
+
+	Object::object*		 selectedObject = nullptr;
 
 };

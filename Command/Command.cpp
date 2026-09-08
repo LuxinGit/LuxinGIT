@@ -114,7 +114,8 @@ namespace Command::Processor {
                 continue;
             }
 
-            if (args[i].index() != static_cast<size_t>(adef.type))
+            if (args[i].index() != static_cast<size_t>(adef.type)
+                and adef.type != Argument::ARGTYPE::UNFIXED_TYPE)
                 return { i, returnCode::ARG_TYPE_INVALID };
 
             if (adef.constraints &&

@@ -26,10 +26,18 @@ namespace Cursor {
     }
 
     void checkCursorData(Application_State& mh) {
-        if (mh.DrawState.penDown and mh.CursorState.cursor != mh.CursorState.deltaCursor) 
+
+        Cursor_State& cS = mh.CursorState;
+        Draw_State& dS = mh.DrawState;
+
+        if (dS.penDown and cS.cursor != cS.deltaCursor) 
             Draw::drawLineToNewCursor(mh);
-        if (mh.DrawState.penContinuous) { mh.DrawState.penContinuous = false; mh.DrawState.penDown = false; }
-        resetCursors(mh.CursorState, mh.CanvasState);
+        if (dS.penContinuous) { dS.penContinuous = false; dS.penDown = false; }
+        resetCursors(cS, mh.CanvasState);
+        if (cS.carryingObject)        
+            mh.ObjectState.selectedObject->topLeft = coordinate{ cS.cursor };          
+
+        
     }
 
     void processMoveCursor(Application_State& mh, Command::Cmd& command) {

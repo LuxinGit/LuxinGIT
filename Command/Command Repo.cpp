@@ -932,5 +932,76 @@ Arguments are:
     },
 
     .processor = &Object::toggleObjectEditMode
+},
+{
+    .ID = COMMAND_ID::OBJECT_MOVE,
+
+    .commandMetadata = {
+        .commandDescription = "Move an object.",
+
+        .arguments = {
+            {
+                Command::Argument::ARGTYPE::INT,
+                "setting",
+                "Movement mode. 0 = set coordinate, 1 = set to cursor, 2 = toggle stick-to-cursor.",
+                std::pair<int, int>{ 0, 2 },
+                true
+            },
+            {
+                Command::Argument::ARGTYPE::COORDINATE,
+                "destination",
+                "Destination coordinate. Required only when setting == 0.",
+                std::nullopt,
+                false
+            },
+            {
+                Command::Argument::ARGTYPE::UNFIXED_TYPE,
+                "object",
+                "Optional object ID or object name. Uses selected object if omitted.",
+                std::nullopt,
+                false
+            }
+        },
+
+        .presets = {
+            {
+                "Set Position",
+                {
+                    0,
+                    coordinate{ 0, 0 },
+                    std::monostate{}
+                }
+            },
+            {
+                "Move To Cursor",
+                {
+                    1,
+                    std::monostate{},
+                    std::monostate{}
+                }
+            },
+            {
+                "Stick To Cursor",
+                {
+                    2,
+                    std::monostate{},
+                    std::monostate{}
+                }
+            }
+        }
+    },
+
+    .inputMetadata = {
+        .cli = inp::CLI_Metadata{
+            "move_object",
+            R"(Move an object.
+Arguments are:
+    [0] Setting. 0 = set coordinate, 1 = move to cursor, 2 = toggle stick-to-cursor.
+    [1] {Optional} Destination coordinate. Used when setting == 0.
+    [2] {Optional} Object ID or object name. Uses selected object if omitted.)"
+        }
+    },
+
+    .processor = &Object::moveObject
 }
 } };
