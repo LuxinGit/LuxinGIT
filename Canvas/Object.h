@@ -4,6 +4,7 @@
 #include "SDL3/SDL.h"
 
 struct SDL_State;
+struct Canvas_State;
 
 namespace Object {
 	
@@ -14,25 +15,34 @@ namespace Object {
 		std::vector<luxel> pixels = {};
 		
 		SDL_Texture* texture = nullptr;
-		SDL_Rect area;
-
-		void renderObject(SDL_State&);
+		SDL_FRect area;
 
 		/* IMPLEMENTATION PLAN :
 
-		1. set up Canvas_State to have 2 canvas, with *activeCanvas (similar to activeColour)
 		1.5 set up SDL_Texture to both render textures within obejct state and choose to display them if we hvae an activeTexture or something
-		2. :) fun refactor the yes for just making sure anything that usees canvas now dereferences it instead.
 		3. move object from texture / whatever -> buffer (for x = 0, x < width, x++) something like that we did it before
 		4. then when done, trim until we can fully describe object within rect and convert into texture again.
 
 		*/
+
+		void renderObject(const SDL_State&);
+
 	};
 
-	
+	struct Object_Edit {
+		coordinate min;
+		coordinate max;
+		object* activeObject = nullptr;
+	};
+
+
+	object createObjectFromEdit(Canvas_State& s, Object_Edit& e);
 
 }
 
-struct Objects_State {
+struct Object_State {
+
 	std::vector<Object::object> objects;
+	Object::Object_Edit* activeObjectEdit = nullptr;
+
 };

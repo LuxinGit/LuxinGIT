@@ -11,6 +11,7 @@ using colour = std::array<uint8_t, 4>;
 struct luxel {
 
     luxel();
+    luxel(const std::array<uint8_t,4>&);
     void resetLuxel();
 
     std::array<uint8_t, 4> colour;

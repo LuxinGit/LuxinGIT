@@ -28,6 +28,13 @@ namespace Draw {
             drawPoint(mh, *p, colour);
         }
         void drawPoint (Application_State& mh, const coordinate& c, const colour& colour) {
+            if (auto* p = mh.ObjectState.activeObjectEdit) 
+            {
+                p->min.x = std::min(p->min.x, c.x);
+                p->min.y = std::min(p->min.y, c.y);
+                p->max.x = std::max(p->max.x, c.x);
+                p->max.y = std::max(p->max.y, c.y);
+            }
             drawPoint(mh, Canvas::getLuxelFromCoord(mh.CanvasState, c, true), colour);
         }
         void drawPoint (Application_State& mh, const coordinate& c, const colour& colour, const bool useP) {
@@ -243,7 +250,7 @@ namespace Draw {
         {
             switch (target)
             {
-            case 0:
+            default:
                 if (s.activeColour == &s.drawColour) target = 1;
                 else target = 2;
                 return s.activeColour;
@@ -302,18 +309,22 @@ namespace Draw {
 
     }
 
-    void processClearCanvas(Application_State& mh, bool full) {
+    void processClearCanvas(Application_State& mh, bool rActions) {
         
-        if (full) {
-            mh.CanvasState.canvas = {};
+        Canvas_State& cS = mh.CanvasState;
+
+        colour c = (cS.activeCanvas == &cS.displayCanvas) ? (mh.DrawState.backgroundColour) : colour{ 0, 0, 0, 0 };
+
+        if (rActions) {
+            *cS.activeCanvas = std::vector<luxel>(DEFAULT_CANVAS_SIZE_MAX, c);
             return;
         }
 
-        for (size_t y = 0; y < mh.CanvasState.height; ++y) {
+        for (size_t y = 0; y < cS.height; ++y) {
             const size_t rowStart = y * DEFAULT_CANVAS_WIDTH_MAX;
 
-            for (size_t i = rowStart; i < rowStart + mh.CanvasState.width; ++i) {
-                drawPoint(mh, mh.CanvasState.canvas[i], mh.DrawState.backgroundColour);
+            for (size_t i = rowStart; i < rowStart + cS.width; ++i) {
+                drawPoint(mh, (*cS.activeCanvas)[i], c);
             }
         }
     }

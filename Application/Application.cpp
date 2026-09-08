@@ -33,9 +33,9 @@ void LuxinPaint::processReset(Application_State& s, Command::Cmd& command)
 
     if (resetActions)
         Action::processClearActionQueue(s, command);
-
+    int i = std::get<int>(command.args[1]);
     if (std::get<int>(command.args[1]))
-        Draw::processClearCanvas(s, !resetActions);
+        Draw::processClearCanvas(s, resetActions);
 
     if (std::get<int>(command.args[2])) {
         c.ID = COMMAND_ID::CURSOR_MOVE;

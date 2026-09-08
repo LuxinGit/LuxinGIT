@@ -8,9 +8,10 @@ struct Canvas_State;
 
 struct SDL_State {
 
-    SDL_Window*     Window = nullptr;
-    SDL_Renderer* Renderer = nullptr;
-    SDL_Texture*   Texture = nullptr;
+    SDL_Window*             Window = nullptr;
+    SDL_Renderer*         Renderer = nullptr;
+    SDL_Texture*    displayTexture = nullptr;
+    SDL_Texture*     bufferTexture = nullptr;
 
 };
 
@@ -18,7 +19,7 @@ namespace SDL {
 
     void initialiseSDL(SDL_State&, Canvas_State&);
 
-    SDL_Texture* createTexture(SDL_State&, int w = DEFAULT_CANVAS_WIDTH_MAX, int h = DEFAULT_CANVAS_HEIGHT_MAX);
+    SDL_Texture* createTexture(const SDL_State&, int w = DEFAULT_CANVAS_WIDTH_MAX, int h = DEFAULT_CANVAS_HEIGHT_MAX);
 
     void renderFrame(Application_State&);
 

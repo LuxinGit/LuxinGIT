@@ -2,6 +2,8 @@
 #include "Application/Application.h"
 
 luxel::luxel() { colour = DEFAULT_BACKGROUND_COLOUR; }
+luxel::luxel(const std::array<uint8_t, 4>& c) : colour(c) {}
+
 void luxel::resetLuxel() {
     colour = DEFAULT_BACKGROUND_COLOUR;
 }
@@ -32,7 +34,7 @@ namespace Canvas {
     }
     luxel* getLuxelFromCoord(Canvas_State& s, const coordinate& c, bool onDisplay) {
         if (!coordCheck(s, c, onDisplay)) return nullptr;
-        return &s.canvas[indexFromCoord(c)];
+        return &(*s.activeCanvas)[indexFromCoord(c)];
     }
     
     void processCanvasSize(Application_State& mh, Command::Cmd& command) {

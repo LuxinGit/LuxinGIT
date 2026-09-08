@@ -712,6 +712,9 @@ Options:
 					if (cS.commandQueue.size()) if (harvestInput("You have unexecuted commands.  Continue? [Y]") != "Y") break;
                     cS.commandQueue = {};
 					return;
+                case 6:
+                    s.CanvasState.activeCanvas = (s.CanvasState.activeCanvas == &s.CanvasState.displayCanvas) ? (&s.CanvasState.bufferCanvas) : (&s.CanvasState.displayCanvas);
+                    break;
 				default:
 					continue;
 				}

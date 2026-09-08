@@ -3,6 +3,7 @@
 #include "Canvas/Canvas.h"
 #include "Canvas/Cursor.h"
 #include "Canvas/Draw.h"
+#include "Canvas/Object.h"
 #include "Platform/SDLWrapper.h"
 #include "Command/Action.h"
 #include "Command/Input.h"
@@ -13,6 +14,7 @@ struct Application_State {
     Canvas_State        CanvasState;
     Cursor_State        CursorState;
     Draw_State          DrawState;
+    Object_State        ObjectState;
     Input_State         InputState;
     Command_State       CommandState;
     SDL_State           SDLState;
