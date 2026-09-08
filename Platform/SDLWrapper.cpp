@@ -25,8 +25,8 @@ namespace SDL {
 		{
 			return {	static_cast<float>(o.topLeft.x), 
 						static_cast<float>(o.topLeft.y), 
-						static_cast<float>(o.bottomRight.x - o.topLeft.x + 1), 
-						static_cast<float>(o.bottomRight.y - o.topLeft.y + 1) };
+						static_cast<float>(o.width), 
+						static_cast<float>(o.height) };
 		}
 		void renderCanvasOverlay(SDL_Renderer* renderer, int width, int height)
 		{
@@ -41,8 +41,8 @@ namespace SDL {
 			updateTexture(sS.displayTexture, cS.displayCanvas, cS.width, cS.height);
 			renderCanvasTexture(sS.Renderer, sS.displayTexture, cS);
 
-			for (const auto& obj : oS.objects)			
-				renderTexture(sS.Renderer, obj.texture, nullptr, obj.area);			
+			for (const auto& [ID, obj] : oS.objects)			
+				renderTexture(sS.Renderer, obj.texture, nullptr, objectRect(obj));			
 
 			if (cS.activeCanvas == &cS.bufferCanvas) 
 			{

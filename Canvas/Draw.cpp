@@ -17,17 +17,19 @@ namespace Draw {
             return { static_cast<uint8_t>(rand() % 256),static_cast<uint8_t>(rand() % 256),static_cast<uint8_t>(rand() % 256), 255 };
         }
 
+        void markStateChanges (Action_State& aS, Draw_State& dS, luxel& l) 
+        {
+            Action::markChangedPixel(aS, &l, l.colour);
+            if (dS.penMode != Draw_State::PEN_MODE::RUBBER)
+                dS.pixelsDrawn++;
+        }
+
         void drawPoint (Application_State& mh, luxel& p, const colour& newColour) {
             if (p.colour == newColour) return;
-            Action::markChangedPixel(mh.ActionState, &p, p.colour);
+            markStateChanges(mh.ActionState, mh.DrawState, p);
             p.colour = newColour;
-            if (p.colour != mh.DrawState.backgroundColour) mh.DrawState.pixelsDrawn++;
         }
-        void drawPoint (Application_State& mh, luxel* p, const colour& colour) {
-            if (!p) return;
-            drawPoint(mh, *p, colour);
-        }
-        void drawPoint (Application_State& mh, const coordinate& c, const colour& colour) {
+        void drawPoint (Application_State& mh, const coordinate& c, const colour& col) {
             if (auto* p = mh.ObjectState.activeObjectEdit) 
             {
                 p->min.x = std::min(p->min.x, c.x);
@@ -35,7 +37,9 @@ namespace Draw {
                 p->max.x = std::max(p->max.x, c.x);
                 p->max.y = std::max(p->max.y, c.y);
             }
-            drawPoint(mh, Canvas::getLuxelFromCoord(mh.CanvasState, c, true), colour);
+            luxel* l = Canvas::getDisplayedLuxelFromActiveCanvas(mh.CanvasState, c);
+            if (!l) return;
+            drawPoint(mh, *l, col);
         }
         void drawPoint (Application_State& mh, const coordinate& c, const colour& colour, const bool useP) {
             if (useP) drawCircle(mh, c, colour, mh.DrawState.pen, true);
@@ -127,7 +131,7 @@ namespace Draw {
 
         void fill(Application_State& mh, const coordinate& oc, const colour& nColour) {
 
-            luxel* o = Canvas::getLuxelFromCoord(mh.CanvasState, oc, true);
+            luxel* o = Canvas::getDisplayedLuxelFromActiveCanvas(mh.CanvasState, oc);
             if (!o) return; // origin could not be on the display, and if so we don't want to fill around it.
             // this behaviour chosen instead of filling the pixel and then returning, fill should not be used as alias for drawPoint.
             colour oColour = o->colour;
@@ -138,7 +142,7 @@ namespace Draw {
             while (!pixelStack.empty()) {
 
                 coordinate c = pixelStack.back();
-                luxel* l = Canvas::getLuxelFromCoord(mh.CanvasState, c, true);
+                luxel* l = Canvas::getDisplayedLuxelFromActiveCanvas(mh.CanvasState, c);
 
                 if (!l or l->colour != oColour) {
                     pixelStack.pop_back();
@@ -277,7 +281,7 @@ namespace Draw {
             case 1:
                 return getRandomColour();
             case 2:
-                return Canvas::getLuxelFromCoord(cS, curS.cursor)->colour;
+                return Canvas::getDisplayedLuxelFromActiveCanvas(cS, curS.cursor)->colour;
             default:
                 return target == 1 ? DEFAULT_DRAW_COLOUR : DEFAULT_BACKGROUND_COLOUR;
             }
@@ -289,9 +293,7 @@ namespace Draw {
         //1 INT: colourSource    { ARG_2, random, underCursor, default }
         //2 COLOUR: colour - only required if newColour == 0, as then implied that commmand carries replacement.
 
-        Draw_State& s = mh.DrawState;
-
-        
+        Draw_State& s = mh.DrawState;        
         
         int& target = std::get<int>(command.args[0]);
         colour* targetC = resolveActiveColourFromArg(s, target);

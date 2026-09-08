@@ -15,9 +15,12 @@ namespace Canvas {
         size_t indexFromCoord(const coordinate& c) {
             return size_t(c.y) * DEFAULT_CANVAS_WIDTH_MAX + size_t(c.x);
         }
+        size_t newIndexFromCoord(const coordinate& c, int width) {
+            return size_t(c.y) * width + size_t(c.x);
+        }
         void updateCanvasSize(Canvas_State& cS, SDL_State& sS, coordinate& c)
         {
-            if (!coordCheck(cS, c, false)) return;
+            if (!newCoordCheck(c)) return;
             if (c.x) std::swap(cS.width, c.x);
             if (c.y) std::swap(cS.height, c.y);
             SDL_SetWindowSize(sS.Window, cS.width, cS.height);
@@ -25,16 +28,28 @@ namespace Canvas {
 
     }
 
-    bool coordCheck(const Canvas_State& s, const coordinate& c, bool onDisplay) {
-        coordinate tC1 = (onDisplay) ? 
-            coordinate(s.width - 1, s.height - 1) : coordinate(DEFAULT_CANVAS_WIDTH_MAX, DEFAULT_CANVAS_HEIGHT_MAX);
-        if (c < coordinate(0,0))   return false;
-        if (c > tC1)  return false;
-        return true;
+    bool newCoordCheck(const coordinate& c, const coordinate& max)
+    {
+        return c >= coordinate{ 0, 0 } and c < max;
     }
-    luxel* getLuxelFromCoord(Canvas_State& s, const coordinate& c, bool onDisplay) {
-        if (!coordCheck(s, c, onDisplay)) return nullptr;
-        return &(*s.activeCanvas)[indexFromCoord(c)];
+    luxel* newGetLuxelFromCoord(std::vector<luxel>& v, const coordinate& c, const coordinate& dim)
+    {
+        // dim == dimensions of vector.
+        if (!newCoordCheck(c, dim)) return nullptr;
+        return &v[newIndexFromCoord(c, dim.x)];
+    }
+    luxel* getDisplayedLuxelFromActiveCanvas(Canvas_State& cS, const coordinate& c)
+    {
+        if (c.x >= cS.width or c.y >= cS.height) return nullptr;
+        return Canvas::newGetLuxelFromCoord(
+            *cS.activeCanvas,
+            c,
+            coordinate{ DEFAULT_CANVAS_WIDTH_MAX, DEFAULT_CANVAS_HEIGHT_MAX });
+    }
+
+    void swapActiveCanvas(Canvas_State& s)
+    {
+        s.activeCanvas = (s.activeCanvas == &s.displayCanvas) ? (&s.bufferCanvas) : (&s.displayCanvas);
     }
     
     void processCanvasSize(Application_State& mh, Command::Cmd& command) {

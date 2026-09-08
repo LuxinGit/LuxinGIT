@@ -600,9 +600,43 @@ namespace Input::CLI {
                 arg = convertVecToColour(ret);
                 return true;
 
+            case Command::Argument::ARGTYPE::STRING:
+
+                arg = harvestInput("STRING: ");
+                return true;
+
             default:
                 return false;
             }
+        }
+
+        Command::Argument::ARGTYPE inferTypeFromInput(const std::string& arginfo) 
+        {
+            using t = Command::Argument::ARGTYPE;
+
+            std::cout << arginfo << std::endl;
+            int option = 0;
+            safestoi(harvestInput(R"(
+This argument accepts multiple types.
+    [1] Int.
+    [2] Coordinate.
+    [3] Colour.
+    [4] String.)"), option);       
+
+            switch (option) {
+            case 1:
+                return t::INT;
+            case 2:
+                return t::COORDINATE;
+            case 3:
+                return t::COLOUR;
+            case 4:
+                return t::STRING;
+            default:
+                std::cout << "Invalid selection." << std::endl;
+                return inferTypeFromInput(arginfo);
+            }
+
         }
 
         bool createCommand(Input_State::CLI_State& CLIS, Command_State& cS, const std::string& input) {
@@ -621,6 +655,7 @@ namespace Input::CLI {
             }
 
             std::vector<Command::argument> args = std::vector<Command::argument>(defArgs.size());
+            
 
             for (size_t i = 0; i < defArgs.size(); i++) {
 
@@ -628,6 +663,9 @@ namespace Input::CLI {
                     if (harvestInput("This argument (" + std::string(defArgs[i].name) + ") is not required.  Input anyway? [Y]") != "Y")
                         continue;
                 std::cout << "Entering argument " << std::string(defArgs[i].name) << std::endl;
+                Command::Argument::ARGTYPE argType = defArgs[i].type;
+                if (argType == Command::Argument::ARGTYPE::UNFIXED_TYPE)
+                    argType = inferTypeFromInput(defArgs[i].desc.data());
                 if (!harvestArgument(defArgs[i].type, args[i]))
                     return false;
 
@@ -686,7 +724,8 @@ Options:
     [2] Execute current commands.
     [3] Get help for a command name.
     [4] List all command names.
-    [5] Quit.
+    [5] Arbitrary code execution.
+    [6] Quit.
 
 )" << std::endl;
 				switch (std::stoi(harvestInput(""))) {
@@ -708,13 +747,14 @@ Options:
                         std::cout << def->inputMetadata.cli->commandName << std::endl;
                     }
                     break;
-				case 5:
+                case 5:
+                    Canvas::swapActiveCanvas(s.CanvasState);
+                    break;
+                case 6:
 					if (cS.commandQueue.size()) if (harvestInput("You have unexecuted commands.  Continue? [Y]") != "Y") break;
                     cS.commandQueue = {};
 					return;
-                case 6:
-                    s.CanvasState.activeCanvas = (s.CanvasState.activeCanvas == &s.CanvasState.displayCanvas) ? (&s.CanvasState.bufferCanvas) : (&s.CanvasState.displayCanvas);
-                    break;
+                
 				default:
 					continue;
 				}

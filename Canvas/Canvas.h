@@ -23,8 +23,17 @@ struct Canvas_State {
 
 namespace Canvas {
 
-    bool coordCheck(const Canvas_State& s, const coordinate& c, bool onDisplay = false);
-    luxel* getLuxelFromCoord(Canvas_State& s, const coordinate& c, bool onDisplay = false);
+    bool newCoordCheck(
+        const coordinate& c,
+        const coordinate& max = coordinate{ DEFAULT_CANVAS_WIDTH_MAX, DEFAULT_CANVAS_HEIGHT_MAX });
+    luxel* newGetLuxelFromCoord(
+        std::vector<luxel>& v, 
+        const coordinate& c,
+        const coordinate& dim = coordinate{ DEFAULT_CANVAS_WIDTH_MAX, DEFAULT_CANVAS_HEIGHT_MAX} // default case = checking against canvas dimensions
+        );
+    luxel* getDisplayedLuxelFromActiveCanvas(Canvas_State& cS, const coordinate& c);
+
+    void swapActiveCanvas(Canvas_State&); // used to swap between displayCanvas and canvasBuffer.
 
     void processCanvasSize(Application_State& mh, Command::Cmd& command);
 

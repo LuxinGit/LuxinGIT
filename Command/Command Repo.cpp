@@ -291,7 +291,7 @@ Arguments are:
     // PEN MODE
     // ============================================================
     {
-    .ID = COMMAND_ID::PENMODE,
+    .ID = COMMAND_ID::PEN_MODE,
 
     .commandMetadata = {
         .commandDescription = "Switch the pen mode.",
@@ -885,5 +885,52 @@ Arguments are:
     },
 
     .processor = &Canvas::processCanvasSize
+},
+{
+    .ID = COMMAND_ID::OBJECT_EDITOR,
+
+    .commandMetadata = {
+        .commandDescription = "Toggle object editing mode.",
+
+        .arguments = {
+            {
+                Command::Argument::ARGTYPE::UNFIXED_TYPE,
+                "object",
+                "Optional object ID or object name.",
+                std::nullopt,
+                false
+            }
+        },
+
+        .presets = {
+            {
+                "New Object",
+                {
+                    std::monostate{}
+                }
+            }
+        }
+    },
+
+    .inputMetadata = {
+            .cli = inp::CLI_Metadata{
+    "object",
+    R"(Toggle object editing mode.
+Arguments are:
+    [0] {Optional} Object ID or object name. Omit to create a new object.)"
+},
+        .gui = {
+            {
+                GUI::GUI_Metadata{
+                    GUI::HEADER::TOOLS,
+                    "Object Editor",
+                    GUI::FUNCTION_TYPE::BINARY,
+                    0
+                }
+            }
+        }
+    },
+
+    .processor = &Object::toggleObjectEditMode
 }
 } };

@@ -1,6 +1,8 @@
 #pragma once
 #include "Application/STRUCTS.h"
+#include "Command/Command.h"
 #include <vector>
+#include <unordered_map>
 #include "SDL3/SDL.h"
 
 struct SDL_State;
@@ -10,12 +12,18 @@ namespace Object {
 	
 	struct object {
 
+		// object metadata
+
+		int objectID;
+		std::string name = "Unnamed Object";
+
+		// data
 		coordinate topLeft = { 0, 0 };
-		coordinate bottomRight = { 0, 0 };
+		int width = 0;
+		int height = 0;
 		std::vector<luxel> pixels = {};
 		
 		SDL_Texture* texture = nullptr;
-		SDL_FRect area;
 
 		/* IMPLEMENTATION PLAN :
 
@@ -25,24 +33,28 @@ namespace Object {
 
 		*/
 
-		void renderObject(const SDL_State&);
-
 	};
 
-	struct Object_Edit {
-		coordinate min;
-		coordinate max;
+	struct Object_Edit 
+	{
+		coordinate min = coordinate{ DEFAULT_CANVAS_WIDTH_MAX, DEFAULT_CANVAS_HEIGHT_MAX };
+		coordinate max = coordinate{ -1 , -1 };
 		object* activeObject = nullptr;
 	};
 
 
-	object createObjectFromEdit(Canvas_State& s, Object_Edit& e);
+
+	void toggleObjectEditMode(Application_State& s, Command::Cmd& cmd);
 
 }
 
 struct Object_State {
 
-	std::vector<Object::object> objects;
+	std::unordered_map<int, Object::object> objects;
+	std::unordered_map<std::string, int>	nameMap;
+	int lastObjectID = 0;
+
+	Object::Object_Edit  objectEditBuffer;
 	Object::Object_Edit* activeObjectEdit = nullptr;
 
 };

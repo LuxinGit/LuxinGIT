@@ -17,7 +17,7 @@ namespace Cursor {
             return;
         }
         void resetCursors(Cursor_State& s, Canvas_State& canvS) {
-            if (!Canvas::coordCheck(canvS, s.deltaCursor, true)) {
+            if (!Canvas::newCoordCheck(s.deltaCursor, coordinate{ canvS.width, canvS.height })) {
                 s.deltaCursor.first = std::clamp(s.deltaCursor.first, 0.0f, static_cast<float>(canvS.width - 1));
                 s.deltaCursor.second = std::clamp(s.deltaCursor.second, 0.0f, static_cast<float>(canvS.height - 1));
             }

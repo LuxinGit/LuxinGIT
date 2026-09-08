@@ -21,17 +21,26 @@ enum class COMMAND_ID {
     CURSOR_MOVE,
     CURSOR_ORIGIN,
     CURSOR_DRAWSTEP,
+
     DRAW_CIRCLE,
     DRAW_FILL,
+
     COLOUR,
-    PENMODE,
+
+    PEN_MODE,
     PEN_DOWN,
     PEN_WIDTH,
+
     INPUT_CLI_ENABLE,
     INPUT_MOUSE_ENABLE,
+    
     RESET,
-    CANVAS_RESIZE,    
+
+    CANVAS_RESIZE,
+
     ACTION_HISTORY,
+
+    OBJECT_EDITOR,
 
     INVALID
 };
@@ -42,7 +51,8 @@ namespace Command {
         std::monostate,
         int,
         colour,
-        coordinate>;
+        coordinate,
+        std::string>;
 
     struct Cmd;
     struct Command_Definition;
@@ -60,7 +70,9 @@ namespace Command::Argument {
     enum class ARGTYPE {
         INT = 1,
         COLOUR = 2,
-        COORDINATE = 3
+        COORDINATE = 3,
+        STRING = 4,
+        UNFIXED_TYPE
     };
 
     struct Argument_Definition {
@@ -163,9 +175,7 @@ namespace Command::Definition::Input::GUI::Resolver {
     int& resolvePenWidth(Application_State&);
     int& resolveDrawstep(Application_State&);
     int& resolveCanvasHeight(Application_State&);
-    Command::argument resolveCanvasWidthArgument(int value);
     int& resolveCanvasWidth(Application_State&);
-    Command::argument resolveCanvasHeightArgument(int value);
     colour& resolveDrawColourChange(Application_State&);
     colour& resolveBackgroundColourChange(Application_State&);
 }
