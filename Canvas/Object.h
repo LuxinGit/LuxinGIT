@@ -4,6 +4,7 @@
 #include <vector>
 #include <unordered_map>
 #include "SDL3/SDL.h"
+#include <memory>
 
 struct SDL_State;
 struct Canvas_State;
@@ -14,7 +15,7 @@ namespace Object {
 
 		// object metadata
 
-		int objectID = 0;
+		int objectID = 1;
 		std::string name = "Unnamed Object";
 
 		// data
@@ -52,9 +53,10 @@ namespace Object {
 
 struct Object_State {
 
-	std::unordered_map<int, Object::object> objects;
-	std::unordered_map<std::string, int>	nameMap;
-	int lastObjectID = 0;
+
+	std::vector<std::unique_ptr<Object::object>> objects;
+
+	int lastObjectID = 1;
 
 	Object::Object_Edit  objectEditBuffer;
 	Object::Object_Edit* activeObjectEdit = nullptr;

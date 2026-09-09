@@ -5,6 +5,54 @@
 
 
 namespace Object {
+
+	//// Helper Functions
+
+	namespace {
+
+		object* retrieveObjectFromIdentifier(Object_State& oS, const Command::argument& a)
+		{
+			if (const int* id = std::get_if<int>(&a)) {
+				for (const auto& object : oS.objects)
+					if (object->objectID == *id) return object.get();
+			}
+
+			if (const std::string* name = std::get_if<std::string>(&a)) {
+				for (const auto& object : oS.objects)
+					if (object->name == *name) return object.get();
+			}
+
+			return nullptr;
+		};
+
+		bool identifyCollision(const Object::object* o, const coordinate& c)
+		{
+			if (c >= o->topLeft && c < coordinate{ o->topLeft.x + o->width, o->topLeft.y + o->height })
+				return true;
+			else
+				return false;
+		}
+
+		object* retrieveObjectFromUnderneathCursor(Object_State& oS, const Cursor_State& cS)
+		{
+			coordinate c = cS.cursor;
+
+			for (const auto& object : oS.objects)
+			{
+				if (identifyCollision(object.get(), c))
+					return object.get();
+			}
+
+			return nullptr;
+		}
+
+		object* retrieveObject(
+			Object_State& oS,
+			const Cursor_State& cS,
+			int& setting,
+			const Command::argument& argument) {}
+
+	}
 	
 	namespace {
 		void createObjectTexture(SDL_State& s, Object::object& o)
@@ -12,8 +60,7 @@ namespace Object {
 			if (o.texture) SDL_DestroyTexture(o.texture);
 			o.texture = SDL::createTexture(s, o.width, o.height);
 			SDL_UpdateTexture(o.texture, nullptr, o.pixels.data(), o.width * sizeof(luxel));			
-		}
-	
+		}	
 
 		void emplaceObjectUntoCanvas(Canvas_State& cS, object& o)
 		{
@@ -127,30 +174,19 @@ namespace Object {
 		}
 	}
 
-	namespace 
+	void selectObject(Application_State& s, Command::Cmd& cmd)
 	{
-		object* retrieveObjectFromIdentifier(Object_State& oS, const Command::argument& a)
+		//0:UNFIXED_TYPE<optional> UniqueIdentifier;
+
+		object* o = retrieveObjectFromIdentifier(s.ObjectState, cmd.args[0]);
+
+		if (o)
 		{
-			if (const int* id = std::get_if<int>(&a)) {
-				auto it = oS.objects.find(*id);
-				return it != oS.objects.end() ? &it->second : nullptr;
-			}
-
-			if (const std::string* name = std::get_if<std::string>(&a)) {
-				auto nameIt = oS.nameMap.find(*name);
-				if (nameIt == oS.nameMap.end()) return nullptr;
-
-				auto objectIt = oS.objects.find(nameIt->second);
-				return objectIt != oS.objects.end() ? &objectIt->second : nullptr;
-			}
-
-			return nullptr;
+			s.ObjectState.selectedObject = o;
+			return;
 		}
-	}
-	/*void selectObject(Application_State& s, Command::Cmd& cmd)
-	{
 
-	}*/
+	}
 	void moveObject(Application_State& s, Command::Cmd& cmd)
 	{
 		//0:INT setting {coord,setToCursor,stickToCursor}
