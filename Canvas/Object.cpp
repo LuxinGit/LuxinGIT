@@ -46,14 +46,54 @@ namespace Object {
 			return nullptr;
 		}
 
-		object* retrieveObject(
-			Object_State& oS,
-			const Cursor_State& cS,
-			int& setting,
-			const Command::argument& argument) {}
-
 	}
 	
+	void selectObject(Application_State& s, Command::Cmd& cmd)
+	{
+		// Behaviour - Selects an object.
+		// if supplied a UiD uses that, otherwise uses the object underneath the cursor.
+		// selectedObject always deselected - we use cmd to figure out if we want to set it to something new or not.
+
+		//0:INT selectionMode { 0 / DEFAULT = CURSOR, 1 UiD, 2 Deselect }
+		//1:UNFIXED_TYPE<optional> UniqueIdentifier;
+
+		int* selectionMode = std::get_if<int>(&cmd.args[0]);
+		object* o = nullptr;
+
+		if (!selectionMode)
+		{
+			cmd.ID = COMMAND_ID::INVALID;
+			cmd.args = { "selectObject", "No selectionMode supplied? " };
+			return;
+		}
+
+		switch (*selectionMode)
+		{
+		case 0:
+			o = retrieveObjectFromUnderneathCursor(s.ObjectState, s.CursorState);
+			break;
+		case 1:
+			o = retrieveObjectFromIdentifier(s.ObjectState, cmd.args[1]);
+			break;
+		case 2:
+			o = nullptr;
+			break;
+		default:
+			cmd.ID = COMMAND_ID::INVALID;
+			cmd.args = { "selectObject", "selectionMode out of range? " };
+			return;
+		}
+
+		std::swap(s.ObjectState.selectedObject, o);
+
+		if (o)
+			cmd.args = { 1, o->objectID };
+		else
+			cmd.args = { 2 };
+
+	}
+
+
 	namespace {
 		void createObjectTexture(SDL_State& s, Object::object& o)
 		{
@@ -97,47 +137,50 @@ namespace Object {
 		
 		}
 
+		object* createNewObject(Object_State& oS, std::string name = "")
+		{
+
+			object* o = nullptr;
+			oS.objects.push_back(std::make_unique<object>());
+			o = oS.objects.back().get();
+
+			o->objectID = ++oS.lastObjectID;
+
+			if(name.empty())
+				name = "Unnamed Object " + std::to_string(o->objectID);
+			o->name = name;
+
+			return o;
+
+		}
+
 		void initaliseObjectEditMode(Application_State& s, Command::Cmd& cmd)
 		{
-			//0:UNFIXED_TYPE ObjectIndex
+
+			//0:UNFIXED_TYPE<optional> UiD
 
 			Object_State& oS = s.ObjectState;
-			if (oS.activeObjectEdit) return;
-
-			int* objID = std::get_if<int>(&cmd.args[0]);
-			std::string* objname = std::get_if<std::string>(&cmd.args[0]);
-			// objID can not be 0.
-			if (objname) {
-				int& id = oS.nameMap[*objname];
-
-				if (id)
-					objID = &id;
-			}
+			object* o = nullptr;
+			std::string name = "";
 
 			oS.objectEditBuffer = Object_Edit();
 			oS.activeObjectEdit = &oS.objectEditBuffer;
 
-			if (objID)
+			if (!std::holds_alternative<std::monostate>(cmd.args[0]))
 			{
-				oS.objectEditBuffer.activeObject = &oS.objects[*objID];
-			}
-			else 
-			{
-				int newID = oS.lastObjectID++;
-				object& o = oS.objects[newID];
-				o.objectID = newID;
+				o = retrieveObjectFromIdentifier(oS, cmd.args[0]);
 
-				if (objname)
-					o.name = *objname;
-				else
-					o.name += " " + std::to_string(newID);
-				oS.objectEditBuffer.activeObject = &o;
-
-				oS.nameMap[o.name] = newID;
-
+				if (!o)
+					if (std::string* n = std::get_if<std::string>(&cmd.args[0]))
+						name = *n;
 			}
 
-			emplaceObjectUntoCanvas(s.CanvasState, *oS.objectEditBuffer.activeObject);
+			if (!o)			
+				o = createNewObject(oS, name);
+				
+			oS.objectEditBuffer.activeObject = o;
+
+			emplaceObjectUntoCanvas(s.CanvasState, *o);			
 
 		}
 
@@ -174,25 +217,10 @@ namespace Object {
 		}
 	}
 
-	void selectObject(Application_State& s, Command::Cmd& cmd)
-	{
-		//0:UNFIXED_TYPE<optional> UniqueIdentifier;
-
-		object* o = retrieveObjectFromIdentifier(s.ObjectState, cmd.args[0]);
-
-		if (o)
-		{
-			s.ObjectState.selectedObject = o;
-			return;
-		}
-
-	}
+	
 	void moveObject(Application_State& s, Command::Cmd& cmd)
 	{
-		//0:INT setting {coord,setToCursor,stickToCursor}
-		//1:Coordinate					<optional> destination
-		//2:UNFIXED_TYPE<int,string>	<optional> objectIdentifier;
-
+		//0:
 		object* o = s.ObjectState.selectedObject;
 		if (!o) o = retrieveObjectFromIdentifier(s.ObjectState, cmd.args[2]);
 		if (!o) 

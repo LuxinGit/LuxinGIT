@@ -751,8 +751,10 @@ Options:
                     }
                     break;
                 case 5:
-                    for (auto& it : s.ObjectState.objects) {
-                        std::cout << it.second.name + " " + std::to_string(it.first) << std::endl;
+                    for (auto& it : s.ObjectState.objects) 
+                    {
+                        Object::object* o = it.get();
+                        std::cout << o->name << std::endl;
                     }
                     break;
                 case 6:

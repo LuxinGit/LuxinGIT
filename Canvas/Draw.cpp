@@ -174,7 +174,10 @@ namespace Draw {
         int& p = std::get<int>(command.args[1]);
 
         if (std::get<int>(command.args[0]) == 0) {
-            p += s.pen;
+            if (p)
+                p = ++s.pen;
+            else
+                p = --s.pen;
             command.args[0] = 1;
         }
 

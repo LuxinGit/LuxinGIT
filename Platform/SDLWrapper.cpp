@@ -41,9 +41,11 @@ namespace SDL {
 			updateTexture(sS.displayTexture, cS.displayCanvas, cS.width, cS.height);
 			renderCanvasTexture(sS.Renderer, sS.displayTexture, cS);
 
-			for (const auto& [ID, obj] : oS.objects)			
-				renderTexture(sS.Renderer, obj.texture, nullptr, objectRect(obj));			
-
+			for (const auto& obj : oS.objects)			
+			{
+				Object::object* o = obj.get();
+				renderTexture(sS.Renderer, o->texture, nullptr, objectRect(*o));			
+			}
 			if (cS.activeCanvas == &cS.bufferCanvas) 
 			{
 				renderCanvasOverlay(sS.Renderer, cS.width, cS.height);

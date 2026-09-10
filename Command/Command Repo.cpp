@@ -441,8 +441,8 @@ Continuous input is not supported through the CLI.)"
         },
 
         .presets = {
-            { "Increment", { 0,  1 } },
-            { "Decrement", { 0, -1 } },
+            { "Decrement", { 0,  1 } },
+            { "Increment", { 0,  2 } },            
             { "Reset",     { 1, DEFAULT_DRAWSTEP_CUR } }
         }
     },
@@ -450,8 +450,8 @@ Continuous input is not supported through the CLI.)"
     .inputMetadata = {
         .keyboard = {
             {
-                inp::Keyboard_Metadata{ SDL_SCANCODE_X, 0 },
-                inp::Keyboard_Metadata{ SDL_SCANCODE_Z, 1 }
+                inp::Keyboard_Metadata{ SDL_SCANCODE_Z, 0 },
+                inp::Keyboard_Metadata{ SDL_SCANCODE_X, 1 } // extremely hacky.
             }
         },
 
@@ -511,7 +511,7 @@ Arguments are:
 
         .presets = {
             { "Increment", { 0,  1 } },
-            { "Decrement", { 0, -1 } },
+            { "Decrement", { 0,  0 } },
             { "Reset",     { 1, DEFAULT_PENWIDTH_CUR } }
         }
     },

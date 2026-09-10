@@ -15,7 +15,7 @@ namespace Object {
 
 		// object metadata
 
-		int objectID = 1;
+		int objectID = 0;
 		std::string name = "Unnamed Object";
 
 		// data
@@ -56,7 +56,7 @@ struct Object_State {
 
 	std::vector<std::unique_ptr<Object::object>> objects;
 
-	int lastObjectID = 1;
+	int lastObjectID = 0;
 
 	Object::Object_Edit  objectEditBuffer;
 	Object::Object_Edit* activeObjectEdit = nullptr;

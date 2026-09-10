@@ -13,6 +13,7 @@ struct Cursor_State {
     int                     drawStep =      DEFAULT_DRAWSTEP_CUR;
     bool enableCrosshair = true;
     bool carryingObject = false;
+    bool carryingContinuous = false;
 };
 
 namespace Cursor {

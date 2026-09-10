@@ -14,6 +14,9 @@ namespace Cursor {
             c.first *= d;
             c.second *= d;
 
+            c.first += s.deltaCursor.first;
+            c.second += s.deltaCursor.second;
+
             return;
         }
         void resetCursors(Cursor_State& s, Canvas_State& canvS) {
@@ -23,6 +26,17 @@ namespace Cursor {
             }
             s.cursor = s.deltaCursor;
         }
+        bool continuousCheck(bool& base, bool& cont) 
+        {
+            if (cont)
+            {
+                cont = false;
+                base = false;
+                return true;
+            }
+            else
+                return base;
+        }
     }
 
     void checkCursorData(Application_State& mh) {
@@ -30,11 +44,10 @@ namespace Cursor {
         Cursor_State& cS = mh.CursorState;
         Draw_State& dS = mh.DrawState;
 
-        if (dS.penDown and cS.cursor != cS.deltaCursor) 
+        if (continuousCheck(dS.penDown, dS.penContinuous) and cS.cursor != cS.deltaCursor) 
             Draw::drawLineToNewCursor(mh);
-        if (dS.penContinuous) { dS.penContinuous = false; dS.penDown = false; }
         resetCursors(cS, mh.CanvasState);
-        if (cS.carryingObject)        
+        if (continuousCheck(cS.carryingObject, cS.carryingContinuous))
             mh.ObjectState.selectedObject->topLeft = coordinate{ cS.cursor };          
 
         
@@ -49,7 +62,7 @@ namespace Cursor {
         std::pair<float, float> c = std::get<coordinate>(command.args[1]);
 
         if (setting == 0) {
-            convertDirectionToSet(s, c);
+            convertDirectionToSet(s, c);            
         }
         else if (setting == 2) {
             c = s.origin;
@@ -68,8 +81,11 @@ namespace Cursor {
         int& d = std::get<int>(command.args[1]);
 
         if (std::get<int>(command.args[0]) == 0) {
+            if (d == 2)
+                d = ++s.drawStep;
+            else
+                d = --s.drawStep;
             command.args[0] = 1;
-            d += s.drawStep;
         }
 
         d = std::clamp(d, DEFAULT_DRAWSTEP_MIN, DEFAULT_DRAWSTEP_MAX);
@@ -80,5 +96,5 @@ namespace Cursor {
     }
     void processChangeOrigin(Application_State& mh, Command::Cmd& command) { 
         mh.CursorState.origin = mh.CursorState.cursor;
-    } // Probably expand this if I ever want to do stuf with origins, but for now this is fine.
+    } // Probably expand this if I ever want to do stuff with origins, but for now this is fine.
 }
