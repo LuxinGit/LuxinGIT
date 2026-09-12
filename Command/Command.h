@@ -5,6 +5,7 @@
 #include <optional>
 #include <string>
 #include <vector>
+#include <memory>
 
 #include <SDL3/SDL_scancode.h>
 #include <SDL3/SDL_mouse.h>
@@ -48,15 +49,28 @@ enum class COMMAND_ID {
 
 namespace Command {
 
+    struct Cmd;
+    struct Command_Definition;
+    
+    struct Command_Call;
+
+    using commandCall = std::shared_ptr<const Command_Call>;
+
     using argument = std::variant<
         std::monostate,
         int,
-        colour,
         coordinate,
-        std::string>;
+        colour,
+        std::string,
+        commandCall
+    >;
 
-    struct Cmd;
-    struct Command_Definition;
+    struct Command_Call {
+        const Command_Definition* def;
+        std::vector<argument> args;
+    };
+
+    
 
 }
 
@@ -73,7 +87,9 @@ namespace Command::Argument {
         COLOUR = 2,
         COORDINATE = 3,
         STRING = 4,
+        COMMAND = 5,
         UNFIXED_TYPE
+
     };
 
     struct Argument_Definition {

@@ -992,6 +992,15 @@ Arguments are:
     },
 
     .inputMetadata = {
+        .keyboard = {
+            {
+                inp::Keyboard_Metadata{
+                    SDL_SCANCODE_8,
+                    2,
+                    true
+                }
+            }
+        },
         .cli = inp::CLI_Metadata{
             "move_object",
             R"(Move an object.

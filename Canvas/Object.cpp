@@ -223,6 +223,7 @@ namespace Object {
 		//0:
 		object* o = s.ObjectState.selectedObject;
 		if (!o) o = retrieveObjectFromIdentifier(s.ObjectState, cmd.args[2]);
+		if (!o) o = retrieveObjectFromUnderneathCursor(s.ObjectState, s.CursorState);
 		if (!o) 
 		{
 			cmd.ID = COMMAND_ID::INVALID;
@@ -241,8 +242,8 @@ namespace Object {
 			dest = s.CursorState.cursor;
 			break;
 		case 2:
-			s.CursorState.carryingObject = !s.CursorState.carryingObject;
-			if (s.CursorState.carryingObject)
+			s.CursorState.carryingContinuous = !s.CursorState.carryingContinuous;
+			if (s.CursorState.carryingContinuous)
 				s.ObjectState.selectedObject = o;
 			else
 				s.ObjectState.selectedObject = nullptr;
