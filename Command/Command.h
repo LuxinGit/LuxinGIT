@@ -43,6 +43,7 @@ enum class COMMAND_ID {
 
     OBJECT_EDITOR,
     OBJECT_MOVE,
+    OBJECT_SELECT,
 
     INVALID
 };
@@ -58,9 +59,9 @@ namespace Command {
 
     using argument = std::variant<
         std::monostate,
-        int,
-        coordinate,
+        int,        
         colour,
+        coordinate,
         std::string,
         commandCall
     >;

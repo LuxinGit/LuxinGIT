@@ -45,6 +45,8 @@ namespace Object {
 		object* activeObject = nullptr;
 	};
 
+	void selectObject(Application_State& s, Command::Cmd& cmd);
+
 	void toggleObjectEditMode(Application_State& s, Command::Cmd& cmd);
 
 	void moveObject(Application_State& s, Command::Cmd& cmd);

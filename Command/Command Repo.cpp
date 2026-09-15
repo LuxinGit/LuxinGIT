@@ -1012,5 +1012,71 @@ Arguments are:
     },
 
     .processor = &Object::moveObject
-}
+},
+{
+    .ID = COMMAND_ID::OBJECT_SELECT,
+
+    .commandMetadata = {
+        .commandDescription = "Select an object.",
+
+        .arguments = {
+            {
+                Command::Argument::ARGTYPE::INT,
+                "selectionMode",
+                "Selection mode. 0 = select object underneath cursor, 1 = select by identifier, 2 = deselect.",
+                std::pair<int, int>{ 0, 2 },
+                true
+            },
+            {
+                Command::Argument::ARGTYPE::UNFIXED_TYPE,
+                "object",
+                "Object ID or object name. Required only when selectionMode == 1.",
+                std::nullopt,
+                false
+            }
+        },
+
+        .presets = {
+            {
+                "Select Under Cursor",
+                {
+                    0,
+                    std::monostate{}
+                }
+            },
+            {
+                "Select By Identifier",
+                {
+                    1,
+                    std::monostate{}
+                }
+            },
+            {
+                "Deselect",
+                {
+                    2,
+                    std::monostate{}
+                }
+            }
+        }
+    },
+
+    .inputMetadata = {
+        .keyboard = 
+        {
+            {
+                inp::Keyboard_Metadata { SDL_SCANCODE_I, 0 }
+            }
+        },
+        .cli = inp::CLI_Metadata{
+            "select_object",
+            R"(Select or deselect an object.
+Arguments are:
+    [0] Selection mode. 0 = select object underneath cursor, 1 = select by identifier, 2 = deselect.
+    [1] {Optional} Object ID or object name. Required when selectionMode == 1.)"
+        }
+    },
+
+    .processor = &Object::selectObject
+},
 } };

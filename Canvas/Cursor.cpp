@@ -37,6 +37,11 @@ namespace Cursor {
             else
                 return base;
         }
+        void setObjectTopLeftFromCursor(Cursor_State& cS, Object::object* o)
+        {
+            coordinate midPoint{ static_cast<int>(o->width / 2), static_cast<int>(o->height / 2) };
+            o->topLeft = coordinate{ cS.cursor } - midPoint;
+        }
     }
 
     void checkCursorData(Application_State& mh) {
@@ -48,7 +53,7 @@ namespace Cursor {
             Draw::drawLineToNewCursor(mh);
         resetCursors(cS, mh.CanvasState);
         if (continuousCheck(cS.carryingObject, cS.carryingContinuous))
-            mh.ObjectState.selectedObject->topLeft = coordinate{ cS.cursor };          
+            setObjectTopLeftFromCursor(cS, mh.ObjectState.selectedObject);
 
         
     }
