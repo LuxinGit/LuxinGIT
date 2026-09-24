@@ -1,6 +1,7 @@
 #include <algorithm>
 
 #include "Cursor.h"
+#include "Command Definition.h"
 #include "Application/Application.h"
 
 #include <cassert>
@@ -102,4 +103,121 @@ namespace Cursor {
     void processChangeOrigin(Application_State& mh, Command::Cmmd& command) { 
         mh.CursorState.origin = mh.CursorState.cursor;
     } // Probably expand this if I ever want to do stuff with origins, but for now this is fine.
+}
+
+namespace Cursor::Move
+{
+	namespace Dir::Interpreter
+	{
+		static coordinate getDeltaFromDirection(const Command::argmap& aMap)
+		{
+			return Direction::get(std::get<std::string>(aMap.at("Direction")));
+		}
+
+		static const int* getDistanceFromDirection(const Command::argmap& aMap)
+		{
+			return std::get_if<int>(&aMap.at("Distance"));
+		}
+
+		static coordinate calculateDestinationFromDirection(const Cursor_State& s, const Command::argmap& aMap)
+		{
+			coordinate delta = getDeltaFromDirection(aMap);
+			const int* distptr = getDistanceFromDirection(aMap);
+
+			int distance = s.drawStep;
+			if (distptr) distance = *distptr;
+
+			return delta * distance + coordinate{ s.deltaCursor };
+		}
+
+		static std::vector<Command::cmd> interpretDirectionalCursorMove(const Application_State& s, const Command::cmd& c)
+		{
+			coordinate destination =
+				calculateDestinationFromDirection(s.CursorState, c.args);
+
+			Command::cmd newC{ &::Cursor::Move::Set::CURSOR_MOVE_SET };
+			newC.setArg("Destination", destination);
+
+			return { std::move(newC) };
+		}
+	}
+
+	namespace Dir::Validator
+	{
+		static bool validateDirection(const Command::argument& a)
+		{
+			return Direction::dirmap.contains(std::get<std::string>(a));
+		}
+	}
+
+	namespace Dir
+	{
+		const Command::dfn CURSOR_MOVE_DIR =
+		{
+			.name = "cursor_move_direction",
+
+			.argDefinitions =
+			{
+				{
+					"Direction",
+					Command::argmd
+					{
+						.type = Command::Argument::ARGTYPE::STRING,
+						.defaultValue = std::monostate(),
+						.validator = &Validator::validateDirection,
+						.required = true,
+					}
+				},
+
+				{
+					"Distance",
+					Command::argmd
+					{
+						.type = Command::Argument::ARGTYPE::INT,
+						.defaultValue = std::monostate(),
+						.validator = nullptr,
+						.required = false
+					}
+				}
+			},
+
+			.interp = &Interpreter::interpretDirectionalCursorMove
+		};
+	}
+
+	namespace Set::Processor
+	{
+		static void processSet(Application_State& s, Command::cmd& c)
+		{
+			coordinate& nc = std::get<coordinate>(c.args.at("Destination"));
+			std::pair<float, float> ncff = static_cast<std::pair<float, float>>(nc);
+
+			std::swap(ncff, s.CursorState.deltaCursor);
+			nc = coordinate(ncff);
+		}
+	}
+
+	namespace Set
+	{
+		const Command::dfn CURSOR_MOVE_SET =
+		{
+			.name = "cursor_move_set",
+
+			.argDefinitions =
+			{
+				{
+					"Destination",
+					Command::argmd
+					{
+						.type = Command::Argument::ARGTYPE::COORDINATE,
+						.defaultValue = std::monostate(),
+						.validator = nullptr,
+						.required = true
+					}
+				}
+			},
+
+			.prcssr = &Processor::processSet
+		};
+	}
 }

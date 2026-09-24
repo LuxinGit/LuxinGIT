@@ -334,3 +334,94 @@ namespace Draw {
         }
     }
 }
+
+namespace Draw
+{
+    namespace Circle::Interpreter
+    {
+        static std::vector<Command::cmd> interpretCircle(const Application_State& s, const Command::cmd& c)
+        {
+            Command::cmd nc{ &DRAW_CIRCLE };
+
+            const int* radius = std::get_if<int>(&c.args.at("Radius"));
+            const coordinate* centre = std::get_if<coordinate>(&c.args.at("Centre"));
+            const colour* col = std::get_if<colour>(&c.args.at("Colour"));
+            const int* fill = std::get_if<int>(&c.args.at("Fill"));
+
+            nc.setArg("Radius", radius ? *radius : 10 * s.CursorState.drawStep);
+            nc.setArg("Centre", centre ? *centre : coordinate{ s.CursorState.cursor });
+            nc.setArg("Colour", col ? *col : *s.DrawState.activeColour);
+            nc.setArg("Fill", fill ? *fill : 0);
+
+            return { std::move(nc) };
+        }
+    }
+
+    namespace Circle::Processor
+    {
+        static void processCircle(Application_State& s, Command::cmd& c)
+        {
+            int radius = std::get<int>(c.args.at("Radius"));
+            coordinate centre = std::get<coordinate>(c.args.at("Centre"));
+            colour col = std::get<colour>(c.args.at("Colour"));
+            bool fill = static_cast<bool>(std::get<int>(c.args.at("Fill")));
+
+            drawCircle(s, centre, col, radius, fill);
+        }
+    }
+
+    namespace Circle
+    {
+        const Command::dfn DRAW_CIRCLE =
+        {
+            .name = "Draw",
+
+            .argDefinitions =
+            {
+                {
+                    "Radius",
+                    Command::argmd
+                    {
+                        .type = Command::Argument::ARGTYPE::INT,
+                        .defaultValue = std::monostate(),
+                        .validator = nullptr,
+                        .required = false
+                    }
+                },
+                {
+                    "Centre",
+                    Command::argmd
+                    {
+                        .type = Command::Argument::ARGTYPE::COORDINATE,
+                        .defaultValue = std::monostate(),
+                        .validator = nullptr,
+                        .required = false
+                    }
+                },
+                {
+                    "Colour",
+                    Command::argmd
+                    {
+                        .type = Command::Argument::ARGTYPE::COLOUR,
+                        .defaultValue = std::monostate(),
+                        .validator = nullptr,
+                        .required = false
+                    }
+                },
+                {
+                    "Fill",
+                    Command::argmd
+                    {
+                        .type = Command::Argument::ARGTYPE::INT,
+                        .defaultValue = std::monostate(),
+                        .validator = nullptr,
+                        .required = false
+                    }
+                }
+            },
+
+            .interp = &Interpreter::interpretCircle,
+            .prcssr = &Processor::processCircle
+        };
+    }
+}

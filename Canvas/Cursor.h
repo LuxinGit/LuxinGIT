@@ -16,11 +16,21 @@ struct Cursor_State {
     bool carryingContinuous = false;
 };
 
-namespace Cursor {
-
+namespace Cursor
+{
     void checkCursorData(Application_State& mh);
-    
+
     void processMoveCursor(Application_State& mh, Command::Cmmd& command);
     void processChangeDrawstep(Application_State& mh, Command::Cmmd& command);
     void processChangeOrigin(Application_State& mh, Command::Cmmd& command);
+}
+
+namespace Cursor::Move::Dir
+{
+    extern const Command::dfn CURSOR_MOVE_DIR;
+}
+
+namespace Cursor::Move::Set
+{
+    extern const Command::dfn CURSOR_MOVE_SET;
 }

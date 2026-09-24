@@ -259,3 +259,46 @@ namespace Command::Processor {
     std::pair<int, returnCode> constructCommand(Command_State& s, const Command_Definition* def, std::vector<argument> args = {});
     void processCommands(Application_State&);
 }
+
+namespace Command
+{
+    struct cmd;
+    struct argmd;
+    struct dfn;
+
+    using argmap = std::unordered_map<std::string, argument>;
+
+    using interpreter = std::vector<cmd>(*)(const Application_State&, const cmd&);
+    using defValidator = bool(*)(const Application_State&, const cmd&);
+    using argValidator = bool(*)(const argument&);
+    using processor = void(*)(Application_State&, cmd&);
+
+    struct cmd
+    {
+        const dfn* definition;
+        argmap args;
+
+        bool setArg(const std::string& argName, const argument& arg);
+        cmd(const dfn* def);
+    };
+
+    struct argmd
+    {
+        Argument::ARGTYPE type;
+        argument defaultValue;
+        argValidator validator = nullptr;
+        bool required = true;
+
+    };
+
+    struct dfn
+    {
+        std::string name;
+
+        std::unordered_map<std::string, argmd> argDefinitions;
+
+        interpreter  interp = nullptr;
+        defValidator valdtr = nullptr;
+        processor    prcssr = nullptr;
+    };
+}

@@ -3,6 +3,7 @@
 #include <vector>
 #include <array>
 #include <string>
+#include <unordered_map>
 #include "CONSTANTS.h"
 #include <optional>
 
@@ -68,6 +69,10 @@ struct coordinate {
     coordinate operator-(const coordinate& other) const {
         return { x - other.x, y - other.y };
     }
+    coordinate operator*(int i) const 
+    {
+        return { x * i, y * i };
+    }
 
     operator std::pair<float, float>() const {
         return {
@@ -95,3 +100,19 @@ struct coordinate_hash {
         return h1 ^ (h2 << 1);
     }
 };
+
+namespace Direction
+{
+    inline const std::unordered_map<std::string, coordinate> dirmap =
+    {
+        { "up",    {  0, -1 } },
+        { "down",  {  0,  1 } },
+        { "left",  { -1,  0 } },
+        { "right", {  1,  0 } }
+    };
+
+    inline coordinate get(const std::string& direction)
+    {
+        return dirmap.at(direction);
+    }
+}

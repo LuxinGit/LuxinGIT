@@ -35,5 +35,9 @@ namespace Draw {
     void processChangePenMode(Application_State& mh, Command::Cmmd& command);
     void processChangeColour(Application_State& mh, Command::Cmmd& command);
     void processClearCanvas(Application_State& mh, bool full);
+}
 
+namespace Draw::Circle
+{
+    extern const Command::dfn DRAW_CIRCLE;
 }
