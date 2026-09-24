@@ -82,7 +82,7 @@ namespace Input {
 
 	bool harvestApplicationInputs(Application_State& s);
 
-	void enableMouse(Application_State& s, Command::Cmd&);
+	void enableMouse(Application_State& s, Command::Cmmd&);
 
 }
 
@@ -100,6 +100,6 @@ namespace Input::GUI {
 
 namespace Input::CLI {
 
-	void openCLI(Application_State& s, Command::Cmd&);
+	void openCLI(Application_State& s, Command::Cmmd&);
 
 }

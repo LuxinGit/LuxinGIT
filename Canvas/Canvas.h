@@ -35,6 +35,6 @@ namespace Canvas {
 
     void swapActiveCanvas(Canvas_State&); // used to swap between displayCanvas and canvasBuffer.
 
-    void processCanvasSize(Application_State& mh, Command::Cmd& command);
+    void processCanvasSize(Application_State& mh, Command::Cmmd& command);
 
 }

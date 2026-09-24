@@ -26,14 +26,6 @@ namespace Object {
 		
 		SDL_Texture* texture = nullptr;
 
-		/* IMPLEMENTATION PLAN :
-
-		1.5 set up SDL_Texture to both render textures within obejct state and choose to display them if we hvae an activeTexture or something
-		3. move object from texture / whatever -> buffer (for x = 0, x < width, x++) something like that we did it before
-		4. then when done, trim until we can fully describe object within rect and convert into texture again.
-
-		*/
-
 		~object();
 
 	};
@@ -45,11 +37,11 @@ namespace Object {
 		object* activeObject = nullptr;
 	};
 
-	void selectObject(Application_State& s, Command::Cmd& cmd);
+	void selectObject(Application_State& s, Command::Cmmd& cmd);
 
-	void toggleObjectEditMode(Application_State& s, Command::Cmd& cmd);
+	void toggleObjectEditMode(Application_State& s, Command::Cmmd& cmd);
 
-	void moveObject(Application_State& s, Command::Cmd& cmd);
+	void moveObject(Application_State& s, Command::Cmmd& cmd);
 
 }
 

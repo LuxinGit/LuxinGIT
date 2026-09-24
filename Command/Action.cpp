@@ -17,7 +17,7 @@ namespace Action {
         }
         void processAction(Application_State& mh, Action_State& s) {
 
-            if (auto* cmd = std::get_if<Command::Cmd>(&s.actionQueue[s.actionQueueIndex])) 
+            if (auto* cmd = std::get_if<Command::Cmmd>(&s.actionQueue[s.actionQueueIndex])) 
             {
                 cmd->processor(mh, *cmd);
             }
@@ -45,13 +45,13 @@ namespace Action {
     void commitCurrentAction(Action_State& s) {
         if (!s.currentAction.changeSet.empty()) addNewAction(s);
     }
-    void processHistory(Application_State& s, Command::Cmd& command) {
+    void processHistory(Application_State& s, Command::Cmmd& command) {
         if (std::get<int>(command.args[0]) == 0)
             undoAction(s, s.ActionState);
         else
             redoAction(s, s.ActionState);
     }
-    void processClearActionQueue(Application_State& mh, Command::Cmd&)
+    void processClearActionQueue(Application_State& mh, Command::Cmmd&)
     {
         mh.ActionState.actionQueue = {}; 
     }

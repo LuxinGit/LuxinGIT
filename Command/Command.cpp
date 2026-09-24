@@ -38,7 +38,7 @@ namespace Command::Processor {
 
     namespace {
 
-        void addCommand(Command_State& s, Cmd command) {
+        void addCommand(Command_State& s, Cmmd command) {
             s.commandQueue.emplace_back(command);
         }
         void addCommand(Command_State& s, COMMAND_ID ID, std::vector<argument> args, Command_Processor p) {
@@ -97,7 +97,7 @@ namespace Command::Processor {
 
         const std::vector<Command::Argument::Argument_Definition>& defArguments = def->commandMetadata.arguments;
 
-        Cmd command = { def->ID, {} , def->processor};
+        Cmmd command = { def->ID, {} , def->processor};
 
         if (args.size() > defArguments.size()) return { 0 , returnCode::ARG_COUNT_INVALID };
         if (args.size() < defArguments.size()) args.resize(defArguments.size());

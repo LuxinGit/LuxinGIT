@@ -21,13 +21,13 @@ void LuxinPaint::cleanup(Application_State& s)
     SDL::cleanup(s.SDLState);
 }
 
-void LuxinPaint::processReset(Application_State& s, Command::Cmd& command)
+void LuxinPaint::processReset(Application_State& s, Command::Cmmd& command)
 // 0: INT ActionQueue
 // 1: INT Canvas
 // 2: INT Cursor
 // 3: INT Colours
 {
-    Command::Cmd c = { COMMAND_ID::INVALID };
+    Command::Cmmd c = { COMMAND_ID::INVALID };
 
     bool resetActions = std::get<int>(command.args[0]);
 

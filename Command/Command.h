@@ -50,7 +50,7 @@ enum class COMMAND_ID {
 
 namespace Command {
 
-    struct Cmd;
+    struct Cmmd;
     struct Command_Definition;
     
     struct Command_Call;
@@ -77,7 +77,7 @@ namespace Command {
 
 struct Command_State {
 
-    std::vector<Command::Cmd> commandQueue;
+    std::vector<Command::Cmmd> commandQueue;
 
 };
 
@@ -222,9 +222,9 @@ namespace Command::Definition {
 
 namespace Command {
 
-    using Command_Processor = void(*)(Application_State&, Cmd&);
+    using Command_Processor = void(*)(Application_State&, Cmmd&);
 
-    struct Cmd {
+    struct Cmmd {
 
         COMMAND_ID                                        ID;
         std::vector<argument>                           args;

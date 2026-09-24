@@ -4,17 +4,12 @@
 
 namespace Command
 {
-    struct Cmd;
+    struct Cmmd;
 
     namespace Definition
     {
         struct Dfn;
         struct Transition;
-
-
-        // =====================================================================
-        // PROCESSING
-        // =====================================================================
 
         // Interpreter:
         // - reads application state
@@ -30,12 +25,7 @@ namespace Command
         // - performs the actual state mutation
         // - generates / records the primitive inverse
 
-        using Processor = void(*)(Application_State&, Command::Cmd&);
-
-
-        // =====================================================================
-        // COMMAND GRAPH
-        // =====================================================================
+        using Processor = void(*)(Application_State&, Command::Cmmd&);
 
         struct Transition
         {
@@ -48,13 +38,12 @@ namespace Command
         {
             std::string name;
 
-            // Canonical explicitly-named routes.
+            // Explicit routes
             std::unordered_map<std::string, Transition> transitions = {};
 
-            // Shorthand routes into the canonical transitions above.
+            // Implicit
             std::unordered_map<Command::Argument::ARGTYPE, Transition*> implicitTransitions = {};
 
-            // Non-null only for primitive state-mutating leaves.
             Processor processor = nullptr;
         };
     }
@@ -64,9 +53,38 @@ namespace Command
     // RUNTIME COMMAND
     // =========================================================================
 
-    struct Cmd
+    //struct 
+    //{
+    //    Definition::Dfn* definition = nullptr;
+    //    std::vector<argument> args = {};
+    //};asdadssdfsdfasdaasdasdadsjkdflkgjdflkasd
+
+
+    namespace random
     {
-        Definition::Dfn* definition = nullptr;
-        std::vector<argument> args = {};
-    };
+        struct cmd;
+
+        using Processor = void(*)(Application_State&, cmd&);
+
+        struct cdef
+        {
+            std::string name;
+            Processor processor = nullptr;
+        };
+
+        struct cmd
+        {
+            cdef* def = nullptr;
+            std::unordered_map<std::string, ::Command::argument> args;
+        };
+
+        template<typename T>
+        T& arg(cmd& command, const std::string& name)
+        {
+            return std::get<T>(command.args.at(name));
+        }
+
+    }
+
+
 }

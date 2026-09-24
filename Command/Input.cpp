@@ -128,7 +128,7 @@ namespace Input {
 
 	}
 
-    void enableMouse(Application_State& s, Command::Cmd&) {
+    void enableMouse(Application_State& s, Command::Cmmd&) {
         s.InputState.MouseState.enableMouse = !s.InputState.MouseState.enableMouse;
     }
 
@@ -769,7 +769,7 @@ Options:
 
 	}
 
-    void openCLI(Application_State& s, Command::Cmd&)
+    void openCLI(Application_State& s, Command::Cmmd&)
     {
         s.CommandState.commandQueue = {};
         CLILoop(s);

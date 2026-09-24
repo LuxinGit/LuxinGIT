@@ -28,12 +28,12 @@ namespace Draw {
 
     void drawLineToNewCursor(Application_State& mh);
 
-    void processChangePenWidth(Application_State& mh, Command::Cmd& command);
-    void processCircle(Application_State&, Command::Cmd& command);
-    void processFill(Application_State& mh, Command::Cmd& command);
-    void processPenDown(Application_State& mh, Command::Cmd& command);
-    void processChangePenMode(Application_State& mh, Command::Cmd& command);
-    void processChangeColour(Application_State& mh, Command::Cmd& command);
+    void processChangePenWidth(Application_State& mh, Command::Cmmd& command);
+    void processCircle(Application_State&, Command::Cmmd& command);
+    void processFill(Application_State& mh, Command::Cmmd& command);
+    void processPenDown(Application_State& mh, Command::Cmmd& command);
+    void processChangePenMode(Application_State& mh, Command::Cmmd& command);
+    void processChangeColour(Application_State& mh, Command::Cmmd& command);
     void processClearCanvas(Application_State& mh, bool full);
 
 }

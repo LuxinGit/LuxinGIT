@@ -167,7 +167,7 @@ namespace Draw {
         drawLine(mh, mh.CursorState.cursor, mh.CursorState.deltaCursor, *mh.DrawState.activeColour, true);
     }
 
-    void processChangePenWidth(Application_State& aS, Command::Cmd& command) {
+    void processChangePenWidth(Application_State& aS, Command::Cmmd& command) {
         // 0:INT Setting {ADD,SET}, 1:INT Delta
 
         Draw_State& s = aS.DrawState;
@@ -186,7 +186,7 @@ namespace Draw {
         std::swap(p, s.pen);
 
     }
-    void processCircle(Application_State& s, Command::Cmd& command) {
+    void processCircle(Application_State& s, Command::Cmmd& command) {
         //0:RADIUS 1:CENTRE_POINT 2:OUTLINE_COLOUR 3:FILL [INT]
 
         int radius =    10 * s.CursorState.drawStep;
@@ -206,7 +206,7 @@ namespace Draw {
         drawCircle(s, centre, c, radius, f);
 
     }
-    void processFill(Application_State& s, Command::Cmd& command) {
+    void processFill(Application_State& s, Command::Cmmd& command) {
         
         colour c = *s.DrawState.activeColour;
         coordinate coor = s.CursorState.cursor;
@@ -219,7 +219,7 @@ namespace Draw {
         fill(s, coor, c);
 
     }
-    void processPenDown(Application_State& mh, Command::Cmd& command) {
+    void processPenDown(Application_State& mh, Command::Cmmd& command) {
         // 0 INT: Type {DISCRETE,CONTINUOUS}
 
         Draw_State& s = mh.DrawState;
@@ -229,7 +229,7 @@ namespace Draw {
 
         if (s.penDown) drawPoint(mh, mh.CursorState.cursor, *s.activeColour, true);
     }
-    void processChangePenMode(Application_State& mh, Command::Cmd& command) {
+    void processChangePenMode(Application_State& mh, Command::Cmmd& command) {
         //0 INT: Penmode to set to {DRAW,RUBBER,RAINBOW}.
         //1 INT: Additional optional parameter.
 
@@ -290,7 +290,7 @@ namespace Draw {
             }
         }
     }
-    void processChangeColour(Application_State& mh, Command::Cmd& command) {
+    void processChangeColour(Application_State& mh, Command::Cmmd& command) {
         
         //0 INT: targetColour { activeColour, drawColour, backgroundColour }
         //1 INT: colourSource    { ARG_2, random, underCursor, default }

@@ -52,7 +52,7 @@ namespace Canvas {
         s.activeCanvas = (s.activeCanvas == &s.displayCanvas) ? (&s.bufferCanvas) : (&s.displayCanvas);
     }
     
-    void processCanvasSize(Application_State& mh, Command::Cmd& command) {
+    void processCanvasSize(Application_State& mh, Command::Cmmd& command) {
 
         coordinate c{
             mh.CanvasState.width,

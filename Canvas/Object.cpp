@@ -48,7 +48,7 @@ namespace Object {
 
 	}
 	
-	void selectObject(Application_State& s, Command::Cmd& cmd)
+	void selectObject(Application_State& s, Command::Cmmd& cmd)
 	{
 		// Behaviour - Selects an object.
 		// if supplied a UiD uses that, otherwise uses the object underneath the cursor.
@@ -154,7 +154,7 @@ namespace Object {
 
 		}
 
-		void initaliseObjectEditMode(Application_State& s, Command::Cmd& cmd)
+		void initaliseObjectEditMode(Application_State& s, Command::Cmmd& cmd)
 		{
 
 			//0:UNFIXED_TYPE<optional> UiD
@@ -203,7 +203,7 @@ namespace Object {
 
 	}
 
-	void toggleObjectEditMode(Application_State& s, Command::Cmd& cmd)
+	void toggleObjectEditMode(Application_State& s, Command::Cmmd& cmd)
 	{
 		if(s.ObjectState.activeObjectEdit)
 		{ 
@@ -218,7 +218,7 @@ namespace Object {
 	}
 
 	
-	void moveObject(Application_State& s, Command::Cmd& cmd)
+	void moveObject(Application_State& s, Command::Cmmd& cmd)
 	{
 		//0:
 		object* o = s.ObjectState.selectedObject;

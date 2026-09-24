@@ -58,7 +58,7 @@ namespace Cursor {
         
     }
 
-    void processMoveCursor(Application_State& mh, Command::Cmd& command) {
+    void processMoveCursor(Application_State& mh, Command::Cmmd& command) {
         
         // 0:SETTING [DIR/SET/ORI], 1:COORDINATE [DRAWSTEP_USAGE/DESTINATION]
         
@@ -79,7 +79,7 @@ namespace Cursor {
 
     }
 
-    void processChangeDrawstep(Application_State& aS, Command::Cmd& command) {
+    void processChangeDrawstep(Application_State& aS, Command::Cmmd& command) {
         // 0:INT Setting {ADD,SET}, 1:INT Delta
 
         Cursor_State& s = aS.CursorState;
@@ -99,7 +99,7 @@ namespace Cursor {
         command.args = { d };
 
     }
-    void processChangeOrigin(Application_State& mh, Command::Cmd& command) { 
+    void processChangeOrigin(Application_State& mh, Command::Cmmd& command) { 
         mh.CursorState.origin = mh.CursorState.cursor;
     } // Probably expand this if I ever want to do stuff with origins, but for now this is fine.
 }
