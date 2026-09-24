@@ -90,8 +90,9 @@ namespace Command::Argument {
         STRING = 4,
         COMMAND = 5,
         UNFIXED_TYPE
-
     };
+
+    bool checkArgtypeMatch(const argument&, ARGTYPE);
 
     struct Argument_Definition {
         ARGTYPE type;

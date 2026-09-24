@@ -33,6 +33,22 @@ namespace Command::Definition::Input::GUI::Resolver {
 
 }
 
+namespace Command::Argument
+{
+    namespace 
+    {
+        ARGTYPE inferArgType(const argument& arg)
+        {
+            return static_cast<ARGTYPE>(arg.index());
+        }
+    }
+    
+    bool checkArgtypeMatch(const argument& a, ARGTYPE t)
+    {
+        return (t == inferArgType(a));
+    }
+
+}
 
 namespace Command::Processor {
 
@@ -144,3 +160,5 @@ namespace Command::Processor {
     }
 
 }
+
+

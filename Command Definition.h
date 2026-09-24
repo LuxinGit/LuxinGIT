@@ -4,50 +4,6 @@
 
 namespace Command
 {
-    struct Cmmd;
-
-    namespace Definition
-    {
-        struct Dfn;
-        struct Transition;
-
-        // Interpreter:
-        // - reads application state
-        // - transforms arguments while lowering
-        // - cannot mutate application state
-        // - does not choose the target definition
-
-        using Interpreter = void(*)(const Application_State&, std::vector<Command::argument>&);
-
-
-        // Processor:
-        // - exists only on primitive definitions
-        // - performs the actual state mutation
-        // - generates / records the primitive inverse
-
-        using Processor = void(*)(Application_State&, Command::Cmmd&);
-
-        struct Transition
-        {
-            Dfn* target = nullptr;
-            Interpreter interpreter = nullptr;
-        };
-
-
-        struct Dfn
-        {
-            std::string name;
-
-            // Explicit routes
-            std::unordered_map<std::string, Transition> transitions = {};
-
-            // Implicit
-            std::unordered_map<Command::Argument::ARGTYPE, Transition*> implicitTransitions = {};
-
-            Processor processor = nullptr;
-        };
-    }
-
 
     // =========================================================================
     // RUNTIME COMMAND
@@ -62,27 +18,40 @@ namespace Command
 
     namespace random
     {
+
         struct cmd;
+        struct argmd;
+        struct dfn;        
 
-        using Processor = void(*)(Application_State&, cmd&);
-
-        struct cdef
-        {
-            std::string name;
-            Processor processor = nullptr;
-        };
+        using interpreter   = std::vector<cmd>(*)(const Application_State&, const cmd&);
+        using validator     = bool(*)(const Application_State&, const cmd&);
+        using processor     = void(*)(Application_State&, cmd&);
 
         struct cmd
         {
-            cdef* def = nullptr;
+            const dfn* definition;
             std::unordered_map<std::string, ::Command::argument> args;
+
+            bool setArg(const std::string& argName, const ::Command::argument& arg);
+            cmd(const dfn* def);
         };
 
-        template<typename T>
-        T& arg(cmd& command, const std::string& name)
+        struct argmd
         {
-            return std::get<T>(command.args.at(name));
-        }
+            ::Command::Argument::ARGTYPE type;
+            ::Command::argument defaultValue;
+        };
+
+        struct dfn
+        {
+            std::string name;
+
+            std::unordered_map<std::string, argmd> argDefinitions;
+            
+            interpreter interp = nullptr;
+            validator   valdtr = nullptr;
+            processor   prcssr = nullptr;
+        };
 
     }
 
