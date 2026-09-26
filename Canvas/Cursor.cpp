@@ -1,7 +1,6 @@
 #include <algorithm>
 
 #include "Cursor.h"
-#include "Command Definition.h"
 #include "Application/Application.h"
 
 #include <cassert>
