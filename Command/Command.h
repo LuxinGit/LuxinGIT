@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <span>
 
 #include <SDL3/SDL_scancode.h>
 #include <SDL3/SDL_mouse.h>
@@ -260,6 +261,9 @@ namespace Command::Processor {
     void processCommands(Application_State&);
 }
 
+
+// NEW IMPLEMENTATION.
+
 namespace Command
 {
     struct cmd;
@@ -270,7 +274,7 @@ namespace Command
 
     using interpreter = std::vector<cmd>(*)(const Application_State&, const cmd&);
     using defValidator = bool(*)(const Application_State&, const cmd&);
-    using argValidator = bool(*)(const argument&);
+    using argValidator = bool(*)(const argument&, const argmd&);
     using processor = void(*)(Application_State&, cmd&);
 
     struct cmd
@@ -288,6 +292,7 @@ namespace Command
         argument defaultValue;
         argValidator validator = nullptr;
         bool required = true;
+        std::span<const argument> constraints = {};
 
     };
 
@@ -301,4 +306,9 @@ namespace Command
         defValidator valdtr = nullptr;
         processor    prcssr = nullptr;
     };
+
+    namespace Validator
+    {
+        bool genericValidator(const argument& arg, const argmd& amd);
+    }
 }

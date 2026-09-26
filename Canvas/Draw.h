@@ -39,9 +39,7 @@ namespace Draw {
 
 
 namespace Draw::Circle { extern const Command::dfn DRAW_CIRCLE; }
-namespace Draw::Fill { extern const Command::dfn DRAW_FILL; }
+namespace Draw::Fill   { extern const Command::dfn DRAW_FILL; }
 
-namespace Draw::Pen::Colour
-{
-    //
-}
+namespace Draw::Pen::Colour::SetSource { extern const Command::dfn DRAW_COLOUR_SETSOURCE; }
+namespace Draw::Pen::Colour::SetColour { extern const Command::dfn DRAW_COLOUR_SETCOLOUR; }

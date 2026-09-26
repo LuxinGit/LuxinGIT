@@ -59,6 +59,11 @@ namespace Cursor {
         
     }
 
+	const colour retrieveColourUnderCursor(const Application_State& s)
+	{
+		return Canvas::getColourFromCoordinate(coordinate{ s.CursorState.deltaCursor }, *s.CanvasState.activeCanvas, s.CanvasState.width);
+	}
+
     void processMoveCursor(Application_State& mh, Command::Cmmd& command) {
         
         // 0:SETTING [DIR/SET/ORI], 1:COORDINATE [DRAWSTEP_USAGE/DESTINATION]
@@ -144,7 +149,7 @@ namespace Cursor::Move
 
 	namespace Dir::Validator
 	{
-		static bool validateDirection(const Command::argument& a)
+		static bool validateDirection(const Command::argument& a, const Command::argmd& md)
 		{
 			return Direction::dirmap.contains(std::get<std::string>(a));
 		}

@@ -372,7 +372,7 @@ namespace Draw::Circle
     
     const Command::dfn DRAW_CIRCLE =
     {
-        .name = "Draw",
+        .name = "Circle",
 
         .argDefinitions =
         {
@@ -484,48 +484,56 @@ namespace Draw::Fill
 
 }
 
+namespace Draw::Pen::Colour::Constants
+{
+    static const std::array<Command::argument, 2> validSources =
+    {
+        std::string{"Random"},
+        std::string{"Cursor"}
+    };
+
+    static const std::array<Command::argument, 3> validTargets =
+    {
+        std::string{"Active"},
+        std::string{"Draw"},
+        std::string{"Background"}
+    };
+
+}
+
 namespace Draw::Pen::Colour::SetSource
 {
     namespace Interpreter
     {       
-        
-        static colour interpretColourUnderCursor(const Application_State& s)
+       
+
+        static const colour retrieveColourFromSource(const Application_State& s, const std::string& src)
         {
-            // THIS WILL REQUIRE REWRITING ONCE FURTHER OBJECT IMPLEMENTATION COMPLETE
-            // CURRENTLY JUST CHECKS CANVAS PIXEL UNDERNEATH CURSOR
+            if (src == "Random")            
+                return Draw::getRandomColour();
 
-            return Canvas::getColourFromCoordinate(coordinate{ s.CursorState.deltaCursor }, *s.CanvasState.activeCanvas, s.CanvasState.width);
-
+            assert(src == "Cursor");
+                return Cursor::retrieveColourUnderCursor(s);
+            
         }
        
         static std::vector<Command::cmd> interpretColourChangeInferred(const Application_State& s, const Command::cmd& c)
         {
+            const std::string& src = std::get<std::string>(c.args.at("Source"));
+            const colour& col = retrieveColourFromSource(s, src);
 
+            Command::cmd nC{ &SetColour::DRAW_COLOUR_SETCOLOUR };
+            
+            nC.setArg("Colour", col);
+            nC.setArg("Target", c.args.at("Target"));
+
+            return { nC };
         }
-    }
-
-    namespace Validator
-    {
-        static bool validTarget(const std::string& target)
-        {
-            static constexpr std::array validTargets =
-            {
-                "Random",
-                "Cursor"
-            };
-
-            return std::ranges::find(validTargets, target) != validTargets.end();
-        }
-    }
-
-    namespace Processor
-    {
-
     }
 
     const Command::dfn DRAW_COLOUR_SETSOURCE =
     {
-        .name = "Draw",
+        .name = "Change pen colour",
 
         .argDefinitions =
         {
@@ -533,12 +541,82 @@ namespace Draw::Pen::Colour::SetSource
                 "Source",
                 Command::argmd
                 {
-                    .type = Command::Argument::ARGTYPE::INT,
+                    .type = Command::Argument::ARGTYPE::STRING,
                     .defaultValue = std::monostate(),
-                    .validator = nullptr
+                    .validator = &Command::Validator::genericValidator,
+                    .required = true,
+                    .constraints = Constants::validSources
+                }
+            },
+            {
+                "Target",
+                Command::argmd
+                {
+                    .type = Command::Argument::ARGTYPE::STRING,
+                    .defaultValue = std::monostate(),
+                    .validator = &Command::Validator::genericValidator,
+                    .required = true,
+                    .constraints = Constants::validTargets
                 }
             }
             
+        },
+
+        .interp = &Interpreter::interpretColourChangeInferred
+
+    };
+}
+
+namespace Draw::Pen::Colour::SetColour
+{
+
+    namespace Processor
+    {
+        static colour* retrieveColourFromTarget(Application_State& s, const std::string& tar)
+        {
+            if (tar == "Active")            
+                return s.DrawState.activeColour;            
+            if (tar == "Draw")            
+                return &s.DrawState.drawColour;            
+            assert(tar == "Background");
+                return &s.DrawState.backgroundColour;
         }
+
+        static void processColourChange(Application_State& s, Command::cmd& c)
+        {
+            colour* col = retrieveColourFromTarget(s, std::get<std::string>(c.args.at("Target")));
+            std::swap(*col, std::get<colour>(c.args.at("Colour")));
+        }
+    }
+
+    const Command::dfn DRAW_COLOUR_SETCOLOUR =
+    {
+        .name = "Change Drawing Colour",
+
+        .argDefinitions =
+        {
+            {
+                "Colour",
+                Command::argmd
+                {
+                    .type = Command::Argument::ARGTYPE::COLOUR,
+                    .defaultValue = std::monostate()
+                }
+            },
+            {
+                "Target",
+                Command::argmd
+                {
+                    .type = Command::Argument::ARGTYPE::STRING,
+                    .defaultValue = std::monostate(),
+                    .validator = &Command::Validator::genericValidator,
+                    .required = true,
+                    .constraints = Constants::validTargets
+                }
+            }
+        },
+
+        .prcssr = &Processor::processColourChange
+
     };
 }

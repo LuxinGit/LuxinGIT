@@ -188,3 +188,11 @@ namespace Command
     }
 
 }
+
+bool Command::Validator::genericValidator(const argument& arg, const argmd& amd)
+{
+
+    if (amd.constraints.empty()) return true;
+    return std::ranges::find(amd.constraints, arg) != amd.constraints.end();
+
+}
