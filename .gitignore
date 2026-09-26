@@ -364,3 +364,10 @@ FodyWeavers.xsdbuild/
 
 build/
 .DS_Store
+
+# Luxin Paint / cross-platform local artifacts
+cmake-build-*/
+*.exe
+*.dll
+*.lib
+imgui.ini

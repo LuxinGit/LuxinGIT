@@ -500,7 +500,6 @@ namespace Draw::Pen::Colour::Constants
     };
 
 }
-
 namespace Draw::Pen::Colour::SetSource
 {
     namespace Interpreter
@@ -566,7 +565,6 @@ namespace Draw::Pen::Colour::SetSource
 
     };
 }
-
 namespace Draw::Pen::Colour::SetColour
 {
 
@@ -617,6 +615,69 @@ namespace Draw::Pen::Colour::SetColour
         },
 
         .prcssr = &Processor::processColourChange
+
+    };
+}
+
+
+namespace Draw::Pen::Mode::Constants
+{
+
+    inline const std::unordered_map<std::string, Draw_State::PEN_MODE> modesByNames
+    {
+        { "Pen",        Draw_State::PEN_MODE::DRAW },
+        { "Rubber",     Draw_State::PEN_MODE::RUBBER },
+        { "Rainbow",    Draw_State::PEN_MODE::RAINBOW }
+    };
+
+    inline const std::unordered_map<Draw_State::PEN_MODE, std::string> namesByModes
+    {
+        { Draw_State::PEN_MODE::DRAW,    "Pen" },
+        { Draw_State::PEN_MODE::RUBBER,  "Rubber" },
+        { Draw_State::PEN_MODE::RAINBOW, "Rainbow" }
+    };
+}
+namespace Draw::Pen::Mode::SetMode
+{
+
+    namespace Processor
+    {
+
+        static void processPenModeChange(Application_State& s, Command::cmd& c)
+        {
+            Draw_State::PEN_MODE newMode = Constants::modesByNames.at(std::get<std::string>(c.args.at("Mode")));
+            std::string oldModeName = Constants::namesByModes.at(s.DrawState.penMode);
+            s.DrawState.penMode = newMode;
+            c.setArg("Mode", oldModeName);
+        }
+    }
+
+    namespace Validator
+    {
+        static bool validatePenModeArg(const Command::argument& arg, const Command::argmd&)
+        {
+            return Constants::modesByNames.contains(std::get<std::string>(arg));
+        }
+    }
+
+    const Command::dfn DRAW_PEN_MODE_SETMODE =
+    {
+        .name = "Change Drawing Mode",
+
+        .argDefinitions =
+        {
+            {
+                "Mode",
+                Command::argmd
+                {
+                    .type = Command::Argument::ARGTYPE::STRING,
+                    .defaultValue = std::monostate(),
+                    .validator = &Validator::validatePenModeArg,
+                }
+            }
+        },
+
+        .prcssr = &Processor::processPenModeChange
 
     };
 }
