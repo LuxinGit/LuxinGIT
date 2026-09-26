@@ -335,9 +335,9 @@ namespace Draw {
     }
 }
 
-namespace Draw
+namespace Draw::Circle
 {
-    namespace Circle::Interpreter
+    namespace Interpreter
     {
         static std::vector<Command::cmd> interpretCircle(const Application_State& s, const Command::cmd& c)
         {
@@ -357,7 +357,7 @@ namespace Draw
         }
     }
 
-    namespace Circle::Processor
+    namespace Processor
     {
         static void processCircle(Application_State& s, Command::cmd& c)
         {
@@ -369,59 +369,176 @@ namespace Draw
             drawCircle(s, centre, col, radius, fill);
         }
     }
-
-    namespace Circle
+    
+    const Command::dfn DRAW_CIRCLE =
     {
-        const Command::dfn DRAW_CIRCLE =
-        {
-            .name = "Draw",
+        .name = "Draw",
 
-            .argDefinitions =
+        .argDefinitions =
+        {
             {
+                "Radius",
+                Command::argmd
                 {
-                    "Radius",
-                    Command::argmd
-                    {
-                        .type = Command::Argument::ARGTYPE::INT,
-                        .defaultValue = std::monostate(),
-                        .validator = nullptr,
-                        .required = false
-                    }
-                },
-                {
-                    "Centre",
-                    Command::argmd
-                    {
-                        .type = Command::Argument::ARGTYPE::COORDINATE,
-                        .defaultValue = std::monostate(),
-                        .validator = nullptr,
-                        .required = false
-                    }
-                },
-                {
-                    "Colour",
-                    Command::argmd
-                    {
-                        .type = Command::Argument::ARGTYPE::COLOUR,
-                        .defaultValue = std::monostate(),
-                        .validator = nullptr,
-                        .required = false
-                    }
-                },
-                {
-                    "Fill",
-                    Command::argmd
-                    {
-                        .type = Command::Argument::ARGTYPE::INT,
-                        .defaultValue = std::monostate(),
-                        .validator = nullptr,
-                        .required = false
-                    }
+                    .type = Command::Argument::ARGTYPE::INT,
+                    .defaultValue = std::monostate(),
+                    .validator = nullptr,
+                    .required = false
                 }
             },
+            {
+                "Centre",
+                Command::argmd
+                {
+                    .type = Command::Argument::ARGTYPE::COORDINATE,
+                    .defaultValue = std::monostate(),
+                    .validator = nullptr,
+                    .required = false
+                }
+            },
+            {
+                "Colour",
+                Command::argmd
+                {
+                    .type = Command::Argument::ARGTYPE::COLOUR,
+                    .defaultValue = std::monostate(),
+                    .validator = nullptr,
+                    .required = false
+                }
+            },
+            {
+                "Fill",
+                Command::argmd
+                {
+                    .type = Command::Argument::ARGTYPE::INT,
+                    .defaultValue = std::monostate(),
+                    .validator = nullptr,
+                    .required = false
+                }
+            }
+        },
 
-            .interp = &Interpreter::interpretCircle,
-            .prcssr = &Processor::processCircle
-        };
+        .interp = &Interpreter::interpretCircle,
+        .prcssr = &Processor::processCircle
+    };
+    
+}
+
+namespace Draw::Fill
+{
+    namespace Interpreter
+    {
+        static std::vector<Command::cmd> interpretFill(const Application_State& s, const Command::cmd& c)
+        {
+            Command::cmd nc = { &DRAW_FILL };
+            nc.args["Fill Colour"] = c.args.contains("Fill Colour")
+                ? c.args.at("Fill Colour")
+                : *s.DrawState.activeColour;
+
+            nc.args["Coordinate"] = c.args.contains("Coordinate")
+                ? c.args.at("Coordinate")
+                : s.CursorState.cursor;
+
+            return { nc };
+        }
     }
+
+    namespace Processor
+    {
+        static void processFill(Application_State& s, Command::cmd& c)
+        {
+            Draw::fill(
+                s, 
+                std::get<coordinate>(c.args.at("Coordinate")), 
+                std::get<colour>(c.args.at("Fill Colour")));
+        }
+    }
+
+    const Command::dfn DRAW_FILL =
+    {
+        .name = "Fill",
+
+        .argDefinitions =
+        {
+            {
+                "Coordinate",
+                Command::argmd
+                {
+                    .type = Command::Argument::ARGTYPE::COORDINATE,
+                    .defaultValue = std::monostate()
+                }
+            },
+            {
+                "Fill Colour",
+                Command::argmd
+                {
+                    .type = Command::Argument::ARGTYPE::COLOUR,
+                    .defaultValue = std::monostate()
+                }
+            }
+        },
+
+        .interp = &Interpreter::interpretFill,
+        .prcssr = &Processor::processFill
+    };
+
+}
+
+namespace Draw::Pen::Colour::SetSource
+{
+    namespace Interpreter
+    {       
+        
+        static colour interpretColourUnderCursor(const Application_State& s)
+        {
+            // THIS WILL REQUIRE REWRITING ONCE FURTHER OBJECT IMPLEMENTATION COMPLETE
+            // CURRENTLY JUST CHECKS CANVAS PIXEL UNDERNEATH CURSOR
+
+            return Canvas::getColourFromCoordinate(coordinate{ s.CursorState.deltaCursor }, *s.CanvasState.activeCanvas, s.CanvasState.width);
+
+        }
+       
+        static std::vector<Command::cmd> interpretColourChangeInferred(const Application_State& s, const Command::cmd& c)
+        {
+
+        }
+    }
+
+    namespace Validator
+    {
+        static bool validTarget(const std::string& target)
+        {
+            static constexpr std::array validTargets =
+            {
+                "Random",
+                "Cursor"
+            };
+
+            return std::ranges::find(validTargets, target) != validTargets.end();
+        }
+    }
+
+    namespace Processor
+    {
+
+    }
+
+    const Command::dfn DRAW_COLOUR_SETSOURCE =
+    {
+        .name = "Draw",
+
+        .argDefinitions =
+        {
+            {
+                "Source",
+                Command::argmd
+                {
+                    .type = Command::Argument::ARGTYPE::INT,
+                    .defaultValue = std::monostate(),
+                    .validator = nullptr
+                }
+            }
+            
+        }
+    };
 }

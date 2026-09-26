@@ -12,9 +12,6 @@ namespace Canvas {
     
     namespace {
 
-        size_t indexFromCoord(const coordinate& c) {
-            return size_t(c.y) * DEFAULT_CANVAS_WIDTH_MAX + size_t(c.x);
-        }
         size_t newIndexFromCoord(const coordinate& c, int width) {
             return size_t(c.y) * width + size_t(c.x);
         }
@@ -26,6 +23,15 @@ namespace Canvas {
             SDL_SetWindowSize(sS.Window, cS.width, cS.height);
         }
 
+        
+
+    }
+    
+    colour getColourFromCoordinate(const coordinate& c, const std::vector<luxel>& canvas, const int width)
+    {
+        // very hacky implementation, but basically wrapper for retrieving colour from given coordinate when caller does not own non-const canvas.
+        // previous implementation for this method also hacky but in a different way...
+        return canvas[newIndexFromCoord(c, width)].colour;
     }
 
     bool newCoordCheck(const coordinate& c, const coordinate& max)

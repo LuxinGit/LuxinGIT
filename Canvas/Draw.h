@@ -37,7 +37,11 @@ namespace Draw {
     void processClearCanvas(Application_State& mh, bool full);
 }
 
-namespace Draw::Circle
+
+namespace Draw::Circle { extern const Command::dfn DRAW_CIRCLE; }
+namespace Draw::Fill { extern const Command::dfn DRAW_FILL; }
+
+namespace Draw::Pen::Colour
 {
-    extern const Command::dfn DRAW_CIRCLE;
+    //
 }

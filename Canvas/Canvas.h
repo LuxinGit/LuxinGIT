@@ -22,7 +22,7 @@ struct Canvas_State {
 };
 
 namespace Canvas {
-
+    colour getColourFromCoordinate(const coordinate& c, const std::vector<luxel>& canvas, const int width);
     bool newCoordCheck(
         const coordinate& c,
         const coordinate& max = coordinate{ DEFAULT_CANVAS_WIDTH_MAX, DEFAULT_CANVAS_HEIGHT_MAX });

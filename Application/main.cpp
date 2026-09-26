@@ -6,15 +6,10 @@
 /*
 TO DO:
     
-    ARGUMENTS SHOULD BE MAP YES GOOD YES GOOD 
-
-    cursor needs some better way to show on dark backgrounds.
-    keybind reduce / increase brightness
-    keybind remappings
-    Save commands from command queue for later use
-    drawBaseball(); drawCock();
-    accept combo commands on keybindings.
-    3d
+    Continue Command_Repo refactor.
+    Take #defines out from CONSTANTS.h and work out better way to do it.
+    Use smart pointers for Action (Action.h) such that no horrific vector memory realloc every time large actions added.
+    Rewrite CLI construction code.    
 
 */
 
