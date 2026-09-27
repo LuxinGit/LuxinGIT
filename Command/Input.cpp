@@ -776,3 +776,44 @@ Options:
     }
 
 }
+
+namespace Input::CLI
+{
+
+    namespace Processor
+    {
+        static void enableCLI(Application_State& s, Command::cmd&)
+        {
+            s.CommandState.commandQueue = {};
+            CLILoop(s);
+        }
+    }
+
+    const Command::dfn CLI_ENABLE =
+    {
+        .name = "Enable CLI",
+
+        .prcssr = &Processor::enableCLI
+
+    };
+}
+
+namespace Input::Mouse
+{
+
+    namespace Processor
+    {
+        static void enableMouse(Application_State& s, Command::cmd&)
+        {
+            s.InputState.MouseState.enableMouse = !s.InputState.MouseState.enableMouse;
+        }
+    }
+
+    const Command::dfn MOUSE_TOGGLE =
+    {
+        .name = "Enable Mouse",
+
+        .prcssr = &Processor::enableMouse
+
+    };
+}

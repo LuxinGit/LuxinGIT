@@ -38,3 +38,4 @@ namespace Canvas {
     void processCanvasSize(Application_State& mh, Command::Cmmd& command);
 
 }
+

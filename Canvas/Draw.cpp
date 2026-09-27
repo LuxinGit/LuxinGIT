@@ -252,7 +252,8 @@ namespace Draw {
 
     }
 
-    namespace {
+    namespace 
+    {
         colour* resolveActiveColourFromArg(Draw_State& s, int& target) 
         {
             switch (target)
@@ -313,7 +314,6 @@ namespace Draw {
         command.args = { target, 0, replacementC };
 
     }
-
     void processClearCanvas(Application_State& mh, bool rActions) {
         
         Canvas_State& cS = mh.CanvasState;
@@ -486,10 +486,11 @@ namespace Draw::Fill
 
 namespace Draw::Pen::Colour::Constants
 {
-    static const std::array<Command::argument, 2> validSources =
+    static const std::array<Command::argument, 3> validSources =
     {
         std::string{"Random"},
-        std::string{"Cursor"}
+        std::string{"Cursor"},
+        std::string{"Reset"}
     };
 
     static const std::array<Command::argument, 3> validTargets =
@@ -499,18 +500,53 @@ namespace Draw::Pen::Colour::Constants
         std::string{"Background"}
     };
 
+    static colour* retrieveColourFromTarget(Application_State& s, const std::string& tar)
+    {
+        if (tar == "Active")
+            return s.DrawState.activeColour;
+        if (tar == "Draw")
+            return &s.DrawState.drawColour;
+        assert(tar == "Background");
+        return &s.DrawState.backgroundColour;
+    }
+
 }
 namespace Draw::Pen::Colour::SetSource
 {
     namespace Interpreter
-    {       
-       
+    {   
 
-        static const colour retrieveColourFromSource(const Application_State& s, const std::string& src)
+        namespace
         {
-            if (src == "Random")            
-                return Draw::getRandomColour();
+            const colour retrieveResetColour(const Application_State& s, const std::string& tar)
+            {
+                // horrific way to do it
+                
+                if (tar == "Active")
+                {
+                    if (s.DrawState.activeColour == &s.DrawState.drawColour)
+                        tar == "Draw";
+                    else
+                        tar == "Background";
+                }
 
+                if (tar == "Draw")
+                    return { 200, 200, 200, 255 };
+                assert(tar == "Background");
+                    return { 0, 0, 0, 255 };               
+
+            }
+        }
+
+        static const colour retrieveColourFromSource(const Application_State& s, const Command::cmd& c)
+        {
+
+            const std::string& src = std::get<std::string>(c.args.at("Source"));
+
+            if (src == "Random")
+                return Draw::getRandomColour();
+            else if (src == "Reset")
+                return retrieveResetColour(s, std::get<std::string>(c.args.at("Target")));                
             assert(src == "Cursor");
                 return Cursor::retrieveColourUnderCursor(s);
             
@@ -518,8 +554,7 @@ namespace Draw::Pen::Colour::SetSource
        
         static std::vector<Command::cmd> interpretColourChangeInferred(const Application_State& s, const Command::cmd& c)
         {
-            const std::string& src = std::get<std::string>(c.args.at("Source"));
-            const colour& col = retrieveColourFromSource(s, src);
+            const colour& col = retrieveColourFromSource(s, c);
 
             Command::cmd nC{ &SetColour::DRAW_COLOUR_SETCOLOUR };
             
@@ -569,22 +604,14 @@ namespace Draw::Pen::Colour::SetColour
 {
 
     namespace Processor
-    {
-        static colour* retrieveColourFromTarget(Application_State& s, const std::string& tar)
-        {
-            if (tar == "Active")            
-                return s.DrawState.activeColour;            
-            if (tar == "Draw")            
-                return &s.DrawState.drawColour;            
-            assert(tar == "Background");
-                return &s.DrawState.backgroundColour;
-        }
+    {     
 
         static void processColourChange(Application_State& s, Command::cmd& c)
         {
-            colour* col = retrieveColourFromTarget(s, std::get<std::string>(c.args.at("Target")));
+            colour* col = Draw::Pen::Colour::Constants::retrieveColourFromTarget(s, std::get<std::string>(c.args.at("Target")));
             std::swap(*col, std::get<colour>(c.args.at("Colour")));
         }
+
     }
 
     const Command::dfn DRAW_COLOUR_SETCOLOUR =
@@ -618,7 +645,6 @@ namespace Draw::Pen::Colour::SetColour
 
     };
 }
-
 
 namespace Draw::Pen::Mode::Constants
 {
@@ -678,6 +704,64 @@ namespace Draw::Pen::Mode::SetMode
         },
 
         .prcssr = &Processor::processPenModeChange
+
+    };
+}
+namespace Draw::Pen::Mode::SetRainbowPixelQuota
+{
+
+    namespace Processor
+    {
+        static void processRainbowPixelQuotaChange(Application_State& s, Command::cmd& c)
+        {
+            std::swap(std::get<int>(c.args.at("Quota")), s.DrawState.pixelsToRainbow);            
+        }
+    }
+
+    const Command::dfn DRAW_PEN_MODE_SETRAINBOWPIXELQUOTA =
+    {
+        .name = "Change Rainbow Pixel Quota",
+
+        .argDefinitions =
+        {
+            {
+                "Quota",
+                Command::argmd
+                {
+                    .type = Command::Argument::ARGTYPE::INT,
+                    .defaultValue = std::monostate()
+                }
+            }
+        },
+
+        .prcssr = &Processor::processRainbowPixelQuotaChange
+
+    };
+}
+
+namespace Canvas::Reset
+{
+    namespace Processor
+    {
+        static void processClearCanvas(Application_State& s, Command::cmd&) {
+
+            Canvas_State& cS = s.CanvasState;
+
+            colour c = (cS.activeCanvas == &cS.displayCanvas) ? (s.DrawState.backgroundColour) : colour{ 0, 0, 0, 0 };
+
+            for (size_t y = 0; y < cS.height; ++y) {
+                const size_t rowStart = y * DEFAULT_CANVAS_WIDTH_MAX;
+
+                for (size_t i = rowStart; i < rowStart + cS.width; ++i) {
+                    Draw::drawPoint(s, (*cS.activeCanvas)[i], c);
+                }
+            }
+        }
+    }
+    const Command::dfn CANVAS_RESET =
+    {
+        .name = "Reset Canvas",
+        .prcssr = &Processor::processClearCanvas
 
     };
 }

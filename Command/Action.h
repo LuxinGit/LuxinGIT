@@ -30,5 +30,12 @@ namespace Action {
 	void commitCurrentAction(Action_State&);
 
 	void processHistory(Application_State& s, Command::Cmmd& command);
-	void processClearActionQueue(Application_State& mh, Command::Cmmd&); 
+	void processClearActionQueue(Application_State& mh, Command::Cmmd&);
+
+	
+}
+
+namespace Action::Queue
+{
+	extern const Command::dfn ACTION_RESETACTIONQUEUE;
 }

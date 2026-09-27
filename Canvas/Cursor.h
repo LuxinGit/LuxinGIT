@@ -27,12 +27,6 @@ namespace Cursor
     void processChangeOrigin(Application_State& mh, Command::Cmmd& command);
 }
 
-namespace Cursor::Move::Dir
-{
-    extern const Command::dfn CURSOR_MOVE_DIR;
-}
-
-namespace Cursor::Move::Set
-{
-    extern const Command::dfn CURSOR_MOVE_SET;
-}
+namespace Cursor::Move::Dir     { extern const Command::dfn CURSOR_MOVE_DIR;   }
+namespace Cursor::Move::Reset   { extern const Command::dfn CURSOR_MOVE_RESET; }
+namespace Cursor::Move::Set     { extern const Command::dfn CURSOR_MOVE_SET;   }

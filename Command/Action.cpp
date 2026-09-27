@@ -56,3 +56,23 @@ namespace Action {
         mh.ActionState.actionQueue = {}; 
     }
 }
+
+namespace Action::Queue
+{
+
+    namespace Processor
+    {
+        static void processClearActionQueue(Application_State& s, Command::cmd& c)
+        {
+            s.ActionState.actionQueue = {};
+        }
+    }
+
+    const Command::dfn ACTION_QUEUE_RESETQUEUE =
+    {
+        .name = "Reset Action Queue",
+
+        .prcssr = &Processor::processClearActionQueue
+
+    };
+}

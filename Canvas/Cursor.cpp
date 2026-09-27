@@ -109,9 +109,9 @@ namespace Cursor {
     } // Probably expand this if I ever want to do stuff with origins, but for now this is fine.
 }
 
-namespace Cursor::Move
+namespace Cursor::Move::Dir
 {
-	namespace Dir::Interpreter
+	namespace Interpreter
 	{
 		static coordinate getDeltaFromDirection(const Command::argmap& aMap)
 		{
@@ -146,7 +146,7 @@ namespace Cursor::Move
 		}
 	}
 
-	namespace Dir::Validator
+	namespace Validator
 	{
 		static bool validateDirection(const Command::argument& a, const Command::argmd& md)
 		{
@@ -154,42 +154,61 @@ namespace Cursor::Move
 		}
 	}
 
-	namespace Dir
+	const Command::dfn CURSOR_MOVE_DIR =
 	{
-		const Command::dfn CURSOR_MOVE_DIR =
+		.name = "Move Cursor in Direction",
+
+		.argDefinitions =
 		{
-			.name = "cursor_move_direction",
-
-			.argDefinitions =
 			{
+				"Direction",
+				Command::argmd
 				{
-					"Direction",
-					Command::argmd
-					{
-						.type = Command::Argument::ARGTYPE::STRING,
-						.defaultValue = std::monostate(),
-						.validator = &Validator::validateDirection,
-						.required = true,
-					}
-				},
-
-				{
-					"Distance",
-					Command::argmd
-					{
-						.type = Command::Argument::ARGTYPE::INT,
-						.defaultValue = std::monostate(),
-						.validator = nullptr,
-						.required = false
-					}
+					.type = Command::Argument::ARGTYPE::STRING,
+					.defaultValue = std::monostate(),
+					.validator = &Validator::validateDirection,
+					.required = true,
 				}
 			},
 
-			.interp = &Interpreter::interpretDirectionalCursorMove
-		};
+			{
+				"Distance",
+				Command::argmd
+				{
+					.type = Command::Argument::ARGTYPE::INT,
+					.defaultValue = std::monostate(),
+					.validator = nullptr,
+					.required = false
+				}
+			}
+		},
+
+		.interp = &Interpreter::interpretDirectionalCursorMove
+	};
+}
+
+namespace Cursor::Move::Reset
+{
+	namespace Interpreter
+	{
+		static std::vector<Command::cmd> interpretCursorReset(const Application_State& s, const Command::cmd&)
+		{
+			Command::cmd nC{ &Set::CURSOR_MOVE_SET };
+			nC.setArg("Destination", coordinate{ s.CursorState.origin });
+			return { nC };
+		}
 	}
 
-	namespace Set::Processor
+	const Command::dfn CURSOR_MOVE_RESET =
+	{
+		.name = "Reset Cursor's location",
+		.interp = &Interpreter::interpretCursorReset
+	};
+}
+
+namespace Cursor::Move::Set
+{
+	namespace Processor
 	{
 		static void processSet(Application_State& s, Command::cmd& c)
 		{
@@ -200,28 +219,25 @@ namespace Cursor::Move
 			nc = coordinate(ncff);
 		}
 	}
-
-	namespace Set
+	
+	const Command::dfn CURSOR_MOVE_SET =
 	{
-		const Command::dfn CURSOR_MOVE_SET =
+		.name = "Move Cursor to set destination",
+
+		.argDefinitions =
 		{
-			.name = "cursor_move_set",
-
-			.argDefinitions =
 			{
+				"Destination",
+				Command::argmd
 				{
-					"Destination",
-					Command::argmd
-					{
-						.type = Command::Argument::ARGTYPE::COORDINATE,
-						.defaultValue = std::monostate(),
-						.validator = nullptr,
-						.required = true
-					}
+					.type = Command::Argument::ARGTYPE::COORDINATE,
+					.defaultValue = std::monostate(),
+					.validator = nullptr,
+					.required = true
 				}
-			},
+			}
+		},
 
-			.prcssr = &Processor::processSet
-		};
-	}
+		.prcssr = &Processor::processSet
+	};
 }

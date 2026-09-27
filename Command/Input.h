@@ -8,29 +8,35 @@
 
 struct Application_State;
 
-struct Input_State {
+struct Input_State 
+{
 
-	struct Keyboard_State {
+	struct Keyboard_State 
+    {
 		bool enableKeyboard = ENABLE_KEYBOARD;
 		std::unordered_map<SDL_Scancode, Command::Definition::Input::Binding> keyBindings;
 		std::array<bool, SDL_SCANCODE_COUNT> previousKeyboardState{};
 	};
 
-	struct Mouse_State {
+	struct Mouse_State
+    {
 		bool enableMouse = ENABLE_MOUSE;
 		std::unordered_map<SDL_MouseButtonFlags, const Command::Definition::Input::Binding> mouseBindings;
 	};
 
-	struct CLI_State {
+	struct CLI_State 
+    {
 		bool enableCLI = ENABLE_CLI;
 		std::unordered_map<std::string_view, const Command::Command_Definition*> commandLineBindings;
 	};
 
-    struct GUI_State {
+    struct GUI_State 
+    {
 
         using def = const Command::Command_Definition*;
 
-        struct GUI_Binding {
+        struct GUI_Binding 
+        {
 
             def definition;
             size_t guiIndex;
@@ -43,7 +49,8 @@ struct Input_State {
             }
         };
 
-        struct GUI_Binding_Hash {
+        struct GUI_Binding_Hash 
+        {
 
             size_t operator()(const GUI_Binding& b) const noexcept {
 
@@ -76,7 +83,8 @@ struct Input_State {
 
 };
 
-namespace Input {
+namespace Input 
+{
 
 	void initialiseBindings(Input_State& s);
 
@@ -86,7 +94,8 @@ namespace Input {
 
 }
 
-namespace Input::GUI {
+namespace Input::GUI 
+{
 
 	void initialiseGUI(Application_State& s);
 
@@ -98,8 +107,16 @@ namespace Input::GUI {
 
 }
 
-namespace Input::CLI {
+namespace Input::CLI 
+{
 
 	void openCLI(Application_State& s, Command::Cmmd&);
 
+    extern const Command::dfn CLI_ENABLE;
+
+}
+
+namespace Input::Mouse
+{
+    extern const Command::dfn MOUSE_TOGGLE;
 }
