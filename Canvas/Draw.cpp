@@ -739,6 +739,37 @@ namespace Draw::Pen::Mode::SetRainbowPixelQuota
     };
 }
 
+namespace Draw::Pen::Width
+{
+	namespace Processor
+    {
+        static void processPenWidthChange(Application_State& s, Command::cmd& c)
+        {
+            std::swap(std::get<int>(c.args.at("Width")), s.DrawState.pen);            
+        }
+    }
+
+    const Command::dfn DRAW_PEN_WIDTH =
+    {
+        
+
+        .argDefinitions =
+        {
+            {
+                "Width",
+                Command::argmd
+                {
+                    .type = Command::Argument::ARGTYPE::INT,
+                    .defaultValue = std::monostate()
+                }
+            }
+        },
+
+        .prcssr = &Processor::processPenWidthChange
+
+    };
+}
+
 namespace Canvas::Reset
 {
     namespace Processor

@@ -241,3 +241,34 @@ namespace Cursor::Move::Set
 		.prcssr = &Processor::processSet
 	};
 }
+
+namespace Cursor::Drawstep
+{
+	namespace Processor
+    {
+        static void processDrawstepChange(Application_State& s, Command::cmd& c)
+        {
+            std::swap(std::get<int>(c.args.at("Drawstep")), s.DrawState.pen);            
+        }
+    }
+
+    const Command::dfn CURSOR_DRAWSTEP =
+    {
+        
+
+        .argDefinitions =
+        {
+            {
+                "Drawstep",
+                Command::argmd
+                {
+                    .type = Command::Argument::ARGTYPE::INT,
+                    .defaultValue = std::monostate()
+                }
+            }
+        },
+
+        .prcssr = &Processor::processDrawstepChange
+
+    };
+}
