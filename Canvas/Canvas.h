@@ -39,3 +39,6 @@ namespace Canvas {
 
 }
 
+namespace Canvas::Resize::Coordinate    { extern const Command::dfn CANVAS_RESIZE_COORDINATE; }
+namespace Canvas::Resize::Width         { extern const Command::dfn CANVAS_RESIZE_WIDTH; }
+namespace Canvas::Resize::Height        { extern const Command::dfn CANVAS_RESIZE_HEIGHT; }

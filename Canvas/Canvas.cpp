@@ -81,3 +81,131 @@ namespace Canvas {
     }
 
 }
+
+namespace Canvas::Resize::Coordinate
+{
+
+
+    namespace Validator
+    {
+        static bool checkResizeWithinAllowedDimensions(const Command::argument& a, const Command::argmd&)
+        {
+            const coordinate& c = std::get<coordinate>(a);
+            return newCoordCheck(c);
+        }
+    }
+
+
+    namespace Interpreter
+    {
+        static std::vector<Command::cmd> interpretResize(const Application_State& s, const Command::cmd& c)
+        {
+
+            const coordinate coor = std::get<coordinate>(c.args.at("Size Coordinate"));
+
+            Command::cmd setW{ &Width::CANVAS_RESIZE_WIDTH };
+            setW.setArg("Width", coor.x);
+            Command::cmd setH{ &Height::CANVAS_RESIZE_HEIGHT };
+            setH.setArg("Height", coor.y);
+
+            return { setW, setH };
+
+        }
+    }
+
+
+    const Command::dfn CANVAS_RESIZE_COORDINATE =
+    {
+        .argDefinitions =
+        {
+            {
+                "Size Coordinate",
+                Command::argmd
+                {
+                    .type = Command::Argument::ARGTYPE::COORDINATE,
+                    .defaultValue = std::monostate(),
+                    .validator = &Validator::checkResizeWithinAllowedDimensions,
+                }
+            }
+        },
+        .interp = &Interpreter::interpretResize
+    };
+
+}
+
+namespace Canvas::Resize::Width
+{
+    namespace Validator
+    {
+        static bool checkResizeWithinAllowedDimensions(const Command::argument& a, const Command::argmd&)
+        {
+            const int& i = std::get<int>(a);
+            return i >= DEFAULT_CANVAS_WIDTH_MIN and i < DEFAULT_CANVAS_WIDTH_MAX;                
+        }
+    }
+
+
+    namespace Processor
+    {
+        static void processResize(Application_State& s, Command::cmd& c)
+        {
+            std::swap(std::get<int>(c.args.at("Width")), s.CanvasState.width);
+            SDL_SetWindowSize(s.SDLState.Window, s.CanvasState.width, s.CanvasState.height);
+        }
+    }
+
+    const Command::dfn CANVAS_RESIZE_WIDTH =
+    {
+        .argDefinitions =
+        {
+            {
+                "Width",
+                Command::argmd
+                {
+                    .type = Command::Argument::ARGTYPE::INT,
+                    .defaultValue = std::monostate(),
+                    .validator = &Validator::checkResizeWithinAllowedDimensions,
+                }
+            }
+        },
+        .prcssr = &Processor::processResize
+    };
+}
+namespace Canvas::Resize::Height
+{
+    namespace Validator
+    {
+        static bool checkResizeWithinAllowedDimensions(const Command::argument& a, const Command::argmd&)
+        {
+            const int& i = std::get<int>(a);
+            return i >= DEFAULT_CANVAS_HEIGHT_MIN and i < DEFAULT_CANVAS_HEIGHT_MAX;
+        }
+    }
+
+
+    namespace Processor
+    {
+        static void processResize(Application_State& s, Command::cmd& c)
+        {
+            std::swap(std::get<int>(c.args.at("Height")), s.CanvasState.height);
+            SDL_SetWindowSize(s.SDLState.Window, s.CanvasState.width, s.CanvasState.height);
+        }
+    }
+
+    const Command::dfn CANVAS_RESIZE_HEIGHT =
+    {
+        .argDefinitions =
+        {
+            {
+                "Height",
+                Command::argmd
+                {
+                    .type = Command::Argument::ARGTYPE::INT,
+                    .defaultValue = std::monostate(),
+                    .validator = &Validator::checkResizeWithinAllowedDimensions,
+                }
+            }
+        },
+        .prcssr = &Processor::processResize
+    };
+}

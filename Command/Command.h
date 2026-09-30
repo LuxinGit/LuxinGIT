@@ -64,13 +64,9 @@ namespace Command {
         colour,
         coordinate,
         std::string,
-        commandCall
+        bool        
     >;
 
-    struct Command_Call {
-        const Command_Definition* def;
-        std::vector<argument> args;
-    };
 
     
 
@@ -89,7 +85,7 @@ namespace Command::Argument {
         COLOUR = 2,
         COORDINATE = 3,
         STRING = 4,
-        COMMAND = 5,
+        BOOL = 5,
         UNFIXED_TYPE
     };
 

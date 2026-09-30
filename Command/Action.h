@@ -35,7 +35,7 @@ namespace Action {
 	
 }
 
-namespace Action::Queue
-{
-	extern const Command::dfn ACTION_RESETACTIONQUEUE;
-}
+namespace Action::Queue { extern const Command::dfn ACTION_RESETACTIONQUEUE; }
+
+namespace Action::Undo	{ extern const Command::dfn ACTION_UNDO; }
+namespace Action::Redo  { extern const Command::dfn ACTION_REDO; }

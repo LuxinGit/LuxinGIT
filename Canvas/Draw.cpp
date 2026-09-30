@@ -423,7 +423,6 @@ namespace Draw::Circle
     };
     
 }
-
 namespace Draw::Fill
 {
     namespace Interpreter
@@ -482,6 +481,40 @@ namespace Draw::Fill
         .prcssr = &Processor::processFill
     };
 
+}
+
+namespace Draw::Pen::PenDown
+{
+
+    namespace Processor
+    {
+        static void processPenDown(Application_State& s, Command::cmd& c)
+        {
+            s.DrawState.penDown = !s.DrawState.penDown;
+
+            if (std::get<bool>(c.args.at("Continuity")) == true)
+                s.DrawState.penContinuous = true;
+
+        }
+    }
+
+    const Command::dfn DRAW_PEN_PENDOWN =
+    {
+        .argDefinitions =
+        {
+            {
+                "Continuity",
+                Command::argmd
+                {
+                    .type = Command::Argument::ARGTYPE::BOOL,
+                    .defaultValue = false
+                }
+            }
+        },
+
+        .prcssr = &Processor::processPenDown
+
+    };
 }
 
 namespace Draw::Pen::Colour::Constants
@@ -772,6 +805,9 @@ namespace Draw::Pen::Width
 
     };
 }
+
+// This may look odd, but the way in which we are resetting the canvas currently uses primarily drawing features, as is allowing us to undo/redo it.  
+// Future implementation will hopefully be better.
 
 namespace Canvas::Reset
 {

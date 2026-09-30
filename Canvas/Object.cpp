@@ -174,6 +174,8 @@ namespace Object {
 					if (std::string* n = std::get_if<std::string>(&cmd.args[0]))
 						name = *n;
 			}
+			else if (oS.selectedObject != nullptr)
+				o = oS.selectedObject;
 
 			if (!o)			
 				o = createNewObject(oS, name);

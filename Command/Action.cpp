@@ -15,26 +15,28 @@ namespace Action {
             s.actionQueue.emplace_back(std::move(s.currentAction));
             s.currentAction = {};
         }
-        void processAction(Application_State& mh, Action_State& s) {
+        void processAction(Application_State& aS) {
 
-            if (auto* cmd = std::get_if<Command::Cmmd>(&s.actionQueue[s.actionQueueIndex])) 
+            Action_State& actS = aS.ActionState;
+
+            if (auto* cmd = std::get_if<Command::Cmmd>(&actS.actionQueue[actS.actionQueueIndex])) 
             {
-                cmd->processor(mh, *cmd);
+                cmd->processor(aS, *cmd);
             }
-            else for (auto& change : std::get<Change_Set>(s.actionQueue[s.actionQueueIndex]).changeSet) {
+            else for (auto& change : std::get<Change_Set>(actS.actionQueue[actS.actionQueueIndex]).changeSet) {
                 std::swap(change.originalColour, change.l->colour);
             }
 
         }
         void undoAction(Application_State& mh, Action_State& s) {
             if (s.actionQueueIndex < 1) return;
-            processAction(mh, s);
+            processAction(mh);
             s.actionQueueIndex--;
         }
         void redoAction(Application_State& mh, Action_State& s) {
             if (s.actionQueueIndex + 1 >= static_cast<int>(s.actionQueue.size())) return;
             s.actionQueueIndex++;
-            processAction(mh, s);
+            processAction(mh);
         }
     }
 
@@ -74,5 +76,43 @@ namespace Action::Queue
 
         .prcssr = &Processor::processClearActionQueue
 
+    };
+}
+
+namespace Action::Undo
+{
+    
+    namespace Processor
+    {
+        static void processUndo(Application_State& s, Command::cmd&) 
+        {
+            if (s.ActionState.actionQueueIndex < 1) return;
+            processAction(s);
+            s.ActionState.actionQueueIndex--;
+        }
+    }
+
+    const Command::dfn ACTION_UNDO =
+    {
+        .prcssr = &Processor::processUndo
+    };
+
+}
+
+namespace Action::Redo
+{
+    namespace Processor
+    {
+        static void processRedo(Application_State& s, Command::cmd&) 
+        {
+            if (s.ActionState.actionQueueIndex + 1 >= static_cast<int>(s.ActionState.actionQueue.size())) return;
+            s.ActionState.actionQueueIndex++;
+            processAction(s);
+        }
+    }
+
+    const Command::dfn ACTION_REDO =
+    {
+        .prcssr = &Processor::processRedo
     };
 }
