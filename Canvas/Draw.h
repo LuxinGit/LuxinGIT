@@ -47,4 +47,6 @@ namespace Draw::Pen::Colour::SetColour      { extern const Command::dfn DRAW_COL
 namespace Draw::Pen::Mode::SetMode              { extern const Command::dfn DRAW_PEN_MODE_SETMODE; }
 namespace Draw::Pen::Mode::SetRainbowPixelQuota { extern const Command::dfn DRAW_PEN_MODE_SETRAINBOWPIXELQUOTA; }
 
+namespace Draw::Pen::Width	{ extern  const Command::dfn DRAW_PEN_WIDTH; }
+
 namespace Canvas::Reset { extern const Command::dfn CANVAS_RESET; }
