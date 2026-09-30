@@ -518,16 +518,16 @@ namespace Draw::Pen::Colour::SetSource
 
         namespace
         {
-            const colour retrieveResetColour(const Application_State& s, const std::string& tar)
+            const colour retrieveResetColour(const Application_State& s, std::string& tar)
             {
                 // horrific way to do it
                 
                 if (tar == "Active")
                 {
                     if (s.DrawState.activeColour == &s.DrawState.drawColour)
-                        tar == "Draw";
+                        tar = "Draw";
                     else
-                        tar == "Background";
+                        tar = "Background";
                 }
 
                 if (tar == "Draw")
@@ -544,9 +544,12 @@ namespace Draw::Pen::Colour::SetSource
             const std::string& src = std::get<std::string>(c.args.at("Source"));
 
             if (src == "Random")
-                return Draw::getRandomColour();
+                return ::Draw::getRandomColour();
             else if (src == "Reset")
-                return retrieveResetColour(s, std::get<std::string>(c.args.at("Target")));                
+            {
+                std::string tar = std::get<std::string>(c.args.at("Target"));
+                return retrieveResetColour(s, tar);                
+            }
             assert(src == "Cursor");
                 return Cursor::retrieveColourUnderCursor(s);
             
